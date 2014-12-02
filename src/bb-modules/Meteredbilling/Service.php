@@ -46,10 +46,16 @@ class Service implements InjectionAwareInterface
         $model->client_id = $clientId;
         $model->order_id = $orderId;
         $model->product_id = $productId;
+        $model->invoice_id = 0;
         $model->created_at = date('c');
 
         $this->di['db']->store($model);
 
         return true;
+    }
+
+    public function getUnbilledUsage($clientId)
+    {
+        return $this->di['db']->find('MeteredBilling', 'client_id = :client_id AND invoice_id = 0', array(':client_id' => $clientId)) ;
     }
 }
