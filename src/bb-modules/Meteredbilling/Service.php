@@ -38,16 +38,45 @@ class Service implements InjectionAwareInterface
         return $this->di;
     }
 
+    public function findLastUnbilledUsage($clientId, $orderId)
+    {
+        $whereStatement = 'client_id = :client_id AND
+             order_id = :order_id AND
+             invoice_id = 0 ';
+        $bindings = array(
+            ':client_id' =>  $clientId,
+            ':order_id' => $orderId,
+        );
+        return $model = $this->di['db']->findOne('MeteredUsage', $whereStatement, $bindings);
+    }
+
+    public function calculateUsageCost($currentTime, \Model_MeteredUsage $newUsage)
+    {
+        $lastUsage = $this->findLastUnbilledUsage($newUsage->client_id, $newUsage->order_id);
+        if (!$lastUsage instanceof \Model_MeteredUsage){
+            return 0.00000000;
+        }
+
+        $intervalInHours = abs(strtotime($lastUsage->created_at) - strtotime($currentTime) ) / 3600;
+        $productService = $this->di['mod_service']('Product');
+        $unitPrice = $productService->getMeteredPrice($newUsage->product_id);
+
+        return $unitPrice * $intervalInHours;
+
+    }
+
     public function logUsage($planId, $clientId, $orderId, $productId)
     {
         $model = $this->di['db']->dispense('MeteredUsage');
+        $creationTime = date('c');
 
         $model->plan_id = $planId;
         $model->client_id = $clientId;
         $model->order_id = $orderId;
         $model->product_id = $productId;
         $model->invoice_id = 0;
-        $model->created_at = date('c');
+        $model->cost = $this->calculateUsageCost($creationTime, $model);
+        $model->created_at = $creationTime;
 
         $this->di['db']->store($model);
 
