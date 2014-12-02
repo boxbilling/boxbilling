@@ -37,4 +37,19 @@ class Service implements InjectionAwareInterface
     {
         return $this->di;
     }
+
+    public function logUsage($planId, $clientId, $orderId, $productId)
+    {
+        $model = $this->di['db']->dispense('MeteredUsage');
+
+        $model->plan_id = $planId;
+        $model->client_id = $clientId;
+        $model->order_id = $orderId;
+        $model->product_id = $productId;
+        $model->created_at = date('c');
+
+        $this->di['db']->store($model);
+
+        return true;
+    }
 }
