@@ -38,6 +38,11 @@ class Service implements InjectionAwareInterface
         return $this->di;
     }
 
+    /**
+     * @param int $clientId
+     * @param int $orderId
+     * @return \Model_MeteredUsage | null
+     */
     public function findLastUnbilledUsage($clientId, $orderId)
     {
         $whereStatement = 'client_id = :client_id AND
@@ -50,6 +55,12 @@ class Service implements InjectionAwareInterface
         return $model = $this->di['db']->findOne('MeteredUsage', $whereStatement, $bindings);
     }
 
+    /**
+     * Calculate usage cost (timebased)
+     * @param string $currentTime
+     * @param \Model_MeteredUsage $newUsage
+     * @return float
+     */
     public function calculateUsageCost($currentTime, \Model_MeteredUsage $newUsage)
     {
         $lastUsage = $this->findLastUnbilledUsage($newUsage->client_id, $newUsage->order_id);
@@ -65,6 +76,14 @@ class Service implements InjectionAwareInterface
 
     }
 
+    /**
+     * Create metered usage record
+     * @param int $planId
+     * @param int $clientId
+     * @param int $orderId
+     * @param int $productId
+     * @return bool
+     */
     public function logUsage($planId, $clientId, $orderId, $productId)
     {
         $model = $this->di['db']->dispense('MeteredUsage');
@@ -83,6 +102,11 @@ class Service implements InjectionAwareInterface
         return true;
     }
 
+    /**
+     * Get client's unbilled metered usage
+     * @param int $clientId
+     * @return array
+     */
     public function getUnbilledUsage($clientId)
     {
         return $this->di['db']->find('MeteredBilling', 'client_id = :client_id AND invoice_id = 0', array(':client_id' => $clientId)) ;
