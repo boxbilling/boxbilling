@@ -5,6 +5,7 @@
         <input type="radio" name="pricing[type]" value="free"{% if product.pricing.type == 'free' %} checked="checked"{% endif %} id="pricing-free"/><label for="pricing-free">{% trans 'Free' %}</label>
         <input type="radio" name="pricing[type]" value="once"{% if product.pricing.type == 'once' %} checked="checked"{% endif %} id="pricing-once"/><label for="pricing-once">{% trans 'One time' %}</label>
         <input type="radio" name="pricing[type]" value="recurrent"{% if product.pricing.type == 'recurrent' %} checked="checked"{% endif %} id="pricing-recurrent"/><label for="pricing-recurrent">{% trans 'Recurrent' %}</label>
+        <input type="radio" name="pricing[type]" value="metered"{% if product.pricing.type == 'metered' %} checked="checked"{% endif %} id="pricing-metered"/><label for="pricing-metered">{% trans 'Metered' %}</label>
     </div>
     <div class="fix"></div>
 </div>
@@ -23,6 +24,22 @@
             <td><input type="text" class="price setup_price" name="pricing[once][setup]" value="{{ product.pricing.once.setup }}"></td>
             <td><input type="text" class="price bill_price" name="pricing[once][price]" value="{{ product.pricing.once.price }}"></td>
             <td><input type="text" class="total price" readonly="readonly" disabled="disabled"/></td>
+            <td>&nbsp;</td>
+        </tr>
+    </tbody>
+    <tbody class="metered" {% if product.pricing.type != 'metered' %}style="display:none;"{% endif %}>
+        <tr>
+            <th>&nbsp;</th>
+            <th>{% trans 'Setup price' %} ({{ admin.currency_get_default.code }})</th>
+            <th>{% trans 'Base price / hour' %} ({{ admin.currency_get_default.code }})</th>
+            <th>&nbsp;</th>
+            <th>&nbsp;</th>
+        </tr>
+        <tr>
+            <td><label for="">{% trans 'Metered' %}</label></td>
+            <td><input type="text" class="price setup_price" name="pricing[metered][setup]" value="{{ product.pricing.metered.setup }}"></td>
+            <td><input type="text" class="price base_price" name="pricing[metered][price]" value="{{ product.pricing.metered.price }}"></td>
+            <td>&nbsp;</td>
             <td>&nbsp;</td>
         </tr>
     </tbody>

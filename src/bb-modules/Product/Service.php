@@ -167,6 +167,7 @@ class Service implements InjectionAwareInterface
             \Model_ProductPayment::FREE      =>  'Free',
             \Model_ProductPayment::ONCE      =>  'One time',
             \Model_ProductPayment::RECURRENT =>  'Recurrent',
+            \Model_ProductPayment::METERED =>  'Metered',
         );
     }
 
@@ -219,6 +220,11 @@ class Service implements InjectionAwareInterface
 
             $pricing = $data['pricing'];
             $productPayment->type = $data['pricing']['type'];
+
+            if($data['pricing']['type'] == \Model_ProductPayment::METERED) {
+                $productPayment->metered_setup_price = $data['pricing']['metered']['setup'];
+                $productPayment->metered_price = $data['pricing']['metered']['price'];
+            }
 
             if($data['pricing']['type'] == \Model_ProductPayment::ONCE) {
                 $productPayment->once_setup_price = $data['pricing']['once']['setup'];
@@ -869,6 +875,7 @@ class Service implements InjectionAwareInterface
             \Model_ProductPayment::FREE      => array('price'=>0, 'setup'=>0),
             \Model_ProductPayment::ONCE      => array('price'=>$model->once_price, 'setup'=>$model->once_setup_price),
             \Model_ProductPayment::RECURRENT => $periods,
+            \Model_ProductPayment::METERED => array('price'=>$model->metered_price, 'setup'=>$model->metered_setup_price),
         );
     }
 
