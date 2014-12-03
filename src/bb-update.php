@@ -28,6 +28,18 @@ class BBPatch_20 extends BBPatchAbstract
         $this->execSql($q);
         $q="ALTER TABLE product_payment ADD metered_setup_price DECIMAL(18,2) NOT NULL;";
         $this->execSql($q);
+        $q = "CREATE TABLE iF NOT EXISTS metered_usage
+                (
+                    id bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                    client_id bigint(20) NOT NULL,
+                    order_id bigint(20) NOT NULL,
+                    plan_id bigint(20) NOT NULL,
+                    product_id bigint(20) NOT NULL,
+                    invoice_id bigint(20) NOT NULL,
+                    cost DOUBLE(18,2) NOT NULL,
+                    created_at DATETIME NOT NULL
+                ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;";
+        $this->execSql($q);
 
     }
 
