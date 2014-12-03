@@ -18,6 +18,21 @@
  */
 
 /**
+ * Version 4.12.1
+ */
+class BBPatch_20 extends BBPatchAbstract
+{
+    public function patch()
+    {
+        $q="ALTER TABLE product_payment ADD metered_price DECIMAL(18, 2) NOT NULL;";
+        $this->execSql($q);
+        $q="ALTER TABLE product_payment ADD metered_setup_price DECIMAL(18,2) NOT NULL;";
+        $this->execSql($q);
+
+    }
+
+}
+/**
  * Version X.XX.X
  */
 class BBPatch_19 extends BBPatchAbstract
@@ -29,7 +44,8 @@ class BBPatch_19 extends BBPatchAbstract
 
     }
 
-}/**
+}
+/**
  * Version 4.12
  */
 class BBPatch_18 extends BBPatchAbstract
