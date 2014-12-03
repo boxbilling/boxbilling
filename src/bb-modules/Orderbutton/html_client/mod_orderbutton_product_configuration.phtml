@@ -24,6 +24,8 @@
                 </select>
                 {% elseif product.pricing.type == 'free' %}
                 <span class="label label-info">{% trans 'FREE' %}</span>
+                {% elseif product.pricing.type == 'metered' %}
+                <span class="label label-info">{{ product.pricing.metered.price | money_convert }} / {% trans 'hour' %}</span>
                 {% else %}
                 <span class="label label-info">{{ product.pricing.once.price | money_convert }}</span>
                 {% endif %}
