@@ -16,6 +16,8 @@
 
 namespace Box\Mod\Product\Api;
 
+use Box\MeteredInterface;
+
 class Admin extends \Api_Abstract
 {
     /**
@@ -556,7 +558,12 @@ class Admin extends \Api_Abstract
         }
         return $this->getService()->deletePromo($model);
     }
-    
+
+    /**
+     * @param $data
+     * @return \Model_Product
+     * @throws \Box_Exception
+     */
     private function _getProduct($data)
     {
         if(!isset($data['id'])) {
@@ -568,5 +575,24 @@ class Admin extends \Api_Abstract
             throw new \Box_Exception('Product not found');
         }
         return $model;
+    }
+
+    /**
+     * @param $data - id => product id
+     * @return bool
+     * @throws \Box_Exception
+     */
+    public function is_metered($data)
+    {
+        if(!isset($data['id'])) {
+            throw new \Box_Exception('Product id not passed');
+        }
+        $product = $this->_getProduct($data);
+        $service = $product->getService();
+        if ($service instanceof MeteredInterface){
+            return true;
+        }
+        return false;
+
     }
 }

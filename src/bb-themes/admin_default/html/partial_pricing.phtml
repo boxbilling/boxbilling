@@ -5,7 +5,9 @@
         <input type="radio" name="pricing[type]" value="free"{% if product.pricing.type == 'free' %} checked="checked"{% endif %} id="pricing-free"/><label for="pricing-free">{% trans 'Free' %}</label>
         <input type="radio" name="pricing[type]" value="once"{% if product.pricing.type == 'once' %} checked="checked"{% endif %} id="pricing-once"/><label for="pricing-once">{% trans 'One time' %}</label>
         <input type="radio" name="pricing[type]" value="recurrent"{% if product.pricing.type == 'recurrent' %} checked="checked"{% endif %} id="pricing-recurrent"/><label for="pricing-recurrent">{% trans 'Recurrent' %}</label>
+        {% if admin.product_is_metered({"id" : product.id}) %}
         <input type="radio" name="pricing[type]" value="metered"{% if product.pricing.type == 'metered' %} checked="checked"{% endif %} id="pricing-metered"/><label for="pricing-metered">{% trans 'Metered' %}</label>
+        {% endif %}
     </div>
     <div class="fix"></div>
 </div>
@@ -27,6 +29,7 @@
             <td>&nbsp;</td>
         </tr>
     </tbody>
+    {% if admin.product_is_metered({"id" : product.id}) %}
     <tbody class="metered" {% if product.pricing.type != 'metered' %}style="display:none;"{% endif %}>
         <tr>
             <th>&nbsp;</th>
@@ -43,6 +46,7 @@
             <td>&nbsp;</td>
         </tr>
     </tbody>
+    {% endif %}
 
     <tbody class="recurrent" {% if product.pricing.type != 'recurrent' %}style="display:none;"{% endif %}>
         <tr>

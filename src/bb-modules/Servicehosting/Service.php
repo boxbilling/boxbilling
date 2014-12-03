@@ -12,7 +12,9 @@
 
 namespace Box\Mod\Servicehosting;
 use Box\InjectionAwareInterface;
-class Service implements InjectionAwareInterface
+use Box\MeteredInterface;
+
+class Service implements InjectionAwareInterface, MeteredInterface
 {
     /**
      * @var \Box_Di
