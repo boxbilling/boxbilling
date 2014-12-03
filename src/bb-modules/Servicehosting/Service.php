@@ -37,6 +37,12 @@ class Service implements InjectionAwareInterface, MeteredInterface
         return $this->di;
     }
 
+    public function setUsage($planId, $clientId, $orderId, $productId)
+    {
+        $meteredBillingService = $this->di['mod_service']('MeteredBilling');
+        $meteredBillingService->logUsage($planId, $clientId, $orderId, $productId);
+    }
+
     public function getCartProductTitle($product, array $data)
     {
         try {
@@ -122,6 +128,8 @@ class Service implements InjectionAwareInterface, MeteredInterface
         } else {
             $username = $this->_generateUsername();
         }
+
+        $this->setUsage($model->service_hosting_hp_id, $model->client_id, $order->id, $order->product_id);
         
         $model->username = $username;
         $model->pass = $pass;

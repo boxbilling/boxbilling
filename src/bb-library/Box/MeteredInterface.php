@@ -14,5 +14,6 @@ namespace Box;
 
 interface MeteredInterface
 {
+    public function setUsage($planId, $clientId, $orderId, $productId);
 
 }
