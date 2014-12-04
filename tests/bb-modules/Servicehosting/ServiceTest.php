@@ -128,7 +128,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
             ->method('store');
 
         $serviceMock = $this->getMockBuilder('\Box\Mod\Servicehosting\Service')
-            ->setMethods(array('_getAM', 'setUsage'))
+            ->setMethods(array('_getAM'))
             ->getMock();
 
         $serverManagerMock = $this->getMockBuilder('\Server_Manager_Custom')->disableOriginalConstructor()->getMock();
@@ -139,10 +139,6 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $serviceMock->expects($this->atLeastOnce())
             ->method('_getAM')
             ->will($this->returnValue($AMresultArray));
-
-        $serviceMock->expects($this->atLeastOnce())
-            ->method('setUsage')
-            ->willReturn(true);
 
 
         $di = new \Box_Di();

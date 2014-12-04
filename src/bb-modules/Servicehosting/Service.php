@@ -129,8 +129,6 @@ class Service implements InjectionAwareInterface, MeteredInterface
         } else {
             $username = $this->_generateUsername();
         }
-
-        $this->setUsage($model->service_hosting_hp_id, $model->client_id, $order->id, $order->product_id);
         
         $model->username = $username;
         $model->pass = $pass;

@@ -14,6 +14,7 @@
 namespace Box\Mod\Order;
 
 use Box\InjectionAwareInterface;
+use Box\MeteredInterface;
 
 class Service implements InjectionAwareInterface
 {
@@ -77,6 +78,13 @@ class Service implements InjectionAwareInterface
 
             $emailService = $di['mod_service']('email');
             $emailService->sendTemplate($email);
+
+            $mod = $di['mod']('service' . $order->service_type);
+            $orderTypeService = $mod->getService();
+            if ($orderTypeService instanceof MeteredInterface){
+                $orderTypeServiceModel = $service->getOrderService($order);
+                $orderTypeService->setUsage($orderTypeServiceModel->service_hosting_hp_id, $orderTypeServiceModel->client_id, $order->id, $order->product_id);
+            }
         } catch (\Exception $exc) {
             error_log($exc->getMessage());
         }
