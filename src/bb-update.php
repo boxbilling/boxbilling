@@ -24,9 +24,9 @@ class BBPatch_20 extends BBPatchAbstract
 {
     public function patch()
     {
-        $q="ALTER TABLE product_payment ADD metered_price DECIMAL(18, 2) NOT NULL;";
+        $q="ALTER TABLE product_payment ADD metered_price DECIMAL(18, 2) DEFAULT '0.00';";
         $this->execSql($q);
-        $q="ALTER TABLE product_payment ADD metered_setup_price DECIMAL(18,2) NOT NULL;";
+        $q="ALTER TABLE product_payment ADD metered_setup_price DECIMAL(18,2) DEFAULT '0.00';";
         $this->execSql($q);
         $q = "CREATE TABLE iF NOT EXISTS metered_usage
                 (
