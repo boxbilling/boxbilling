@@ -176,6 +176,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
             'free' =>  'Free',
             'once' =>  'One time',
             'recurrent' =>  'Recurrent',
+            'metered' => 'Metered',
         );
 
         $result = $this->service->getPaymentTypes();

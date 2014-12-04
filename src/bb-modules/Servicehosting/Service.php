@@ -41,6 +41,7 @@ class Service implements InjectionAwareInterface, MeteredInterface
     {
         $meteredBillingService = $this->di['mod_service']('MeteredBilling');
         $meteredBillingService->logUsage($planId, $clientId, $orderId, $productId);
+        return true;
     }
 
     public function getCartProductTitle($product, array $data)
