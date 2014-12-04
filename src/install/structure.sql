@@ -901,8 +901,8 @@ CREATE TABLE `product_payment` (
   `a_enabled` tinyint(1) DEFAULT '1',
   `bia_enabled` tinyint(1) DEFAULT '1',
   `tria_enabled` tinyint(1) DEFAULT '1',
-  `metered_setup_price` decimal(18,2) DEFAULT '0.00'
-  `metered_price` decimal(18,2) DEFAULT '0.00'
+  `metered_setup_price` decimal(18,2) DEFAULT '0.00',
+  `metered_price` decimal(18,2) DEFAULT '0.00',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
