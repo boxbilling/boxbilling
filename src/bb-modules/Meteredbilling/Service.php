@@ -58,12 +58,13 @@ class Service implements InjectionAwareInterface
     /**
      * Calculate usage cost (timebased)
      * @param string $currentTime
-     * @param \Model_MeteredUsage $newUsage
+     * @param int $client_id
+     * @param int $order_id
      * @return float
      */
-    public function calculateUsageCost($currentTime, \Model_MeteredUsage $newUsage)
+    public function calculateUsageCost($currentTime, $client_id, $order_id)
     {
-        $lastUsage = $this->findLastUnbilledUsage($newUsage->client_id, $newUsage->order_id);
+        $lastUsage = $this->findLastUnbilledUsage($client_id, $order_id);
         if (!$lastUsage instanceof \Model_MeteredUsage){
             return 0.00000000;
         }
@@ -94,7 +95,7 @@ class Service implements InjectionAwareInterface
         $model->order_id = $orderId;
         $model->product_id = $productId;
         $model->invoice_id = 0;
-        $model->cost = $this->calculateUsageCost($creationTime, $model);
+        $model->cost = $this->calculateUsageCost($creationTime, $clientId, $orderId);
         $model->created_at = $creationTime;
 
         $this->di['db']->store($model);
