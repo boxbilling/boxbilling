@@ -70,7 +70,7 @@ class Service implements InjectionAwareInterface
 
         $intervalInHours = abs(strtotime($lastUsage->created_at) - strtotime($currentTime) ) / 3600;
         $productService = $this->di['mod_service']('Product');
-        $unitPrice = $productService->getMeteredPrice($newUsage->product_id);
+        $unitPrice = $productService->getMeteredPrice($lastUsage->product_id);
 
         return $unitPrice * $intervalInHours;
 
