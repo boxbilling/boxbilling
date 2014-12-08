@@ -149,5 +149,34 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $result = $this->service->getUnbilledUsage($client_id);
         $this->assertInternalType('array', $result);
     }
+
+    public function testgetOrderUsageTotalCost()
+    {
+        $model = new \Model_ClientOrder();
+        $model->loadBean(new \RedBeanPHP\OODBBean());
+
+        $usedTotalCost = 0.05;
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('getCell')
+            ->willReturn($usedTotalCost);
+
+        $di = new \Box_Di();
+        $di['db'] = $dbMock;
+
+        $serviceMock = $this->getMockBuilder('Box\Mod\Meteredbilling\Service')
+            ->setMethods(array('calculateUsageCost'))
+            ->getMock();
+
+        $usedCurrentCost  = 0.87;
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('calculateUsageCost')
+            ->willReturn($usedCurrentCost);
+
+        $serviceMock->setDi($di);
+        $result = $serviceMock->getOrderUsageTotalCost($model);
+        $this->assertGreaterThan(0.00000000, $result);
+        $this->assertEquals($usedTotalCost + $usedCurrentCost, $result);
+    }
 }
  

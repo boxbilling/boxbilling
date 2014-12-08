@@ -112,4 +112,20 @@ class Service implements InjectionAwareInterface
     {
         return $this->di['db']->find('MeteredBilling', 'client_id = :client_id AND invoice_id = 0', array(':client_id' => $clientId)) ;
     }
+
+    public function getOrderUsageTotalCost(\Model_ClientOrder $clientOrder)
+    {
+        $sql = 'SELECT sum(metered_usage.cost)
+                FROM metered_usage
+                  LEFT JOIN invoice on metered_usage.invoice_id = invoice.id
+                WHERE metered_usage.order_id = :order_id
+                  AND invoice.status = :invoice_status';
+        $bindings = array(
+            ':order_id' => $clientOrder->id,
+            ':invoice_status' =>\Model_Invoice::STATUS_UNPAID,
+        );
+
+        $usedCost = $this->di['db']->getCell($sql, $bindings);
+        return $usedCost + $this->calculateUsageCost(date('c'), $clientOrder->client_id, $clientOrder->id);
+    }
 }
