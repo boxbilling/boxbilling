@@ -63,7 +63,11 @@
 
                     <tr>
                         <td><label>{% trans 'Payment amount' %}</label></td>
+                        {% if (admin.order_is_metered({"id":order.id})) %}
+                            <td>-{{ mf.currency_format( admin.meteredbilling_get_total_cost({"order_id":order.id}), order.currency) }}</td>
+                        {% else %}
                         <td>{{ mf.currency_format( order.total, order.currency) }} {% if order.period %}{{mf.period_name(order.period)}}{% endif %} {% if order.quantity > 1 %}({{ order.quantity }} x {{ mf.currency_format( order.price, order.currency) }}){% endif %}</td>
+                        {% endif %}
                     </tr>
 
                     {% if order.discount and order.discount > 0%}
