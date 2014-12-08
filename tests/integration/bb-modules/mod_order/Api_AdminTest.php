@@ -285,4 +285,69 @@ class Api_Admin_OrderTest extends BBDbApiTestCase
         $result = $orderService->haveMeteredBilling($orderModel);
         $this->assertTrue($result);
     }
+
+    public function testChangeMeteredProductinOrder()
+    {
+        $data['client_id']      = 1;
+        $data['product_id']     = 17;
+        $data['group_id']       = 2;
+        $data['invoice_option'] = 'no-invoice';
+        $data['activate']       = 1;
+        $data['config']         = array('domain' => array('action' => 'owndomain', 'owndomain_sld' => 'changeProductorder', 'owndomain_tld' => '.com'));
+
+        $id = $this->api_admin->order_create($data);
+
+        $newProductId = 18;
+        $data         = array(
+            'id'         => $id,
+            'product_id' => $newProductId,
+        );
+        $bool         = $this->api_admin->order_change_order_product($data);
+        $this->assertTrue($bool);
+
+        $orderModel = $this->di['db']->load("ClientOrder", $id);
+        $this->assertEquals($newProductId, $orderModel->product_id);
+    }
+
+    public function testChangeMeteredProductinOrder_DifferentType()
+    {
+        $data['client_id']      = 1;
+        $data['product_id']     = 17;
+        $data['group_id']       = 2;
+        $data['invoice_option'] = 'no-invoice';
+        $data['activate'] = 1;
+        $data['config'] = array('domain'=>array('action'=>'owndomain', 'owndomain_sld'=>'changeProductorder', 'owndomain_tld'=>'.com'));
+
+        $id = $this->api_admin->order_create($data);
+
+        $newProductId = 7;
+        $data = array(
+            'id' => $id,
+            'product_id' => $newProductId,
+        );
+
+        $this->setExpectedException('\Box_Exception', 'Order product can not be changed');
+        $this->api_admin->order_change_order_product($data);
+    }
+
+    public function testChangeMeteredProductinOrder_NotMeteredPayment()
+    {
+        $data['client_id']      = 1;
+        $data['product_id']     = 17;
+        $data['group_id']       = 2;
+        $data['invoice_option'] = 'no-invoice';
+        $data['activate'] = 1;
+        $data['config'] = array('domain'=>array('action'=>'owndomain', 'owndomain_sld'=>'changeProductorder', 'owndomain_tld'=>'.com'));
+
+        $id = $this->api_admin->order_create($data);
+
+        $newProductId = 8;
+        $data = array(
+            'id' => $id,
+            'product_id' => $newProductId,
+        );
+
+        $this->setExpectedException('\Box_Exception', 'Order product can not be changed');
+        $this->api_admin->order_change_order_product($data);
+    }
 }

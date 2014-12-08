@@ -1959,8 +1959,13 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $productTypeService->expects($this->atLeastOnce())
             ->method('setUsage');
 
+        $toolsMock = $this->getMockBuilder('\Box_Tools')->getMock();
+        $toolsMock->expects($this->atLeastOnce())
+            ->method('decodeJ')
+            ->willReturn(array());
 
         $di = new \Box_Di();
+        $di['tools'] = $toolsMock;
         $di['db'] = $dbMock;
         $di['mod_service'] = $di->protect(function ($serviceName) use($productServiceMock, $productTypeService){
             if ($serviceName == 'Product'){
