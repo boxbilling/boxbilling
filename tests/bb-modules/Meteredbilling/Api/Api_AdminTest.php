@@ -1,4 +1,5 @@
 <?php
+namespace Box\Mod\Api\Meteredbilling;
 
 class AdminTest extends \PHPUnit_Framework_TestCase
 {
@@ -27,8 +28,9 @@ class AdminTest extends \PHPUnit_Framework_TestCase
         $validatorMock->expects($this->atLeastOnce())
             ->method('checkRequiredParamsForArray');
 
-        $model = new Model_ClientOrder();
+        $model = new \Model_ClientOrder();
         $model->loadBean(new \RedBeanPHP\OODBBean());
+
 
         $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
         $dbMock->expects($this->atLeastOnce())
@@ -36,7 +38,7 @@ class AdminTest extends \PHPUnit_Framework_TestCase
             ->with('ClientOrder')
             ->willReturn($model);
 
-        $di = new Box_Di();
+        $di = new \Box_Di();
         $di['db'] = $dbMock;
         $di['validator'] = $validatorMock;
         $this->api->setDi($di);
