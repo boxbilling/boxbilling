@@ -82,10 +82,10 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $serviceMock->expects($this->atLeastOnce())
             ->method('findLastUnbilledUsage');
 
-        $model = new \Model_MeteredUsage();
-        $model->loadBean(new \RedBeanPHP\OODBBean());
+        $client_id = 1;
+        $order_id = 2;
 
-        $result = $serviceMock->calculateUsageCost(date('c'), $model);
+        $result = $serviceMock->calculateUsageCost(date('c'), $client_id, $order_id);
         $this->assertEquals($result, 0);
     }
 
