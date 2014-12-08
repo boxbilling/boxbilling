@@ -712,7 +712,7 @@ CREATE TABLE `metered_usage` (
   `plan_id` bigint(20) NOT NULL,
   `product_id` bigint(20) NOT NULL,
   `invoice_id` bigint(20) NOT NULL,
-  `cost` double(18,2) NOT NULL,
+  `cost` double(18,6) NOT NULL,
   `created_at` datetime NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
