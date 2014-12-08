@@ -1338,4 +1338,30 @@ class Service implements InjectionAwareInterface
         return false;
     }
 
+    public function changeOrderProduct(\Model_ClientOrder $clientOrder, \Model_Product $product)
+    {
+        $orderProduct = $this->di['db']->load('Product', $clientOrder->product_id);
+
+        $productService = $this->di['mod_service']('Product');
+        $changeableProducts = $productService->getChangeableProductPairs($orderProduct);
+
+        if (array_search($product->title, $changeableProducts) === false) {
+            throw new \Box_Exception("Order product can not be changed");
+        }
+
+        $productTypeService = $this->di['mod_service']('service'.$product->type);
+        if (!$productTypeService instanceof MeteredInterface){
+            throw new \Box_Exception('Product service does not support metered billing');
+        }
+
+        $orderTypeServiceModel = $this->getOrderService($clientOrder);
+
+        $clientOrder->product_id = $product->id;
+        $this->di['db']->store($clientOrder);
+
+        $productTypeService->setUsage($orderTypeServiceModel->service_hosting_hp_id, $clientOrder->client_id, $clientOrder->id, $clientOrder->product_id);
+
+        return true;
+    }
+
 }

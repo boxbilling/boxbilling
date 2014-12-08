@@ -1085,4 +1085,34 @@ class Service implements InjectionAwareInterface
 
     }
 
+    /**
+     * Get list of changeable products (payment type must be metered)
+     * @param \Model_Product $product
+     * @return array
+     */
+    public function getChangeableProductPairs(\Model_Product $product)
+    {
+        $sql = 'SELECT product.id, product.title
+                FROM product
+                  LEFT JOIN product_payment on product.product_payment_id = product_payment.id
+                WHERE product.product_category_id = :product_category_id
+                  AND product.type = :type
+                  AND product_payment.type = :payment_type
+                  AND product.id != :id';
+
+        $bindings = array(
+            ':product_category_id' => $product->product_category_id,
+            ':type' => $product->type,
+            ':payment_type' => \Model_ProductPayment::METERED,
+            ':id' => $product->id,
+        );
+
+        $rows = $this->di['db']->getAll($sql, $bindings);
+        $result = array();
+        foreach ($rows as $record) {
+            $result[ $record['id'] ] = $record['title'];
+        }
+        return $result;
+    }
+
 }

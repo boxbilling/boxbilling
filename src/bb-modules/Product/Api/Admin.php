@@ -584,9 +584,6 @@ class Admin extends \Api_Abstract
      */
     public function is_metered($data)
     {
-        if(!isset($data['id'])) {
-            throw new \Box_Exception('Product id not passed');
-        }
         $product = $this->_getProduct($data);
         $service = $product->getService();
         if ($service instanceof MeteredInterface){
@@ -594,5 +591,17 @@ class Admin extends \Api_Abstract
         }
         return false;
 
+    }
+
+    /**
+     * @param $data - id : product id
+     * @return mixed
+     * @throws \Box_Exception
+     */
+    public function get_changeable_products($data)
+    {
+        $product = $this->_getProduct($data);
+
+        return $this->getService()->getChangeableProductPairs($product);
     }
 }

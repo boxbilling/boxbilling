@@ -716,6 +716,49 @@ class AdminTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(true, $result);
     }
 
+    public function testchange_order_product()
+    {
+        $data = array(
+            'id' => 1,
+            'product_id' => 2,
+        );
+
+        $modelOrder = new \Model_ClientOrder();
+        $modelOrder->loadBean(new \RedBeanPHP\OODBBean());
+
+        $modelProduct = new \Model_Product();
+        $modelProduct->loadBean(new \RedBeanPHP\OODBBean());
+
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->disableOriginalConstructor()->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')
+            ->will($this->returnValue(null));
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('getExistingModelById')
+            ->withConsecutive(
+                array('ClientOrder'),
+                array('Product'))
+            ->willReturnOnConsecutiveCalls(
+                $modelOrder,
+                $modelProduct);
+
+        $di = new Box_Di();
+        $di['db'] = $dbMock;
+        $di['validator'] = $validatorMock;
+        $this->api->setDi($di);
+
+        $serviceMock = $this->getMockBuilder('\Box\Mod\Order\Service')->getMock();
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('changeOrderProduct')
+            ->will($this->returnValue(true));
+        $this->api->setService($serviceMock);
+
+        $result = $this->api->change_order_product($data);
+        $this->assertTrue($result);
+    }
+
 
 }
  

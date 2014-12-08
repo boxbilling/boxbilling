@@ -1082,5 +1082,37 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $result = $this->service->canUpgradeTo($productModel, $newProductModel);
         $this->assertFalse($result);
     }
+
+    public function testgetChangeableProductPairs()
+    {
+        $model = new \Model_Product();
+        $model->loadBean(new \RedBeanPHP\OODBBean());
+
+        $key = 1;
+        $value = 'shared hosting';
+        $sqlResult = array(
+            array(
+                'id' => $key,
+                'title' => $value,
+            ),
+        );
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('getAll')
+            ->willReturn($sqlResult);
+
+        $di = new \Box_Di();
+        $di['db'] = $dbMock;
+        $this->service->setDi($di);
+
+        $result = $this->service->getChangeableProductPairs($model);
+        $this->assertInternalType('array', $result);
+
+        $expected = array(
+            $key => $value,
+        );
+        $this->assertEquals($expected, $result);
+    }
 }
  
