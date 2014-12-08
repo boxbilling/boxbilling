@@ -28,6 +28,8 @@
     <product_payment id="10" type="recurrent" once_price="0" m_price="30" q_price="20" b_price="10" a_price="5" bia_price="50" tria_price="150" />
     <product_payment id="11" type="once" once_price="50" once_setup_price="20" />
     <product_payment id="12" type="recurrent" once_price="0" once_setup_price="0" m_price="30" q_price="90" b_price="180" a_price="360" bia_price="720" tria_price="1440" />
+    <product_payment id="13" type="metered" metered_price="0.05" metered_setup_price="9.99" />
+
 
     <product id="1" product_category_id="1" product_payment_id="1" type="custom" title="SSL Certificate" description="SSL cetificate information" unit="product" active="1" is_addon="0" addons="[3,4,5]" setup="after_payment" plugin="Example" created_at="2011-01-01T12:00:00+00:00" updated_at="2011-01-01T12:00:00+00:00"/>
     <product id="2" product_category_id="1" product_payment_id="2" type="custom" title="Custom product with plugin" description="Custom product with plugin" unit="product" active="1" is_addon="0" addons="[3,4,5]" setup="after_payment" plugin="Example" created_at="2011-01-01T12:00:00+00:00" updated_at="2011-01-01T12:00:00+00:00"/>
@@ -46,6 +48,7 @@
     <product id="13" product_category_id="1" product_payment_id="11" type="custom" title="Product with setup price" description="Product with setup price" unit="product" active="1" is_addon="0" addons="" setup="after_payment" plugin="" created_at="2011-01-01T12:00:00+00:00" updated_at="2011-01-01T12:00:00+00:00"/>
     <product id="15" product_category_id="1" product_payment_id="12" type="solusvm" title="SolusVM product" description="VPS Product" unit="product" active="1" is_addon="0" addons="" config='{"node":"1", "plan":"mazas", "vtype":"openvz", "ips":"1"}' setup="after_payment" plugin="" created_at="2011-01-01T12:00:00+00:00" updated_at="2011-01-01T12:00:00+00:00"/>
     <product id="16" product_category_id="1" product_payment_id="12" type="boxbillinglicense" title="BoxBilling license" description="BoxBilling License product" unit="product" active="1" is_addon="0" addons="" config='' setup="after_payment" plugin="" created_at="2011-01-01T12:00:00+00:00" updated_at="2011-01-01T12:00:00+00:00"/>
+    <product id="17" product_category_id="1" product_payment_id="13" type="hosting" title="Metered hosting" description="shared hosting with metered billing" unit="product" active="1" is_addon="0" addons="" config='{"server_id":"1", "hosting_plan_id":"1"}' setup="after_payment" plugin="" created_at="2011-01-01T12:00:00+00:00" updated_at="2011-01-01T12:00:00+00:00"/>
 
     <client_order id="1" client_id="1" group_id="1" group_master="1" product_id="1" currency="USD" service_type="custom" period="" quantity="1" price="10" status="pending_setup" notes="" created_at="2011-10-24T15:23:43+03:00" updated_at="2011-10-24T15:23:43+03:00"/>
     <client_order id="2" client_id="1" group_id="1" product_id="2" currency="USD" service_type="custom" period="" quantity="1" price="10" status="pending_setup" notes="" config='{"plugin":"Example"}' created_at="2011-10-24T15:23:43+03:00" updated_at="2011-10-24T15:23:43+03:00"/>

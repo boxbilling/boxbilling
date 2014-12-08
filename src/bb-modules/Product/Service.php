@@ -1077,7 +1077,7 @@ class Service implements InjectionAwareInterface
     public function getMeteredPrice($productId)
     {
         $product = $this->di['db']->load('Product', $productId);
-        $productPayment = $this->di['db']->findOne('ProductPayment', $product->product_payment_id);
+        $productPayment = $this->di['db']->load('ProductPayment', $product->product_payment_id);
         if ($productPayment->type != 'metered'){
             throw new \Box_Exception('Metered price is not set', 1124);
         }

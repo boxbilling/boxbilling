@@ -267,4 +267,22 @@ class Api_Admin_OrderTest extends BBDbApiTestCase
         $this->assertEquals(0, count($array['list']));
         $this->assertTrue($result);
     }
+
+    public function testcreateMeteredProductOrder()
+    {
+        $data['client_id']      = 1;
+        $data['product_id']     = 17;
+        $data['group_id']       = 2;
+        $data['invoice_option'] = 'no-invoice';
+        $data['activate'] = 1;
+        $data['config'] = array('domain'=>array('action'=>'owndomain', 'owndomain_sld'=>'vm', 'owndomain_tld'=>'.com'));
+
+        $id = $this->api_admin->order_create($data);
+        $this->assertInternalType('int', $id);
+
+        $orderModel = $this->di['db']->load("ClientOrder", $id);
+        $orderService = $this->di['mod_service']('Order');
+        $result = $orderService->haveMeteredBilling($orderModel);
+        $this->assertTrue($result);
+    }
 }
