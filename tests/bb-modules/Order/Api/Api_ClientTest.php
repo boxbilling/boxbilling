@@ -344,5 +344,44 @@ class ClientTest extends PHPUnit_Framework_TestCase
         );
         $this->api->get($data);
     }
+
+    public function testis_metered()
+    {
+        $data = array(
+            'id' => 1,
+        );
+
+        $model = new \Model_ClientOrder();
+        $model->loadBean(new \RedBeanPHP\OODBBean());
+
+
+        $serviceMock = $this->getMockBuilder('\Box\Mod\Order\Service')->getMock();
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('haveMeteredBilling')
+            ->with($model)
+            ->will($this->returnValue(true));
+
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('findForClientById')
+            ->willReturn($model);
+
+        $this->api->setService($serviceMock);
+
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->disableOriginalConstructor()->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray');
+
+        $di = new \Box_Di();
+        $di['validator'] = $validatorMock;
+
+        $this->api->setDi($di);
+
+        $identity = new \Model_Client();
+        $identity->loadBean(new \RedBeanPHP\OODBBean());
+        $this->api->setIdentity($identity);
+
+        $result = $this->api->is_metered($data);
+        $this->assertTrue($result);
+    }
 }
  

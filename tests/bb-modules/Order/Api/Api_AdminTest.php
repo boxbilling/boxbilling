@@ -759,7 +759,7 @@ class AdminTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($result);
     }
 
-    public function testis_metered($data)
+    public function testis_metered()
     {
         $data = array(
             'id' => 1,

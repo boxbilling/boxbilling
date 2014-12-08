@@ -128,4 +128,10 @@ class Client extends \Api_Abstract
 
         return $order;
     }
+
+    public function is_metered($data)
+    {
+        $orderModel = $this->_getOrder($data);
+        return $this->getService()->haveMeteredBilling($orderModel);
+    }
 }
