@@ -35,7 +35,11 @@
 
                     <tr>
                         <td><label>{% trans 'Payment amount' %}</label></td>
-                        <td>{{ order.total | money(order.currency) }}</td>
+                        {% if (client.order_is_metered({"id":order.id})) %}
+                            <td>-{{ mf.currency_format( client.meteredbilling_get_total_cost({"order_id":order.id}), order.currency) }}</td>
+                        {% else %}
+                            <td>{{ order.total | money(order.currency) }}</td>
+                        {% endif %}
                     </tr>
 
                     {% if order.period %}
