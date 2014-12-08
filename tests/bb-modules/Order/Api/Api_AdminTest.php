@@ -759,6 +759,40 @@ class AdminTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($result);
     }
 
+    public function testis_metered($data)
+    {
+        $data = array(
+            'id' => 1,
+        );
+
+        $model = new Model_ClientOrder();
+        $model->loadBean(new \RedBeanPHP\OODBBean());
+
+        $serviceMock = $this->getMockBuilder('\Box\Mod\Order\Service')->getMock();
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('haveMeteredBilling')
+            ->with($model)
+            ->will($this->returnValue(true));
+        $this->api->setService($serviceMock);
+
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->disableOriginalConstructor()->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray');
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('getExistingModelById')
+            ->willReturn($model);
+
+        $di = new \Box_Di();
+        $di['validator'] = $validatorMock;
+        $di['db'] = $dbMock;
+
+        $this->api->setDi($di);
+
+        $result = $this->api->is_metered($data);
+        $this->assertTrue($result);
+    }
 
 }
  

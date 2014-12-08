@@ -493,4 +493,10 @@ class Admin extends \Api_Abstract
 
         return $this->getService()->changeOrderProduct($orderModel, $productModel);
     }
+
+    public function is_metered($data)
+    {
+        $orderModel = $this->_getOrder($data);
+        return $this->getService()->haveMeteredBilling($orderModel);
+    }
 }
