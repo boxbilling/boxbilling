@@ -41,11 +41,11 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             ->method('store');
 
         $serviceMock = $this->getMockBuilder('Box\Mod\Meteredbilling\Service')
-            ->setMethods(array('calculateUsageCost'))
+            ->setMethods(array('calculateProductUsageCost'))
             ->getMock();
 
         $serviceMock->expects($this->atLeastOnce())
-            ->method('calculateUsageCost')
+            ->method('calculateProductUsageCost')
             ->willReturn(0);
 
 
@@ -73,37 +73,52 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($result);
     }
 
-    public function testcalculateUsageCost_FIrstUsageLog()
+    public function testcalculateProductUsageCost()
     {
         $serviceMock = $this->getMockBuilder('Box\Mod\Meteredbilling\Service')
-            ->setMethods(array('findLastUnbilledUsage'))
+            ->setMethods(array('findLastLoggedProductUsage', 'cost'))
+            ->getMock();
+
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('findLastLoggedProductUsage');
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('cost')
+            ->willReturn(0);
+
+        $client_id = 1;
+        $order_id = 2;
+        $product_id = 3;
+
+        $result = $serviceMock->calculateProductUsageCost(date('c'), $client_id, $order_id, $product_id);
+        $this->assertEquals($result, 0);
+    }
+
+    public function testcalculateCurrentUsageCost()
+    {
+        $serviceMock = $this->getMockBuilder('Box\Mod\Meteredbilling\Service')
+            ->setMethods(array('findLastUnbilledUsage', 'cost'))
             ->getMock();
 
         $serviceMock->expects($this->atLeastOnce())
             ->method('findLastUnbilledUsage');
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('cost')
+            ->willReturn(0);
 
         $client_id = 1;
         $order_id = 2;
 
-        $result = $serviceMock->calculateUsageCost(date('c'), $client_id, $order_id);
+        $result = $serviceMock->calculateCurrentUsageCost(date('c'), $client_id, $order_id);
         $this->assertEquals($result, 0);
     }
 
 
-    public function testcalculateUsageCost()
+    public function testcost()
     {
-        $serviceMock = $this->getMockBuilder('Box\Mod\Meteredbilling\Service')
-            ->setMethods(array('findLastUnbilledUsage'))
-            ->getMock();
-
         $lastUsageModel = new \Model_MeteredUsage();
         $lastUsageModel->loadBean(new \RedBeanPHP\OODBBean());
         $intervalInHours = 24;
         $lastUsageModel->created_at = date('c', strtotime(sprintf('-%d hours', $intervalInHours)));
-
-        $serviceMock->expects($this->atLeastOnce())
-            ->method('findLastUnbilledUsage')
-            ->willReturn($lastUsageModel);
 
         $di = new \Box_Di();
 
@@ -121,12 +136,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             return null;
         });
 
-        $serviceMock->setDi($di);
+        $this->service->setDi($di);
 
-        $client_id = 1;
-        $order_id = 2;
-
-        $result = $serviceMock->calculateUsageCost(date('c'), $client_id, $order_id);
+        $result = $this->service->cost($lastUsageModel, date('c'));
         $this->assertGreaterThan(0.00000000, $result);
         $this->assertEquals($intervalInHours * $meteredPrice, $result);
 
@@ -165,12 +177,12 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $di['db'] = $dbMock;
 
         $serviceMock = $this->getMockBuilder('Box\Mod\Meteredbilling\Service')
-            ->setMethods(array('calculateUsageCost'))
+            ->setMethods(array('calculateCurrentUsageCost'))
             ->getMock();
 
         $usedCurrentCost  = 0.87;
         $serviceMock->expects($this->atLeastOnce())
-            ->method('calculateUsageCost')
+            ->method('calculateCurrentUsageCost')
             ->willReturn($usedCurrentCost);
 
         $serviceMock->setDi($di);

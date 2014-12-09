@@ -1355,6 +1355,7 @@ class Service implements InjectionAwareInterface
         }
 
         $orderTypeServiceModel = $this->getOrderService($clientOrder);
+        $productTypeService->setUsage($orderTypeServiceModel->service_hosting_hp_id, $clientOrder->client_id, $clientOrder->id, $clientOrder->product_id);
 
         $productConfig = $this->di['tools']->decodeJ($product->config);
         $orderTypeServiceModel->service_hosting_hp_id = isset($productConfig['hosting_plan_id']) ? $productConfig['hosting_plan_id'] : null;

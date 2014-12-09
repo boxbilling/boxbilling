@@ -47,12 +47,30 @@ class Service implements InjectionAwareInterface
     {
         $whereStatement = 'client_id = :client_id AND
              order_id = :order_id AND
-             invoice_id = 0 ';
+             invoice_id = 0
+             ORDER BY id desc';
         $bindings = array(
             ':client_id' =>  $clientId,
             ':order_id' => $orderId,
         );
         return $model = $this->di['db']->findOne('MeteredUsage', $whereStatement, $bindings);
+    }
+
+    public function findLastLoggedProductUsage($clientId, $orderId, $productId)
+    {
+        $whereStatement = 'client_id = :client_id AND
+             order_id = :order_id AND
+             invoice_id = 0
+             ORDER BY id desc';
+        $bindings = array(
+            ':client_id' =>  $clientId,
+            ':order_id' => $orderId,
+        );
+        $model = $this->di['db']->findOne('MeteredUsage', $whereStatement, $bindings);
+        if ($model->product_id == $productId){
+            return $model;
+        }
+        return null;
     }
 
     /**
@@ -62,19 +80,30 @@ class Service implements InjectionAwareInterface
      * @param int $order_id
      * @return float
      */
-    public function calculateUsageCost($currentTime, $client_id, $order_id)
+    public function calculateCurrentUsageCost($currentTime, $client_id, $order_id)
     {
         $lastUsage = $this->findLastUnbilledUsage($client_id, $order_id);
-        if (!$lastUsage instanceof \Model_MeteredUsage){
+        return $this->cost($lastUsage, $currentTime);
+
+    }
+
+    public function calculateProductUsageCost($currentTime, $client_id, $order_id, $product_id)
+    {
+        $lastUsage = $this->findLastLoggedProductUsage($client_id, $order_id, $product_id);
+        return $this->cost($lastUsage, $currentTime);
+
+    }
+
+    public function cost($model, $currentTime)
+    {
+        if (!$model instanceof \Model_MeteredUsage){
             return 0.00000000;
         }
-
-        $intervalInHours = abs(strtotime($lastUsage->created_at) - strtotime($currentTime) ) / 3600;
+        $intervalInHours = abs(strtotime($model->created_at) - strtotime($currentTime) ) / 3600;
         $productService = $this->di['mod_service']('Product');
-        $unitPrice = $productService->getMeteredPrice($lastUsage->product_id);
+        $unitPrice = $productService->getMeteredPrice($model->product_id);
 
         return $unitPrice * $intervalInHours;
-
     }
 
     /**
@@ -95,7 +124,7 @@ class Service implements InjectionAwareInterface
         $model->order_id = $orderId;
         $model->product_id = $productId;
         $model->invoice_id = 0;
-        $model->cost = $this->calculateUsageCost($creationTime, $clientId, $orderId);
+        $model->cost = $this->calculateProductUsageCost($creationTime, $clientId, $orderId, $productId);
         $model->created_at = $creationTime;
 
         $this->di['db']->store($model);
@@ -125,6 +154,6 @@ class Service implements InjectionAwareInterface
         );
 
         $usedCost = $this->di['db']->getCell($sql, $bindings);
-        return $usedCost + $this->calculateUsageCost(date('c'), $clientOrder->client_id, $clientOrder->id);
+        return $usedCost + $this->calculateCurrentUsageCost(date('c'), $clientOrder->client_id, $clientOrder->id);
     }
 }
