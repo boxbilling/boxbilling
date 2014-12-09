@@ -87,10 +87,10 @@ class Service implements InjectionAwareInterface
 
     }
 
-    public function calculateProductUsageCost($currentTime, $client_id, $order_id, $product_id)
+    public function calculateProductUsageCost(\Model_MeteredUsage $model)
     {
-        $lastUsage = $this->findLastLoggedProductUsage($client_id, $order_id, $product_id);
-        return $this->cost($lastUsage, $currentTime);
+        $lastUsage = $this->findLastLoggedProductUsage($model->client_id, $model->order_id, $model->product_id);
+        return $this->cost($lastUsage, $model->created_at);
 
     }
 
@@ -107,29 +107,33 @@ class Service implements InjectionAwareInterface
     }
 
     /**
-     * Create metered usage record
+     * Save \Model_MeteredUsage $model
+     * @return bool
+     */
+    public function save(\Model_MeteredUsage $model)
+    {
+        $model->cost = $this->calculateProductUsageCost($model);
+        $this->di['db']->store($model);
+        return true;
+    }
+
+    /**
+     * Create metered usage model
      * @param int $planId
      * @param int $clientId
      * @param int $orderId
      * @param int $productId
-     * @return bool
+     * @return \Model_MeteredUsage
      */
-    public function logUsage($planId, $clientId, $orderId, $productId)
+    public function create($planId, $clientId, $orderId, $productId)
     {
         $model = $this->di['db']->dispense('MeteredUsage');
-        $creationTime = date('c');
-
         $model->plan_id = $planId;
         $model->client_id = $clientId;
         $model->order_id = $orderId;
         $model->product_id = $productId;
-        $model->invoice_id = 0;
-        $model->cost = $this->calculateProductUsageCost($creationTime, $clientId, $orderId, $productId);
-        $model->created_at = $creationTime;
-
-        $this->di['db']->store($model);
-
-        return true;
+        $model->created_at = date('c');
+        return $model;
     }
 
     /**

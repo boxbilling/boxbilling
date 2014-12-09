@@ -40,7 +40,8 @@ class Service implements InjectionAwareInterface, MeteredInterface
     public function setUsage($planId, $clientId, $orderId, $productId)
     {
         $meteredBillingService = $this->di['mod_service']('MeteredBilling');
-        $meteredBillingService->logUsage($planId, $clientId, $orderId, $productId);
+        $model = $meteredBillingService->create($planId, $clientId, $orderId, $productId);
+        $meteredBillingService->save($model);
         return true;
     }
 

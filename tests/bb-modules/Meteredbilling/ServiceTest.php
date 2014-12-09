@@ -22,13 +22,8 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($di, $getDi);
     }
 
-    public function testlogUsage()
+    public function testcreate()
     {
-        $planId = 1;
-        $clientId = 3;
-        $orderId = 2;
-        $productId = 5;
-
         $model = new \Model_MeteredUsage();
         $model->loadBean(new \RedBeanPHP\OODBBean());
 
@@ -37,6 +32,26 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             ->method('dispense')
             ->willReturn($model);
 
+        $di = new \Box_Di();
+        $di['db'] = $dbMock;
+
+        $this->service->setDi($di);
+        $planId = 1;
+        $clientId = 3;
+        $orderId = 2;
+        $productId = 5;
+
+        $result = $this->service->create($planId, $clientId, $orderId, $productId);
+        $this->assertInstanceOf('\Model_MeteredUsage', $result);
+
+    }
+
+    public function testsave()
+    {
+        $model = new \Model_MeteredUsage();
+        $model->loadBean(new \RedBeanPHP\OODBBean());
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
         $dbMock->expects($this->atLeastOnce())
             ->method('store');
 
@@ -46,6 +61,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
 
         $serviceMock->expects($this->atLeastOnce())
             ->method('calculateProductUsageCost')
+            ->with($model)
             ->willReturn(0);
 
 
@@ -53,7 +69,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $di['db'] = $dbMock;
 
         $serviceMock->setDi($di);
-        $result = $serviceMock->logUsage($planId, $clientId, $orderId, $productId);
+        $result = $serviceMock->save($model);
         $this->assertTrue($result);
     }
 
@@ -85,11 +101,10 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             ->method('cost')
             ->willReturn(0);
 
-        $client_id = 1;
-        $order_id = 2;
-        $product_id = 3;
+        $model = new \Model_MeteredUsage();
+        $model->loadBean(new \RedBeanPHP\OODBBean());
 
-        $result = $serviceMock->calculateProductUsageCost(date('c'), $client_id, $order_id, $product_id);
+        $result = $serviceMock->calculateProductUsageCost($model);
         $this->assertEquals($result, 0);
     }
 
