@@ -141,16 +141,6 @@ class Service implements InjectionAwareInterface
         return $model;
     }
 
-    /**
-     * Get client's unbilled metered usage
-     * @param int $clientId
-     * @return array
-     */
-    public function getUnbilledUsage($clientId)
-    {
-        return $this->di['db']->find('MeteredBilling', 'client_id = :client_id AND invoice_id = 0', array(':client_id' => $clientId)) ;
-    }
-
     public function getOrderUsageTotalCost(\Model_ClientOrder $clientOrder)
     {
         $sql = 'SELECT sum(metered_usage.quantity * metered_usage.price)

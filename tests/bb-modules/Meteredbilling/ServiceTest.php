@@ -148,24 +148,6 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
 
     }
 
-    public function testgetUnbilledUsage()
-    {
-        $client_id = 1;
-
-        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
-        $dbMock->expects($this->atLeastOnce())
-            ->method('find')
-            ->with('MeteredBilling')
-            ->willReturn(array());
-
-        $di = new \Box_Di();
-        $di['db'] = $dbMock;
-
-        $this->service->setDi($di);
-        $result = $this->service->getUnbilledUsage($client_id);
-        $this->assertInternalType('array', $result);
-    }
-
     public function testgetOrderUsageTotalCost()
     {
         $model = new \Model_ClientOrder();
