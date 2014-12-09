@@ -125,13 +125,17 @@ class Service implements InjectionAwareInterface
      * @param int $productId
      * @return \Model_MeteredUsage
      */
-    public function create($planId, $clientId, $orderId, $productId)
+    public function create(\Model_ClientOrder $clientOrder)
     {
+        $productModel = $this->di['db']->load('Product', $clientOrder->product_id);
+        $productConfig = $this->di['tools']->decodeJ($productModel ->config);
+
+
         $model = $this->di['db']->dispense('MeteredUsage');
-        $model->plan_id = $planId;
-        $model->client_id = $clientId;
-        $model->order_id = $orderId;
-        $model->product_id = $productId;
+        $model->plan_id = isset($productConfig['hosting_plan_id']) ? $productConfig['hosting_plan_id'] : null;;
+        $model->client_id = $clientOrder->client_id;
+        $model->order_id = $clientOrder->id;
+        $model->product_id = $productModel->id;
         $model->created_at = date('c');
         return $model;
     }

@@ -32,16 +32,27 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             ->method('dispense')
             ->willReturn($model);
 
+        $productModel = new \Model_Product();
+        $productModel->loadBean(new \RedBeanPHP\OODBBean());
+        $dbMock->expects($this->atLeastOnce())
+            ->method('load')
+            ->willReturn($productModel);
+
+        $toolsMock = $this->getMockBuilder('\Box_Tools')->getMock();
+        $toolsMock->expects($this->atLeastOnce())
+            ->method('decodeJ')
+            ->willReturn(array());
+
         $di = new \Box_Di();
         $di['db'] = $dbMock;
+        $di['tools'] = $toolsMock;
 
         $this->service->setDi($di);
-        $planId = 1;
-        $clientId = 3;
-        $orderId = 2;
-        $productId = 5;
 
-        $result = $this->service->create($planId, $clientId, $orderId, $productId);
+        $clientOrder = new \Model_ClientOrder();
+        $clientOrder->loadBean(new \RedBeanPHP\OODBBean());
+
+        $result = $this->service->create($clientOrder);
         $this->assertInstanceOf('\Model_MeteredUsage', $result);
 
     }
