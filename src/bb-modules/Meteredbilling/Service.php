@@ -17,6 +17,9 @@ use Box\InjectionAwareInterface;
 
 class Service implements InjectionAwareInterface
 {
+
+    private $fractionPrecision = 8;
+
     /**
      * @var \Box_Di
      */
@@ -67,7 +70,7 @@ class Service implements InjectionAwareInterface
             ':order_id' => $orderId,
         );
         $model = $this->di['db']->findOne('MeteredUsage', $whereStatement, $bindings);
-        if ($model->product_id == $productId){
+        if (isset($model) && $model->product_id == $productId){
             return $model;
         }
         return null;
@@ -83,27 +86,23 @@ class Service implements InjectionAwareInterface
     public function calculateCurrentUsageCost($currentTime, $client_id, $order_id)
     {
         $lastUsage = $this->findLastUnbilledUsage($client_id, $order_id);
-        return $this->cost($lastUsage, $currentTime);
+        return $this->quantity($lastUsage, $currentTime) * $lastUsage->price;
 
     }
 
-    public function calculateProductUsageCost(\Model_MeteredUsage $model)
+    public function calculateProductUsage(\Model_MeteredUsage $model)
     {
         $lastUsage = $this->findLastLoggedProductUsage($model->client_id, $model->order_id, $model->product_id);
-        return $this->cost($lastUsage, $model->created_at);
+        return $this->quantity($lastUsage, $model->created_at);
 
     }
 
-    public function cost($model, $currentTime)
+    public function quantity($model, $currentTime)
     {
         if (!$model instanceof \Model_MeteredUsage){
-            return 0.00000000;
+            return 0;
         }
-        $intervalInHours = abs(strtotime($model->created_at) - strtotime($currentTime) ) / 3600;
-        $productService = $this->di['mod_service']('Product');
-        $unitPrice = $productService->getMeteredPrice($model->product_id);
-
-        return $unitPrice * $intervalInHours;
+        return strtotime($currentTime) - strtotime($model->created_at);
     }
 
     /**
@@ -112,7 +111,7 @@ class Service implements InjectionAwareInterface
      */
     public function save(\Model_MeteredUsage $model)
     {
-        $model->cost = $this->calculateProductUsageCost($model);
+        $model->quantity = $this->calculateProductUsage($model);
         $this->di['db']->store($model);
         return true;
     }
@@ -128,14 +127,16 @@ class Service implements InjectionAwareInterface
     public function create(\Model_ClientOrder $clientOrder)
     {
         $productModel = $this->di['db']->load('Product', $clientOrder->product_id);
-        $productConfig = $this->di['tools']->decodeJ($productModel ->config);
+        $productConfig = $this->di['tools']->decodeJ($productModel->config);
 
+        $productService = $this->di['mod_service']('Product');
 
         $model = $this->di['db']->dispense('MeteredUsage');
         $model->plan_id = isset($productConfig['hosting_plan_id']) ? $productConfig['hosting_plan_id'] : null;;
         $model->client_id = $clientOrder->client_id;
         $model->order_id = $clientOrder->id;
         $model->product_id = $productModel->id;
+        $model->price = bcdiv($productService->getMeteredPrice($model->product_id), 3600, $this->fractionPrecision);
         $model->created_at = date('c');
         return $model;
     }
@@ -152,7 +153,7 @@ class Service implements InjectionAwareInterface
 
     public function getOrderUsageTotalCost(\Model_ClientOrder $clientOrder)
     {
-        $sql = 'SELECT sum(metered_usage.cost)
+        $sql = 'SELECT sum(metered_usage.quantity * metered_usage.price)
                 FROM metered_usage
                   LEFT JOIN invoice on metered_usage.invoice_id = invoice.id AND invoice.status = :invoice_status
                 WHERE metered_usage.order_id = :order_id';
@@ -160,8 +161,7 @@ class Service implements InjectionAwareInterface
             ':order_id' => $clientOrder->id,
             ':invoice_status' =>\Model_Invoice::STATUS_UNPAID,
         );
-
         $usedCost = $this->di['db']->getCell($sql, $bindings);
-        return $usedCost + $this->calculateCurrentUsageCost(date('c'), $clientOrder->client_id, $clientOrder->id);
+        return bcadd($usedCost, $this->calculateCurrentUsageCost(date('c'), $clientOrder->client_id, $clientOrder->id), $this->fractionPrecision);
     }
 }

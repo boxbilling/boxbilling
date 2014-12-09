@@ -711,8 +711,9 @@ CREATE TABLE `metered_usage` (
   `order_id` bigint(20) NOT NULL,
   `plan_id` bigint(20) NOT NULL,
   `product_id` bigint(20) NOT NULL,
-  `invoice_id` bigint(20) NOT NULL,
-  `cost` double(18,6) NOT NULL,
+  `invoice_id` bigint(20) NOT NULL DEFAULT '0',
+  `quantity` int NOT NULL COMMENT 'Duration in seconds',
+  `price` double(18,8) NOT NULL COMMENT 'Price for 1 quantity',
   `created_at` datetime NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

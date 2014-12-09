@@ -35,8 +35,9 @@ class BBPatch_20 extends BBPatchAbstract
                     order_id bigint(20) NOT NULL,
                     plan_id bigint(20) NOT NULL,
                     product_id bigint(20) NOT NULL,
-                    invoice_id bigint(20) NOT NULL,
-                    cost DOUBLE(18,6) NOT NULL,
+                    invoice_id bigint(20) NOT NULL DEFAULT '0',
+                    quantity int NOT NULL COMMENT 'Duration in seconds',
+                    price double(18,8) NOT NULL COMMENT 'Price for 1 quantity',
                     created_at DATETIME NOT NULL
                 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;";
         $this->execSql($q);

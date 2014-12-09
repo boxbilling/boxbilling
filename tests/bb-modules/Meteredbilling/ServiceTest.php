@@ -43,9 +43,23 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             ->method('decodeJ')
             ->willReturn(array());
 
+        $meteredPrice = 10;
+        $productServiceMock = $this->getMockBuilder('\Box\Mod\Product\Service')->getMock();
+        $productServiceMock->expects($this->atLeastOnce())
+            ->method('getMeteredPrice')
+            ->willReturn($meteredPrice);
+
+
         $di = new \Box_Di();
         $di['db'] = $dbMock;
         $di['tools'] = $toolsMock;
+        $di['mod_service'] = $di->protect(function ($serviceName) use ($productServiceMock){
+            if ($serviceName == 'Product'){
+                return $productServiceMock;
+            }
+
+            return null;
+        });
 
         $this->service->setDi($di);
 
@@ -54,6 +68,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->service->create($clientOrder);
         $this->assertInstanceOf('\Model_MeteredUsage', $result);
+        $this->assertEquals(bcdiv($meteredPrice, 3600, 8), $result->price, 'Incorrect unit price in seconds');
 
     }
 
@@ -67,11 +82,11 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             ->method('store');
 
         $serviceMock = $this->getMockBuilder('Box\Mod\Meteredbilling\Service')
-            ->setMethods(array('calculateProductUsageCost'))
+            ->setMethods(array('calculateProductUsage'))
             ->getMock();
 
         $serviceMock->expects($this->atLeastOnce())
-            ->method('calculateProductUsageCost')
+            ->method('calculateProductUsage')
             ->with($model)
             ->willReturn(0);
 
@@ -100,73 +115,36 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($result);
     }
 
-    public function testcalculateProductUsageCost()
+    public function testcalculateProductUsage()
     {
         $serviceMock = $this->getMockBuilder('Box\Mod\Meteredbilling\Service')
-            ->setMethods(array('findLastLoggedProductUsage', 'cost'))
+            ->setMethods(array('findLastLoggedProductUsage', 'quantity'))
             ->getMock();
 
         $serviceMock->expects($this->atLeastOnce())
             ->method('findLastLoggedProductUsage');
         $serviceMock->expects($this->atLeastOnce())
-            ->method('cost')
+            ->method('quantity')
             ->willReturn(0);
 
         $model = new \Model_MeteredUsage();
         $model->loadBean(new \RedBeanPHP\OODBBean());
 
-        $result = $serviceMock->calculateProductUsageCost($model);
+        $result = $serviceMock->calculateProductUsage($model);
         $this->assertEquals($result, 0);
     }
 
-    public function testcalculateCurrentUsageCost()
-    {
-        $serviceMock = $this->getMockBuilder('Box\Mod\Meteredbilling\Service')
-            ->setMethods(array('findLastUnbilledUsage', 'cost'))
-            ->getMock();
-
-        $serviceMock->expects($this->atLeastOnce())
-            ->method('findLastUnbilledUsage');
-        $serviceMock->expects($this->atLeastOnce())
-            ->method('cost')
-            ->willReturn(0);
-
-        $client_id = 1;
-        $order_id = 2;
-
-        $result = $serviceMock->calculateCurrentUsageCost(date('c'), $client_id, $order_id);
-        $this->assertEquals($result, 0);
-    }
-
-
-    public function testcost()
+    public function testquantity()
     {
         $lastUsageModel = new \Model_MeteredUsage();
         $lastUsageModel->loadBean(new \RedBeanPHP\OODBBean());
         $intervalInHours = 24;
         $lastUsageModel->created_at = date('c', strtotime(sprintf('-%d hours', $intervalInHours)));
 
-        $di = new \Box_Di();
-
-        $meteredPrice = 10;
-        $productServiceMock = $this->getMockBuilder('\Box\Mod\Product\Service')->getMock();
-        $productServiceMock->expects($this->atLeastOnce())
-            ->method('getMeteredPrice')
-            ->willReturn($meteredPrice);
-
-        $di['mod_service'] = $di->protect(function ($serviceName) use ($productServiceMock){
-            if ($serviceName == 'Product'){
-                return $productServiceMock;
-            }
-
-            return null;
-        });
-
-        $this->service->setDi($di);
-
-        $result = $this->service->cost($lastUsageModel, date('c'));
+        $currentTime =  date('c');
+        $result = $this->service->quantity($lastUsageModel, $currentTime);
         $this->assertGreaterThan(0.00000000, $result);
-        $this->assertEquals($intervalInHours * $meteredPrice, $result);
+        $this->assertEquals(strtotime($currentTime) - strtotime($lastUsageModel->created_at), $result);
 
     }
 

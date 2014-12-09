@@ -732,9 +732,8 @@ class Service implements InjectionAwareInterface
         }
 
         if ($this->haveMeteredBilling($order)){
-            $orderTypeServiceModel = $this->getOrderService($order);
             $orderTypeService = $this->di['mod_service']('service' . $order->service_type);
-            $orderTypeService->setUsage($orderTypeServiceModel->service_hosting_hp_id, $orderTypeServiceModel->client_id, $order->id, $order->product_id);
+            $orderTypeService->setUsage($order);
         }
 
         $this->saveStatusChange($order, 'Order activated');
