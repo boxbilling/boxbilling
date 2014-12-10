@@ -1317,22 +1317,23 @@ class Service implements InjectionAwareInterface
     public function haveMeteredBilling(\Model_ClientOrder $order)
     {
         $orderTypeService = $this->di['mod_service']('service' . $order->service_type);
-        if ($orderTypeService instanceof \Box\MeteredInterface ){
+        if (!$orderTypeService instanceof \Box\MeteredInterface ) {
+            return false;
+        }
 
-            $sql = 'SELECT pp.type
-                    FROM product_payment as pp
-                      LEFT JOIN product as p on p.product_payment_id = pp.id
-                      LEFT JOIN client_order as co on co.product_id = p.id
-                    WHERE co.id = :order_id
-                    LIMIT 1';
-            $bindings = array(
-                ':order_id' => $order->id
-            );
-            $paymentType = $this->di['db']->getCell($sql, $bindings);
+        $sql = 'SELECT pp.type
+                FROM product_payment as pp
+                  LEFT JOIN product as p on p.product_payment_id = pp.id
+                  LEFT JOIN client_order as co on co.product_id = p.id
+                WHERE co.id = :order_id
+                LIMIT 1';
+        $bindings = array(
+            ':order_id' => $order->id
+        );
+        $paymentType = $this->di['db']->getCell($sql, $bindings);
 
-            if ($paymentType == \Model_ProductPayment::METERED){
-                return true;
-            }
+        if ($paymentType == \Model_ProductPayment::METERED){
+            return true;
         }
         return false;
     }
