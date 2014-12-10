@@ -1109,6 +1109,11 @@ class Service implements InjectionAwareInterface
             $this->rmInvoiceItemByOrder($order);
         }
 
+        if ($this->haveMeteredBilling($order)){
+            $orderTypeService = $this->di['mod_service']('service' . $order->service_type);
+            $orderTypeService->setUsage($order);
+        }
+
         $this->_callOnService($order, \Model_ClientOrder::ACTION_DELETE);
         $id = $order->id;
         $this->rmClientOrderStatusByOrder($order);
