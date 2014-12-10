@@ -958,6 +958,11 @@ class Service implements InjectionAwareInterface
         $note = (NULL === $reason) ? "Order suspeded" : 'Order suspended for ' . $reason;
         $this->saveStatusChange($order, $note);
 
+        if ($this->haveMeteredBilling($order)){
+            $orderTypeService = $this->di['mod_service']('service' . $order->service_type);
+            $orderTypeService->setUsage($order);
+        }
+
         if (!$skipEvent) $this->di['events_manager']->fire(array('event' => 'onAfterAdminOrderSuspend', 'params' => array('id' => $order->id)));
 
         $this->di['logger']->info('Suspended order #%s', $order->id);
@@ -979,6 +984,11 @@ class Service implements InjectionAwareInterface
         $this->di['db']->store($order);
 
         $this->saveStatusChange($order, 'Order unsuspended');
+
+        if ($this->haveMeteredBilling($order)){
+            $orderTypeService = $this->di['mod_service']('service' . $order->service_type);
+            $orderTypeService->setUsage($order);
+        }
 
         $this->di['events_manager']->fire(array('event' => 'onAfterAdminOrderUnsuspend', 'params' => array('id' => $order->id)));
 

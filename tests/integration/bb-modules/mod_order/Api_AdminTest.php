@@ -350,4 +350,31 @@ class Api_Admin_OrderTest extends BBDbApiTestCase
         $this->setExpectedException('\Box_Exception', 'Order product can not be changed');
         $this->api_admin->order_change_order_product($data);
     }
+
+    public function testmeteredBillingOrderSuspendAndUnsuspend()
+    {
+        $data['client_id']      = 1;
+        $data['product_id']     = 17;
+        $data['group_id']       = 2;
+        $data['invoice_option'] = 'no-invoice';
+        $data['activate'] = 1;
+        $data['config'] = array('domain'=>array('action'=>'owndomain', 'owndomain_sld'=>'changeProductorder', 'owndomain_tld'=>'.com'));
+
+        $id = $this->api_admin->order_create($data);
+
+        sleep(1);
+
+        $data = array(
+            'id' => $id,
+        );
+        $this->api_admin->order_suspend($data);
+
+        sleep(1);
+
+        $this->api_admin->order_unsuspend($data);
+
+        $meteredUsaged = $this->di['db']->findOne('MeteredUsage', 'Order by id desc');
+        $this->assertEquals(0, $meteredUsaged->quantity);
+    }
+
 }

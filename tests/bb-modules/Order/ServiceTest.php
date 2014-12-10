@@ -1815,12 +1815,61 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $di['db'] = $dbMock;
 
         $serviceMock = $this->getMockBuilder('\Box\Mod\Order\Service')
-            ->setMethods(array('_callOnService', 'saveStatusChange'))
+            ->setMethods(array('_callOnService', 'saveStatusChange', 'haveMeteredBilling'))
             ->getMock();
         $serviceMock->expects($this->atLeastOnce())
             ->method('_callOnService');
         $serviceMock->expects($this->atLeastOnce())
             ->method('saveStatusChange');
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('haveMeteredBilling')
+            ->willReturn(false);
+
+        $serviceMock->setDi($di);
+        $result = $serviceMock->suspendFromOrder($clientOrderModel);
+        $this->assertTrue($result);
+    }
+
+    public function testsuspendFromOrder_meteredBilling()
+    {
+        $clientOrderModel = new \Model_ClientOrder();
+        $clientOrderModel->loadBean(new \RedBeanPHP\OODBBean());
+        $clientOrderModel->status = \Model_ClientOrder::STATUS_ACTIVE;
+        $clientOrderModel->service_type = 'hosting';
+
+        $eventMock = $this->getMockBuilder('\Box_EventManager')->getMock();
+        $eventMock->expects($this->atLeastOnce())
+            ->method('fire');
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('store')
+            ->with($clientOrderModel);
+
+        $hostingServiceMock = $this->getMockBuilder('\Box\Mod\Servicehosting\Service')->getMock();
+        $hostingServiceMock->expects($this->atLeastOnce())
+            ->method('setUsage');
+
+        $di = new \Box_Di();
+        $di['events_manager'] = $eventMock;
+        $di['logger'] = new \Box_Log();
+        $di['db'] = $dbMock;
+        $di['mod_service'] = $di->protect(function ($serviceName) use ($hostingServiceMock) {
+            if ($serviceName == 'servicehosting'){
+                return $hostingServiceMock;
+            }
+        });
+
+        $serviceMock = $this->getMockBuilder('\Box\Mod\Order\Service')
+            ->setMethods(array('_callOnService', 'saveStatusChange', 'haveMeteredBilling'))
+            ->getMock();
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('_callOnService');
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('saveStatusChange');
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('haveMeteredBilling')
+            ->willReturn(true);
 
         $serviceMock->setDi($di);
         $result = $serviceMock->suspendFromOrder($clientOrderModel);

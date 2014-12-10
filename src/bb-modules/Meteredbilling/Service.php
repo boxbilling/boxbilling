@@ -111,7 +111,9 @@ class Service implements InjectionAwareInterface
      */
     public function save(\Model_MeteredUsage $model)
     {
-        $model->quantity = $this->calculateProductUsage($model);
+        if (!isset($model->quantity)){
+            $model->quantity = $this->calculateProductUsage($model);
+        }
         $this->di['db']->store($model);
         return true;
     }
