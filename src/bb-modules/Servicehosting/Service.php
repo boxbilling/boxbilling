@@ -39,6 +39,9 @@ class Service implements InjectionAwareInterface, MeteredInterface
 
     public function setUsage(\Model_ClientOrder $clientOrder)
     {
+        if ($clientOrder->status != \Model_ClientOrder::STATUS_ACTIVE){
+            return false;
+        }
         $meteredBillingService = $this->di['mod_service']('MeteredBilling');
         $model = $meteredBillingService->create($clientOrder);
 
