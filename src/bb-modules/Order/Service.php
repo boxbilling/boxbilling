@@ -1054,6 +1054,11 @@ class Service implements InjectionAwareInterface
 
         $this->saveStatusChange($order, 'Activated canceled order');
 
+        if ($this->haveMeteredBilling($order)){
+            $orderTypeService = $this->di['mod_service']('service' . $order->service_type);
+            $orderTypeService->setUsage($order);
+        }
+
         $this->di['events_manager']->fire(array('event' => 'onAfterAdminOrderUncancel', 'params' => array('id' => $order->id)));
 
         $this->di['logger']->info('Uncanceled order #%s', $order->id);

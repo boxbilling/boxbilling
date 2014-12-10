@@ -42,8 +42,11 @@ class Service implements InjectionAwareInterface, MeteredInterface
         $meteredBillingService = $this->di['mod_service']('MeteredBilling');
         $model = $meteredBillingService->create($clientOrder);
 
+        $noteStatusToStartNewBilling = array(
+            'Activated canceled order', 'Order unsuspended'
+        );
         $orderStatus = $this->di['db']->findOne('ClientOrderStatus', 'client_order_id = :order_id ORDER BY id desc', array(':order_id' => $clientOrder->id));
-        if (isset($orderStatus) && $orderStatus->notes == 'Order unsuspended'){
+        if (isset($orderStatus) && in_array($orderStatus->notes, $noteStatusToStartNewBilling)){
             $model->quantity = 0;
         }
 
