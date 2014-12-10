@@ -1018,6 +1018,11 @@ class Service implements InjectionAwareInterface
         $note = (NULL === $reason) ? "Order canceled" : 'Canceled order for ' . $reason;
         $this->saveStatusChange($order, $note);
 
+        if ($this->haveMeteredBilling($order)){
+            $orderTypeService = $this->di['mod_service']('service' . $order->service_type);
+            $orderTypeService->setUsage($order);
+        }
+
         if (!$skipEvent) $this->di['events_manager']->fire(array('event' => 'onAfterAdminOrderCancel', 'params' => array('id' => $order->id)));
 
         $this->di['logger']->info('Canceled order #%s', $order->id);

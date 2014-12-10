@@ -154,6 +154,9 @@ class Service implements InjectionAwareInterface
             ':invoice_status' =>\Model_Invoice::STATUS_UNPAID,
         );
         $usedCost = $this->di['db']->getCell($sql, $bindings);
-        return bcadd($usedCost, $this->calculateCurrentUsageCost(date('c'), $clientOrder->client_id, $clientOrder->id), $this->fractionPrecision);
+        if ($clientOrder->status == \Model_ClientOrder::STATUS_ACTIVE){
+            return bcadd($usedCost, $this->calculateCurrentUsageCost(date('c'), $clientOrder->client_id, $clientOrder->id), $this->fractionPrecision);
+        }
+        return bcadd($usedCost, 0, $this->fractionPrecision);
     }
 }

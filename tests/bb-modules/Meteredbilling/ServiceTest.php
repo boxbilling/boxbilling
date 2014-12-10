@@ -152,6 +152,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
     {
         $model = new \Model_ClientOrder();
         $model->loadBean(new \RedBeanPHP\OODBBean());
+        $model->status = \Model_ClientOrder::STATUS_ACTIVE;
 
         $usedTotalCost = 0.05;
         $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
@@ -174,7 +175,29 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $serviceMock->setDi($di);
         $result = $serviceMock->getOrderUsageTotalCost($model);
         $this->assertGreaterThan(0.00000000, $result);
-        $this->assertEquals($usedTotalCost + $usedCurrentCost, $result);
+        $this->assertEquals(bcadd($usedTotalCost, $usedCurrentCost, 8), $result);
+    }
+
+    public function testgetOrderUsageTotalCost_OrderIsNotActive()
+    {
+        $model = new \Model_ClientOrder();
+        $model->loadBean(new \RedBeanPHP\OODBBean());
+
+        $usedTotalCost = 0.05;
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('getCell')
+            ->willReturn($usedTotalCost);
+
+        $di = new \Box_Di();
+        $di['db'] = $dbMock;
+
+        $usedCurrentCost = 0;
+
+        $this->service->setDi($di);
+        $result = $this->service->getOrderUsageTotalCost($model);
+        $this->assertGreaterThan(0.00000000, $result);
+        $this->assertEquals(bcadd($usedTotalCost, $usedCurrentCost, 8), $result);
     }
 }
  
