@@ -90,11 +90,11 @@ class Admin extends \Api_Abstract
         $client_id    = isset($data['client_id']) ? $data['client_id'] : NULL;
         $sender       = isset($data['sender']) ? $data['sender'] : NULL;
         $recipients   = isset($data['recipients']) ? $data['recipients'] : NULL;
-        $subject      = isset($data['subject']) ? $data['subject'] : NULL;
+        $subject      = $data['subject'];
         $content_html = isset($data['content_html']) ? $data['content_html'] : NULL;
         $content_text = isset($data['content_text']) ? $data['content_text'] : NULL;
 
-        return $this->getService()->logEmail($subject, $client_id, $sender, $recipients, $subject, $content_html, $content_text);
+        return $this->getService()->logEmail($subject, $client_id, $sender, $recipients, $content_html, $content_text);
     }
 
     /**
@@ -115,6 +115,27 @@ class Admin extends \Api_Abstract
         }
 
         $database->trash($model);
+        return true;
+    }
+
+    /**
+     * Deletes logs with given IDs
+     *
+     * @param array $ids - IDs for deletion
+     *
+     * @return bool
+     */
+    public function batch_delete($data)
+    {
+        $required = array(
+            'ids' => 'IDs not passed',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
+
+        foreach ($data['ids'] as $id) {
+            $this->log_delete(array('id' => $id));
+        }
+
         return true;
     }
 }

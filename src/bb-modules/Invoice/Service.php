@@ -477,7 +477,7 @@ class Service implements InjectionAwareInterface
                 $next_nr = $r->nr + 1;
             }
         }
-        $systemService->updateParam($p, $next_nr+1);
+        $systemService->setParamValue($p, $next_nr+1);
         return $next_nr;
     }
 
@@ -763,7 +763,7 @@ class Service implements InjectionAwareInterface
                     $this->di['db']->store($new);
 
                     //update next credit note starting number
-                    $systemService->updateParam('invoice_cn_starting_number', ++$next_nr, true);
+                    $systemService->setParamValue('invoice_cn_starting_number', ++$next_nr, true);
                 }
                 $result = (int)$new->id;
                 break;
@@ -1050,6 +1050,11 @@ class Service implements InjectionAwareInterface
         return true;
     }
 
+    /**
+     * @param integer $due_days
+     *
+     * @return \Model_Invoice
+     */
     public function generateForOrder(\Model_ClientOrder $order, $due_days = null)
     {
         //check if we do have invoice prepared already
@@ -1544,8 +1549,9 @@ class Service implements InjectionAwareInterface
         $mpi->setTitle($title);
         $mpi->setItems($items);
 
+        $subscribeService = $this->di['mod_service']('Invoice', 'Subscription');
         // can subscribe only if proforma has one item with defined period
-        if($subscribe && $this->isSubscribable($invoice->id)) {
+        if($subscribe && $subscribeService->isSubscribable($invoice->id)) {
 
             $subitem = $invoice->InvoiceItem->getFirst();
             $period = $this->di['period']($subitem->period);

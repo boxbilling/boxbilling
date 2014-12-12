@@ -42,45 +42,16 @@ class Admin extends \Api_Abstract
      */
     public function get_list($data)
     {
-        $orderConfig = $this->di['mod']('order')->getConfig();
+        $orderConfig         = $this->di['mod']('order')->getConfig();
         $data['hide_addons'] = (isset($orderConfig['show_addons']) && $orderConfig['show_addons']) ? 0 : 1;
         list($sql, $params) = $this->getService()->getSearchQuery($data);
         $paginator = $this->di['pager'];
-        $per_page = isset($data['per_page']) ? $data['per_page'] : $this->di['pager']->getPer_page();
+        $per_page  = isset($data['per_page']) ? $data['per_page'] : $this->di['pager']->getPer_page();
         $resultSet = $paginator->getAdvancedResultSet($sql, $params, $per_page);
 
-        $meta = (isset($data['meta']) && is_array($data['meta'])) ? $data['meta'] : null;
-
         foreach ($resultSet['list'] as $key => $result) {
-            $orderObj = $this->di['db']->getExistingModelById('ClientOrder', $result['id'], 'Order not found');
-            $data     = $this->getService()->toApiArray($orderObj, true, $this->getIdentity());
-
-            $data['config'] = json_decode($orderObj->config, 1);
-            $data['total']  = $this->getService()->getTotal($orderObj);
-            $data['title']  = $orderObj->title;
-
-            if ($meta) {
-                $i     = 1;
-                $query = 'SELECT name, value FROM client_order_meta WHERE client_order_id = :id';
-                foreach ($meta as $k => $v) {
-                    $where[]                      = "(name = :meta_name$i AND value LIKE :meta_value$i)";
-                    $bindings[':meta_name' . $i]  = $k;
-                    $bindings[':meta_value' . $i] = $v . '%';
-                    $i++;
-                }
-
-                if (!empty($where)) {
-                    $query .= ' AND ' . implode(' AND ', $where);
-                }
-                $bindings[':id'] = $orderObj->id;
-
-                $data['meta'] = $this->di['db']->getAssoc($query, $bindings);
-
-            }
-            $supportService         = $this->di['mod_service']('support');
-            $data['active_tickets'] = $supportService->getActiveTicketsCountForOrder($orderObj);
-
-            $resultSet['list'][$key] = $data;
+            $orderObj                = $this->di['db']->getExistingModelById('ClientOrder', $result['id'], 'Order not found');
+            $resultSet['list'][$key] = $this->getService()->toApiArray($orderObj, true, $this->getIdentity());
         }
 
         return $resultSet;
@@ -453,5 +424,30 @@ class Admin extends \Api_Abstract
         $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
         return $this->di['db']->getExistingModelById('ClientOrder', $data['id'], 'Order not found');
+    }
+
+    /**
+     * Deletes orders with given IDs
+     *
+     * @param array $ids - Order ids for deletion
+     *
+     * @optional bool $delete_addons - Remove addons also. Default false.
+     *
+     * @return bool
+     */
+    public function batch_delete($data)
+    {
+        $required = array(
+            'ids' => 'Orders ids not passed',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
+
+        $delete_addons = isset($data['delete_addons']) ? (bool)$data['delete_addons'] : false;
+
+        foreach ($data['ids'] as $id) {
+            $this->delete(array('id' => $id, 'delete_addons' => $delete_addons));
+        }
+
+        return true;
     }
 }

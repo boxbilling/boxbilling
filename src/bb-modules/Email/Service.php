@@ -110,6 +110,9 @@ class Service implements \Box\InjectionAwareInterface
         return true;
     }
 
+    /**
+     * @param \Model_EmailTemplate $t
+     */
     public function getVars($t)
     {
         $json = $this->di['crypt']->decrypt($t->vars, 'v8JoWZph12DYSY4aq8zpvWdzC');
@@ -582,7 +585,7 @@ class Service implements \Box\InjectionAwareInterface
 
         if (isset($settings['log_enabled']) && $settings['log_enabled']) {
             $activityService =  $this->di['mod_service']('activity');
-            $activityService->logEmail($queue->subject, $queue->client_id, $queue->from, $queue->to, $queue->subject, $queue->content);
+            $activityService->logEmail($queue->subject, $queue->client_id, $queue->from, $queue->to, $queue->content);
         }
 
         $transport = isset($settings['mailer']) ? $settings['mailer'] : 'sendmail';

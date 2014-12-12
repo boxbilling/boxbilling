@@ -157,9 +157,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
         $logMock = $this->getMockBuilder('\Box_Log')->getMock();
 
-        $systemServiceMock = $this->getMockBuilder('\Box\Mod\System\Service')->setMethods(array('updateParam'))->getMock();
+        $systemServiceMock = $this->getMockBuilder('\Box\Mod\System\Service')->setMethods(array('setParamValue'))->getMock();
         $systemServiceMock->expects($this->atLeastOnce())
-            ->method('updateParam')
+            ->method('setParamValue')
             ->will($this->returnValue(true));
 
         $di = new \Box_Di();
@@ -295,23 +295,6 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $this->service->setDi($di);
 
         $result = $this->service->clearCache();
-        $this->assertInternalType('bool', $result);
-        $this->assertTrue($result);
-    }
-
-    public function teststaffHasPermissions()
-    {
-
-        $staffServiceMock = $this->getMockBuilder('\Box\Mod\Staff\Service')->getMock();
-        $staffServiceMock->expects($this->atLeastOnce())
-            ->method('hasPermission')
-            ->will($this->returnValue(true));
-
-        $di = new \Box_Di();
-        $di['mod_service'] = $di->protect(function () use($staffServiceMock) {return $staffServiceMock;});
-
-        $this->service->setDi($di);
-        $result = $this->service->staffHasPermissions(new \Model_Client(), 'extension');
         $this->assertInternalType('bool', $result);
         $this->assertTrue($result);
     }

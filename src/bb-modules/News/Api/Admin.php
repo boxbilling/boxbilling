@@ -31,7 +31,7 @@ class Admin extends \Api_Abstract
         $pager = $this->di['pager']->getSimpleResultSet($sql, $params, $per_page);
         foreach ($pager['list'] as $key => $item) {
             $post               = $this->di['db']->getExistingModelById('Post', $item['id'], 'Post not found');
-            $pager['list'][$key] = $this->getService()->toApiArray($post);
+            $pager['list'][$key] = $this->getService()->toApiArray($post, 'admin');
         }
 
         return $pager;
@@ -174,6 +174,27 @@ class Admin extends \Api_Abstract
         $id = $model->id;
         $this->di['db']->trash($model);
         $this->di['logger']->info('Removed news item #%s', $id);
+        return true;
+    }
+
+    /**
+     * Deletes news items with given IDs
+     *
+     * @param array $ids - IDs for deletion
+     *
+     * @return bool
+     */
+    public function batch_delete($data)
+    {
+        $required = array(
+            'ids' => 'IDs not passed',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
+
+        foreach ($data['ids'] as $id) {
+            $this->delete(array('id' => $id));
+        }
+
         return true;
     }
 }

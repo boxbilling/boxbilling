@@ -152,11 +152,6 @@ class Service implements \Box\InjectionAwareInterface
             $data['period']   = $years . 'Y';
             $data['quantity'] = $years;
         }
-
-        list($sld, $tld) = $this->_getTuple($data);
-        if ($this->isDomainRegistered($sld, $tld)) {
-            throw new \Box_Exception(':domain is already registered!', array(':domain' => $sld . $tld), 856);
-        }
     }
 
     /**
@@ -259,8 +254,8 @@ class Service implements \Box\InjectionAwareInterface
     }
 
     /**
-     * @param Model_ClientOrder $order
-     * @return void
+     * @param \Model_ClientOrder $order
+     * @return boolean
      */
     public function action_renew(\Model_ClientOrder $order)
     {
@@ -281,8 +276,8 @@ class Service implements \Box\InjectionAwareInterface
     /**
      *
      * @todo
-     * @param Model_ClientOrder $order
-     * @return void
+     * @param \Model_ClientOrder $order
+     * @return boolean
      */
     public function action_suspend(\Model_ClientOrder $order)
     {
@@ -292,8 +287,8 @@ class Service implements \Box\InjectionAwareInterface
     /**
      *
      * @todo
-     * @param Model_ClientOrder $order
-     * @return void
+     * @param \Model_ClientOrder $order
+     * @return boolean
      */
     public function action_unsuspend(\Model_ClientOrder $order)
     {
@@ -301,8 +296,8 @@ class Service implements \Box\InjectionAwareInterface
     }
 
     /**
-     * @param Model_ClientOrder $order
-     * @return void
+     * @param \Model_ClientOrder $order
+     * @return boolean
      */
     public function action_cancel(\Model_ClientOrder $order)
     {
@@ -319,8 +314,8 @@ class Service implements \Box\InjectionAwareInterface
     }
 
     /**
-     * @param Model_ClientOrder $order
-     * @return void
+     * @param \Model_ClientOrder $order
+     * @return boolean
      */
     public function action_uncancel(\Model_ClientOrder $order)
     {
@@ -330,7 +325,7 @@ class Service implements \Box\InjectionAwareInterface
     }
 
     /**
-     * @param Model_ClientOrder $order
+     * @param \Model_ClientOrder $order
      * @return void
      */
     public function action_delete(\Model_ClientOrder $order)
@@ -738,17 +733,6 @@ class Service implements \Box\InjectionAwareInterface
         return array($d, $adapter);
     }
 
-    protected function isDomainRegistered($sld, $tld)
-    {
-        $query = "SELECT id FROM service_domain WHERE sld=:sld AND tld=:tld";
-        $pdo   = $this->di['pdo'];
-        $stmt  = $pdo->prepare($query);
-        $stmt->execute(array('sld' => $sld, 'tld' => $tld));
-        $results = $stmt->fetchColumn();
-
-        return (bool)$results;
-    }
-
     public function onBeforeAdminCronRun()
     {
         try {
@@ -934,6 +918,9 @@ class Service implements \Box\InjectionAwareInterface
         );
     }
 
+    /**
+     * @return \Model_Tld
+     */
     public function tldFindOneByTld($tld)
     {
         return $this->di['db']->findOne('Tld', 'tld = :tld ORDER by id ASC', array(':tld' => $tld));
