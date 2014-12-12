@@ -1093,13 +1093,8 @@ class Service implements InjectionAwareInterface
         $invoiceItemService->generateFromOrder($proforma, $order, \Model_InvoiceItem::TASK_RENEW, $price);
 
         // invoice due date
-        if($due_days > 0) {
-            $proforma->due_at = date('c', strtotime('+'.$due_days.' days'));
-            $this->di['db']->store($proforma);
-        } else if($order->expires_at) {
-            $proforma->due_at = $order->expires_at;
-            $this->di['db']->store($proforma);
-        }
+        $proforma->due_at = ($due_days > 0) ? date('c', strtotime('+'.$due_days.' days')) : $order->expires_at;
+        $this->di['db']->store($proforma);
 
         return $proforma;
     }
