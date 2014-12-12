@@ -1060,21 +1060,16 @@ class Service implements InjectionAwareInterface
             }
         }
 
+        if ($this->di['mod_service']('Order')->haveMeteredBilling($order)){
+            return $this->generateForOrderWithMeteredBilling($order);
+        }
+
         if($order->price <= 0) {
             throw new \Box_Exception('Invoices are not generated for 0 amount orders');
         }
 
-        $client = $this->di['db']->load('Client', $order->client_id);
 
-        // generate proforma
-        $proforma = $this->di['db']->dispense('Invoice');
-        $proforma->client_id = $client->id;
-        $proforma->status = \Model_Invoice::STATUS_UNPAID;
-        $proforma->currency = $order->currency;
-        $proforma->approved = false;
-        $proforma->created_at = date('c');
-        $proforma->updated_at = date('c');
-        $this->di['db']->store($proforma);
+        $proforma = $this->create($order);
 
         $this->setInvoiceDefaults($proforma);
 
@@ -1585,5 +1580,46 @@ class Service implements InjectionAwareInterface
             }
             $this->di['db']->trash($invoice);
         }
+    }
+
+    public function generateForOrderWithMeteredBilling(\Model_ClientOrder $clientOrder)
+    {
+        $orderTypeService = $this->di['mod_service']('service' . $clientOrder->service_type);
+        $orderTypeService->setUsage($clientOrder);
+
+        $meteredBillingService = $this->di['mod_service']('Meteredbilling');
+        $price = $meteredBillingService->getOrderUsageTotalCost($clientOrder);
+        if ($price < 0.01){
+            throw new \Box_Exception('Invoices are not generated for 0 amount orders', null, 1157);
+        }
+        $proforma = $this->create($clientOrder);
+        $this->setInvoiceDefaults($proforma);
+
+        $invoiceItemService = $this->di['mod_service']('Invoice', "InvoiceItem");
+        $invoiceItemService->generateFromOrder($proforma, $clientOrder, \Model_InvoiceItem::TASK_RENEW, $price);
+        $this->di['mod_service']('Order')->setUnpaidInvoice($clientOrder, $proforma);
+        $proforma->due_at = $clientOrder->expires_at;
+        $this->di['db']->store($proforma);
+        $meteredBillingService->setInvoiceForUsage($clientOrder, $proforma->id);
+        $orderTypeService->setUsage($clientOrder);
+
+        return $proforma;
+    }
+
+    /**
+     * @param \Model_ClientOrder $clientOrder
+     * @return \Model_Invoice
+     */
+    public function create(\Model_ClientOrder $clientOrder)
+    {
+        $proforma = $this->di['db']->dispense('Invoice');
+        $proforma->client_id = $clientOrder->client_id;
+        $proforma->status = \Model_Invoice::STATUS_UNPAID;
+        $proforma->currency = $clientOrder->currency;
+        $proforma->approved = false;
+        $proforma->created_at = date('c');
+        $proforma->updated_at = date('c');
+        $this->di['db']->store($proforma);
+        return $proforma;
     }
 }

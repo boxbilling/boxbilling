@@ -147,8 +147,9 @@ class Service implements InjectionAwareInterface
     {
         $sql = 'SELECT sum(metered_usage.quantity * metered_usage.price)
                 FROM metered_usage
-                  LEFT JOIN invoice on metered_usage.invoice_id = invoice.id AND invoice.status = :invoice_status
-                WHERE metered_usage.order_id = :order_id';
+                  LEFT JOIN invoice on metered_usage.invoice_id = invoice.id
+                WHERE metered_usage.order_id = :order_id
+                  AND (invoice.status = :invoice_status or metered_usage.invoice_id = 0)';
         $bindings = array(
             ':order_id' => $clientOrder->id,
             ':invoice_status' =>\Model_Invoice::STATUS_UNPAID,
@@ -158,5 +159,18 @@ class Service implements InjectionAwareInterface
             return bcadd($usedCost, $this->calculateCurrentUsageCost(date('c'), $clientOrder->client_id, $clientOrder->id), $this->fractionPrecision);
         }
         return bcadd($usedCost, 0, $this->fractionPrecision);
+    }
+
+    public function setInvoiceForUsage(\Model_ClientOrder $clientOrder, $invoiceId)
+    {
+        $sql = 'UPDATE metered_usage
+                SET metered_usage.invoice_id = :invoice_id
+                WHERE metered_usage.order_id = :order_id
+                  AND invoice_id = 0';
+        $bindings = array(
+            ':order_id' => $clientOrder->id,
+            ':invoice_id' => $invoiceId,
+        );
+        return $this->di['db']->exec($sql, $bindings);
     }
 }
