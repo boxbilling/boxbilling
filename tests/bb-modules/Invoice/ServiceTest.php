@@ -1881,7 +1881,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             ->with($invoiceModel);
 
         $di = new \Box_Di();
-        $di['mod_service'] = $di->protect(function ($serviceName, $sub) use($orderServiceTypeServiceMock, $meteredBillingServiceMock, $invoiceItemServiceMock, $orderServiceMock){
+        $di['mod_service'] = $di->protect(function ($serviceName, $sub = '') use($orderServiceTypeServiceMock, $meteredBillingServiceMock, $invoiceItemServiceMock, $orderServiceMock){
             if ($serviceName == 'servicehosting'){
                 return $orderServiceTypeServiceMock;
             }
@@ -1913,6 +1913,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $invoiceModel->loadBean(new \RedBeanPHP\OODBBean());
 
         $orderServiceTypeServiceMock = $this->getMockBuilder('\Box\Mod\Servicehosting\Service')->getMock();
+        $orderServiceTypeServiceMock->expects($this->atLeastOnce())
+            ->method('stopUsage')
+            ->with($clientModel);
         $orderServiceTypeServiceMock->expects($this->atLeastOnce())
             ->method('setUsage')
             ->with($clientModel);

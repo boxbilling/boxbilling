@@ -1590,6 +1590,7 @@ class Service implements InjectionAwareInterface
         $meteredBillingService = $this->di['mod_service']('Meteredbilling');
         $price = $meteredBillingService->getOrderUsageTotalCost($clientOrder);
         if ($price < 0.01){
+            $orderTypeService->setUsage($clientOrder);
             throw new \Box_Exception('Invoices are not generated for 0 amount orders', null, 1157);
         }
         $proforma = $this->create($clientOrder);

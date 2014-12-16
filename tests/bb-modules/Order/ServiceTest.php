@@ -1848,8 +1848,6 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
 
         $hostingServiceMock = $this->getMockBuilder('\Box\Mod\Servicehosting\Service')->getMock();
         $hostingServiceMock->expects($this->atLeastOnce())
-            ->method('setUsage');
-        $hostingServiceMock->expects($this->atLeastOnce())
             ->method('stopUsage');
 
         $di = new \Box_Di();

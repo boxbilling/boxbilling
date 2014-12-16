@@ -16,7 +16,7 @@ class Api_Admin_MeteredbillingTest extends BBDbApiTestCase
 
         $id = $this->api_admin->order_create($data);
 
-        $lastUsage = $this->di['db']->load('MeteredUsage', 5);
+        $lastUsage = $this->di['db']->load('MeteredUsage', 3);
         $loggedTotal = 1.23896571; // From fixtures
 
         $fractionPrecision = 8;

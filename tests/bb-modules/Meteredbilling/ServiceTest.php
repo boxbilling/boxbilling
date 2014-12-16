@@ -82,11 +82,11 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             ->method('store');
 
         $serviceMock = $this->getMockBuilder('Box\Mod\Meteredbilling\Service')
-            ->setMethods(array('calculateProductUsage'))
+            ->setMethods(array('getDuration'))
             ->getMock();
 
         $serviceMock->expects($this->atLeastOnce())
-            ->method('calculateProductUsage')
+            ->method('getDuration')
             ->with($model)
             ->willReturn(0);
 
@@ -115,26 +115,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($result);
     }
 
-    public function testcalculateProductUsage()
-    {
-        $serviceMock = $this->getMockBuilder('Box\Mod\Meteredbilling\Service')
-            ->setMethods(array('findLastLoggedProductUsage', 'quantity'))
-            ->getMock();
-
-        $serviceMock->expects($this->atLeastOnce())
-            ->method('findLastLoggedProductUsage');
-        $serviceMock->expects($this->atLeastOnce())
-            ->method('quantity')
-            ->willReturn(0);
-
-        $model = new \Model_MeteredUsage();
-        $model->loadBean(new \RedBeanPHP\OODBBean());
-
-        $result = $serviceMock->calculateProductUsage($model);
-        $this->assertEquals($result, 0);
-    }
-
-    public function testquantity()
+    public function getDuration()
     {
         $lastUsageModel = new \Model_MeteredUsage();
         $lastUsageModel->loadBean(new \RedBeanPHP\OODBBean());
@@ -142,10 +123,21 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $lastUsageModel->created_at = date('c', strtotime(sprintf('-%d hours', $intervalInHours)));
 
         $currentTime =  date('c');
-        $result = $this->service->quantity($lastUsageModel, $currentTime);
+        $result = $this->service->getDuration($lastUsageModel, $currentTime);
         $this->assertGreaterThan(0.00000000, $result);
         $this->assertEquals(strtotime($currentTime) - strtotime($lastUsageModel->created_at), $result);
+    }
 
+    public function getDuration_stoppedAtisNull()
+    {
+        $lastUsageModel = new \Model_MeteredUsage();
+        $lastUsageModel->loadBean(new \RedBeanPHP\OODBBean());
+        $intervalInHours = 24;
+        $lastUsageModel->created_at = date('c', strtotime(sprintf('-%d hours', $intervalInHours)));
+
+        $currentTime =  null;
+        $result = $this->service->getDuration($lastUsageModel, $currentTime);
+        $this->assertEquals(0, $result);
     }
 
     public function testgetOrderUsageTotalCost()

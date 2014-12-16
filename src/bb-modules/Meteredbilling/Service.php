@@ -80,8 +80,8 @@ class Service implements InjectionAwareInterface
     {
         $whereStatement = 'order_id = :order_id AND
              client_id = :client_id AND
-             product_id = :product_id
-             stopped_at is null
+             product_id = :product_id AND
+             stopped_at is null AND
              invoice_id = 0
              ORDER BY id desc';
         $bindings = array(
@@ -113,7 +113,7 @@ class Service implements InjectionAwareInterface
 
     }
 
-    public function getDuration($model, $currentTime)
+    public function getDuration($model, $currentTime = null)
     {
         if (!$currentTime){
             return 0;
