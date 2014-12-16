@@ -57,6 +57,19 @@ class Service implements InjectionAwareInterface, MeteredInterface
         return true;
     }
 
+    public function stopUsage (\Model_ClientOrder $clientOrder)
+    {
+        $productModel = $this->di['db']->load('Product', $clientOrder->product_id);
+
+        $meteredBillingService = $this->di['mod_service']('MeteredBilling');
+        $meteredUsageModel = $meteredBillingService->findActiveProductUsage($clientOrder->client_id, $clientOrder->id, $productModel->id);
+        if (!isset($meteredUsageModel)){
+            error_log('Metered usage was not found');
+            return false;
+        }
+        return $meteredBillingService->stopUsage($meteredUsageModel);
+    }
+
     public function getCartProductTitle($product, array $data)
     {
         try {

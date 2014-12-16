@@ -76,6 +76,30 @@ class Service implements InjectionAwareInterface
         return null;
     }
 
+    public function findActiveProductUsage($clientId, $orderId, $productId)
+    {
+        $whereStatement = 'order_id = :order_id AND
+             client_id = :client_id AND
+             product_id = :product_id
+             stopped_at is null
+             invoice_id = 0
+             ORDER BY id desc';
+        $bindings = array(
+            ':client_id' =>  $clientId,
+            ':order_id' => $orderId,
+            ':product_id' => $productId,
+        );
+        $model = $this->di['db']->findOne('MeteredUsage', $whereStatement, $bindings);
+        return $model;
+    }
+
+    public function stopUsage(\Model_MeteredUsage $model)
+    {
+        $model->stopped_at = date('c');
+        $this->di['db']->store($model);
+        return true;
+    }
+
     /**
      * Calculate usage cost (timebased)
      * @param string $currentTime

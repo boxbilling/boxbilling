@@ -16,4 +16,6 @@ interface MeteredInterface
 {
     public function setUsage(\Model_ClientOrder $model);
 
+    public function stopUsage(\Model_ClientOrder $model);
+
 }
