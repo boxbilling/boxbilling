@@ -108,6 +108,15 @@
                             <a href="#submit-cancellation-ticket" class="btn btn-primary btn-warning btn-small" type="button" data-toggle="modal">{% trans 'Request Cancellation' %}</a>
                             {% endif %}
 
+                            {% if (client.order_is_metered({"id":order.id})) %}
+                                {% if (order.status == 'active') %}
+                                    <a href="#submit-suspend-order" id="suspend-order" data-order="{{ order.id }}" class="btn btn-primary btn-info btn-small" type="button" >{% trans 'Suspend order' %}</a>
+                                {% endif %}
+                                {% if (order.status == 'suspended') %}
+                                    <a href="#submit-unsuspend-order" id="unsuspend-order" data-order="{{ order.id }}" class="btn btn-primary btn-info btn-small" type="button" >{% trans 'Unsuspend order' %}</a>
+                                {% endif %}
+                            {% endif %}
+
                         </td>
                     </tr>
                     </tfoot>
@@ -359,6 +368,30 @@ $(function() {
                 $('#submit-upgrade-ticket').modal('hide')
                 bb.msg('Service upgrade request received');
                 $('.wait').hide();
+            }
+        );
+        return false;
+    });
+
+    $('#suspend-order').on('click', function(){
+        var order_id = $(this).data('order');
+        bb.post(
+            'client/order/suspend',
+            {'id' : order_id},
+            function(result) {
+                bb.msg('Order suspended');
+            }
+        );
+        return false;
+    });
+
+    $('#unsuspend-order').on('click', function(){
+        var order_id = $(this).data('order');
+        bb.post(
+            'client/order/unsuspend',
+            {'id' : order_id},
+            function(result) {
+                bb.msg('Order unsuspended');
             }
         );
         return false;
