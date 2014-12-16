@@ -1849,6 +1849,8 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $hostingServiceMock = $this->getMockBuilder('\Box\Mod\Servicehosting\Service')->getMock();
         $hostingServiceMock->expects($this->atLeastOnce())
             ->method('setUsage');
+        $hostingServiceMock->expects($this->atLeastOnce())
+            ->method('stopUsage');
 
         $di = new \Box_Di();
         $di['events_manager'] = $eventMock;
@@ -2005,6 +2007,8 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             ->willReturn($changeableProductPairs);
 
         $productTypeService = $this->getMockBuilder('\Box\Mod\Servicehosting\Service')->getMock();
+        $productTypeService->expects($this->atLeastOnce())
+            ->method('stopUsage');
         $productTypeService->expects($this->atLeastOnce())
             ->method('setUsage');
 

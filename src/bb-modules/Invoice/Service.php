@@ -1585,7 +1585,7 @@ class Service implements InjectionAwareInterface
     public function generateForOrderWithMeteredBilling(\Model_ClientOrder $clientOrder)
     {
         $orderTypeService = $this->di['mod_service']('service' . $clientOrder->service_type);
-        $orderTypeService->setUsage($clientOrder);
+        $orderTypeService->stopUsage($clientOrder);
 
         $meteredBillingService = $this->di['mod_service']('Meteredbilling');
         $price = $meteredBillingService->getOrderUsageTotalCost($clientOrder);

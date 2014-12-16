@@ -1837,8 +1837,11 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $invoiceModel->loadBean(new \RedBeanPHP\OODBBean());
 
         $orderServiceTypeServiceMock = $this->getMockBuilder('\Box\Mod\Servicehosting\Service')->getMock();
-        $orderServiceTypeServiceMock->expects($this->exactly(2))
+        $orderServiceTypeServiceMock->expects($this->atLeastOnce())
             ->method('setUsage')
+            ->with($clientModel);
+        $orderServiceTypeServiceMock->expects($this->atLeastOnce())
+            ->method('stopUsage')
             ->with($clientModel);
 
         $meteredBillingServiceMock = $this->getMockBuilder('\Box\Mod\Meteredbilling\Service')

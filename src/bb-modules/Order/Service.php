@@ -960,7 +960,7 @@ class Service implements InjectionAwareInterface
 
         if ($this->haveMeteredBilling($order)){
             $orderTypeService = $this->di['mod_service']('service' . $order->service_type);
-            $orderTypeService->setUsage($order);
+            $orderTypeService->stopUsage($order);
         }
 
         if (!$skipEvent) $this->di['events_manager']->fire(array('event' => 'onAfterAdminOrderSuspend', 'params' => array('id' => $order->id)));
@@ -1020,7 +1020,7 @@ class Service implements InjectionAwareInterface
 
         if ($this->haveMeteredBilling($order)){
             $orderTypeService = $this->di['mod_service']('service' . $order->service_type);
-            $orderTypeService->setUsage($order);
+            $orderTypeService->stopUsage($order);
         }
 
         if (!$skipEvent) $this->di['events_manager']->fire(array('event' => 'onAfterAdminOrderCancel', 'params' => array('id' => $order->id)));
@@ -1111,7 +1111,7 @@ class Service implements InjectionAwareInterface
 
         if ($this->haveMeteredBilling($order)){
             $orderTypeService = $this->di['mod_service']('service' . $order->service_type);
-            $orderTypeService->setUsage($order);
+            $orderTypeService->stopUsage($order);
         }
 
         $this->_callOnService($order, \Model_ClientOrder::ACTION_DELETE);
@@ -1380,7 +1380,7 @@ class Service implements InjectionAwareInterface
         }
 
         $orderTypeServiceModel = $this->getOrderService($clientOrder);
-        $productTypeService->setUsage($clientOrder);
+        $productTypeService->stopUsage($clientOrder);
 
         $productConfig = $this->di['tools']->decodeJ($product->config);
         $orderTypeServiceModel->service_hosting_hp_id = isset($productConfig['hosting_plan_id']) ? $productConfig['hosting_plan_id'] : null;

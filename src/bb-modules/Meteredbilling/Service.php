@@ -96,8 +96,7 @@ class Service implements InjectionAwareInterface
     public function stopUsage(\Model_MeteredUsage $model)
     {
         $model->stopped_at = date('c');
-        $this->di['db']->store($model);
-        return true;
+        return $this->save($model);
     }
 
     /**
@@ -110,20 +109,13 @@ class Service implements InjectionAwareInterface
     public function calculateCurrentUsageCost($currentTime, $client_id, $order_id)
     {
         $lastUsage = $this->findLastUnbilledUsage($client_id, $order_id);
-        return $this->quantity($lastUsage, $currentTime) * $lastUsage->price;
+        return $this->getDuration($lastUsage, $currentTime) * $lastUsage->price;
 
     }
 
-    public function calculateProductUsage(\Model_MeteredUsage $model)
+    public function getDuration($model, $currentTime)
     {
-        $lastUsage = $this->findLastLoggedProductUsage($model->client_id, $model->order_id, $model->product_id);
-        return $this->quantity($lastUsage, $model->created_at);
-
-    }
-
-    public function quantity($model, $currentTime)
-    {
-        if (!$model instanceof \Model_MeteredUsage){
+        if (!$currentTime){
             return 0;
         }
         return strtotime($currentTime) - strtotime($model->created_at);
@@ -135,9 +127,7 @@ class Service implements InjectionAwareInterface
      */
     public function save(\Model_MeteredUsage $model)
     {
-        if (!isset($model->quantity)){
-            $model->quantity = $this->calculateProductUsage($model);
-        }
+        $model->duration = $this->getDuration($model, $model->stopped_at);
         $this->di['db']->store($model);
         return true;
     }
@@ -169,7 +159,7 @@ class Service implements InjectionAwareInterface
 
     public function getOrderUsageTotalCost(\Model_ClientOrder $clientOrder)
     {
-        $sql = 'SELECT sum(metered_usage.quantity * metered_usage.price)
+        $sql = 'SELECT sum(metered_usage.duration * metered_usage.price)
                 FROM metered_usage
                   LEFT JOIN invoice on metered_usage.invoice_id = invoice.id
                 WHERE metered_usage.order_id = :order_id

@@ -43,18 +43,14 @@ class Service implements InjectionAwareInterface, MeteredInterface
             return false;
         }
         $meteredBillingService = $this->di['mod_service']('MeteredBilling');
-        $model = $meteredBillingService->create($clientOrder);
-
-        $noteStatusToStartNewBilling = array(
-            'Activated canceled order', 'Order unsuspended'
-        );
-        $orderStatus = $this->di['db']->findOne('ClientOrderStatus', 'client_order_id = :order_id ORDER BY id desc', array(':order_id' => $clientOrder->id));
-        if (isset($orderStatus) && in_array($orderStatus->notes, $noteStatusToStartNewBilling)){
-            $model->quantity = 0;
+        $productModel = $this->di['db']->load('Product', $clientOrder->product_id);
+        $meteredUsageModel = $meteredBillingService->findActiveProductUsage($clientOrder->client_id, $clientOrder->id, $productModel->id);
+        if (isset($meteredUsageModel)){
+            error_log(sprintf("Order#%d has active metered billing #%d", $clientOrder->id, $meteredUsageModel->id));
+            return false;
         }
-
-        $meteredBillingService->save($model);
-        return true;
+        $model = $meteredBillingService->create($clientOrder);
+        return $meteredBillingService->save($model);
     }
 
     public function stopUsage (\Model_ClientOrder $clientOrder)
@@ -64,7 +60,7 @@ class Service implements InjectionAwareInterface, MeteredInterface
         $meteredBillingService = $this->di['mod_service']('MeteredBilling');
         $meteredUsageModel = $meteredBillingService->findActiveProductUsage($clientOrder->client_id, $clientOrder->id, $productModel->id);
         if (!isset($meteredUsageModel)){
-            error_log('Metered usage was not found');
+            error_log(sprintf("Order#%d has not active metered billing", $clientOrder->id));
             return false;
         }
         return $meteredBillingService->stopUsage($meteredUsageModel);
