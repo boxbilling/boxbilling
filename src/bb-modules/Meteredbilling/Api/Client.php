@@ -33,4 +33,19 @@ class Client extends \Api_Abstract
 
         return $this->getService()->getOrderUsageTotalCost($orderModel);
     }
+
+    public function get_order_usage_list($data)
+    {
+        $required = array(
+            'order_id' => 'Missing order id',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
+        $orderModel = $this->di['db']->getExistingModelById('ClientOrder', $data['order_id'], 'Order not found');
+
+        if ($orderModel->client_id != $this->getIdentity()->id){
+            throw new \Box_Exception('Order not found', array(), 5548);
+        }
+
+        return $this->getService()->getOrderUsageList($orderModel);
+    }
 }

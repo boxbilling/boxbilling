@@ -299,6 +299,10 @@
     {# trans 'Service does not have configuration page' #}
 {% endif %}
 
+{% if guest.system_template_exists({"file":"mod_meteredbilling_orderusage.phtml"}) and client.order_is_metered({"id" : order.id}) %}
+    {% include 'mod_meteredbilling_orderusage.phtml' with {'order': order, 'service': service} %}
+{% endif %}
+
 {% endblock %}
 
 {% block js %}

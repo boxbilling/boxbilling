@@ -187,4 +187,28 @@ class Service implements InjectionAwareInterface
         );
         return $this->di['db']->exec($sql, $bindings);
     }
+
+    public function getOrderUsageList(\Model_ClientOrder $clientOrder)
+    {
+        $sql = 'SELECT metered_usage.*, invoice.serie, invoice.nr, product.title as product_name
+                FROM metered_usage
+                  LEFT JOIN invoice on metered_usage.invoice_id = invoice.id
+                  LEFT JOIN product on metered_usage.product_id = product.id
+                WHERE
+                  metered_usage.order_id = :order_id AND
+                  metered_usage.client_id = :client_id';
+        $bindings = array(
+            ':order_id' => $clientOrder->id,
+            ':client_id' => $clientOrder->client_id,
+        );
+        $usages = $this->di['db']->getAll($sql, $bindings);
+
+        $elem = array_pop($usages);
+        if ($elem['stopped_at'] == '0000-00-00 00:00:00'){
+            $elem['stopped_at'] = '';
+            $elem['duration'] = strtotime(date('c')) - strtotime($elem['created_at']);
+        }
+        array_push($usages, $elem);
+        return $usages;
+    }
 }
