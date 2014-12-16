@@ -712,10 +712,12 @@ CREATE TABLE `metered_usage` (
   `plan_id` bigint(20) NOT NULL,
   `product_id` bigint(20) NOT NULL,
   `invoice_id` bigint(20) NOT NULL DEFAULT '0',
-  `quantity` int NOT NULL COMMENT 'Duration in seconds',
-  `price` double(18,8) NOT NULL COMMENT 'Price for 1 quantity',
+  `duration` int NOT NULL COMMENT 'Duration in seconds',
+  `price` double(18,8) NOT NULL COMMENT 'Price for 1 duration item',
   `created_at` datetime NOT NULL,
-  PRIMARY KEY (`id`)
+  `stopped_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `order_id` (`order_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
