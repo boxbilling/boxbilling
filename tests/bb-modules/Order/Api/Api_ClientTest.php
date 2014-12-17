@@ -557,5 +557,56 @@ class ClientTest extends PHPUnit_Framework_TestCase
         $this->setExpectedException('\Box_Exception', 'Only suspended orders can be unsuspended');
         $apiMock->unsuspend($data);
     }
+
+    public function testchange_order_product()
+    {
+        $data = array(
+            'id' => 1,
+            'product_id' => 2,
+        );
+
+        $modelOrder = new \Model_ClientOrder();
+        $modelOrder->loadBean(new \RedBeanPHP\OODBBean());
+
+        $modelProduct = new \Model_Product();
+        $modelProduct->loadBean(new \RedBeanPHP\OODBBean());
+
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->disableOriginalConstructor()->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')
+            ->will($this->returnValue(null));
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('getExistingModelById')
+            ->with('Product')
+            ->willReturn($modelProduct);
+
+        $di = new Box_Di();
+        $di['db'] = $dbMock;
+        $di['validator'] = $validatorMock;
+
+        $apiMock = $this->getMockBuilder('\Box\Mod\Order\Api\Client')
+            ->setMethods(array('_getOrder'))
+            ->disableOriginalConstructor()
+            ->getMock();
+        $apiMock->expects($this->atLeastOnce())
+            ->method('_getOrder')
+            ->will($this->returnValue($modelOrder));
+
+        $apiMock->setDi($di);
+
+        $serviceMock = $this->getMockBuilder('\Box\Mod\Order\Service')->getMock();
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('changeOrderProduct')
+            ->will($this->returnValue(true));
+        $apiMock->setService($serviceMock);
+
+        $identity = new \Model_Client();
+        $apiMock->setIdentity($identity);
+
+        $result = $apiMock->change_order_product($data);
+        $this->assertTrue($result);
+    }
 }
  

@@ -115,6 +115,7 @@
                                 {% if (order.status == 'suspended') %}
                                     <a href="#submit-unsuspend-order" id="unsuspend-order" data-order="{{ order.id }}" class="btn btn-primary btn-info btn-small" type="button" >{% trans 'Unsuspend order' %}</a>
                                 {% endif %}
+                                {% include 'mod_meteredbilling_changeproduct.phtml' with {'order': order} %}
                             {% endif %}
 
                         </td>
