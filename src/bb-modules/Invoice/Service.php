@@ -1582,6 +1582,12 @@ class Service implements InjectionAwareInterface
         }
     }
 
+
+    /**
+     * @param \Model_ClientOrder $clientOrder
+     * @return \Model_Invoice
+     * @throws \Box_Exception
+     */
     public function generateForOrderWithMeteredBilling(\Model_ClientOrder $clientOrder)
     {
         $orderTypeService = $this->di['mod_service']('service' . $clientOrder->service_type);

@@ -191,5 +191,182 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertGreaterThan(0.00000000, $result);
         $this->assertEquals(bcadd($usedTotalCost, $usedCurrentCost, 8), $result);
     }
+
+    public function testgenerateInvoicesOnFirstDayOfTheMonth_NotFirstDay()
+    {
+        $serviceMock = $this->getMockBuilder('Box\Mod\Meteredbilling\Service')
+            ->setMethods(array('isFirstDayOfTheMonth'))
+            ->getMock();
+
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('isFirstDayOfTheMonth')
+            ->with()
+            ->willReturn(false);
+
+        $result = $serviceMock->generateInvoicesOnFirstDayOfTheMonth();
+        $this->assertEquals(-1, $result);
+    }
+
+    public function testgenerateInvoicesOnFirstDayOfTheMonth_NoOrdersToBill()
+    {
+        $serviceMock = $this->getMockBuilder('Box\Mod\Meteredbilling\Service')
+            ->setMethods(array('isFirstDayOfTheMonth'))
+            ->getMock();
+
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('isFirstDayOfTheMonth')
+            ->with()
+            ->willReturn(true);
+
+        $invoiceMock = $this->getMockBuilder('\Box\Mod\Invoice\Service')->getMock();
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('getAll')
+            ->willReturn(array());
+
+        $di = new \Box_Di();
+        $di['mod_service'] = $di->protect(function ($serviceName) use($invoiceMock){
+            if ('Invoice' == $serviceName) {
+                return $invoiceMock;
+            }
+        });
+        $di['db'] = $dbMock;
+
+        $serviceMock->setDi($di);
+
+
+        $result = $serviceMock->generateInvoicesOnFirstDayOfTheMonth();
+        $this->assertEquals(0, $result);
+    }
+
+    public function testgenerateInvoicesOnFirstDayOfTheMonth()
+    {
+        $serviceMock = $this->getMockBuilder('Box\Mod\Meteredbilling\Service')
+            ->setMethods(array('isFirstDayOfTheMonth'))
+            ->getMock();
+
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('isFirstDayOfTheMonth')
+            ->with()
+            ->willReturn(true);
+
+        $invoiceMock = $this->getMockBuilder('\Box\Mod\Invoice\Service')->getMock();
+        $invoiceMock->expects($this->atLeastOnce())
+            ->method('generateForOrderWithMeteredBilling');
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('getAll')
+            ->willReturn(array(
+                array('order_id' => 1)));
+
+        $orderModel = new \Model_ClientOrder();
+        $orderModel->loadBean(new \RedBeanPHP\OODBBean());
+        $dbMock->expects($this->atLeastOnce())
+            ->method('load')
+            ->willReturn($orderModel);
+
+
+        $di = new \Box_Di();
+        $di['mod_service'] = $di->protect(function ($serviceName) use($invoiceMock){
+            if ('Invoice' == $serviceName) {
+                return $invoiceMock;
+            }
+        });
+        $di['db'] = $dbMock;
+
+        $serviceMock->setDi($di);
+
+
+        $result = $serviceMock->generateInvoicesOnFirstDayOfTheMonth();
+        $this->assertEquals(1, $result);
+    }
+
+    public function testgenerateInvoicesOnFirstDayOfTheMonth_InvoiceGenerateException()
+    {
+        $serviceMock = $this->getMockBuilder('Box\Mod\Meteredbilling\Service')
+            ->setMethods(array('isFirstDayOfTheMonth'))
+            ->getMock();
+
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('isFirstDayOfTheMonth')
+            ->with()
+            ->willReturn(true);
+
+        $invoiceMock = $this->getMockBuilder('\Box\Mod\Invoice\Service')->getMock();
+        $invoiceMock->expects($this->atLeastOnce())
+            ->method('generateForOrderWithMeteredBilling')
+            ->willThrowException(new \Box_Exception('PHP UNit exception'));
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('getAll')
+            ->willReturn(array(
+                array('order_id' => 1)));
+
+        $orderModel = new \Model_ClientOrder();
+        $orderModel->loadBean(new \RedBeanPHP\OODBBean());
+        $dbMock->expects($this->atLeastOnce())
+            ->method('load')
+            ->willReturn($orderModel);
+
+
+        $di = new \Box_Di();
+        $di['mod_service'] = $di->protect(function ($serviceName) use($invoiceMock){
+            if ('Invoice' == $serviceName) {
+                return $invoiceMock;
+            }
+        });
+        $di['db'] = $dbMock;
+
+        $serviceMock->setDi($di);
+
+        $this->setExpectedException('\Box_Exception');
+        $serviceMock->generateInvoicesOnFirstDayOfTheMonth();
+    }
+
+    public function testgenerateInvoicesOnFirstDayOfTheMonth_ZeroAmountUsage()
+    {
+        $serviceMock = $this->getMockBuilder('Box\Mod\Meteredbilling\Service')
+            ->setMethods(array('isFirstDayOfTheMonth'))
+            ->getMock();
+
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('isFirstDayOfTheMonth')
+            ->with()
+            ->willReturn(true);
+
+        $invoiceMock = $this->getMockBuilder('\Box\Mod\Invoice\Service')->getMock();
+        $invoiceMock->expects($this->atLeastOnce())
+            ->method('generateForOrderWithMeteredBilling')
+            ->willThrowException(new \Box_Exception('Invoices are not generated for 0 amount orders', null, 1157));
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('getAll')
+            ->willReturn(array(
+                array('order_id' => 1)));
+
+        $orderModel = new \Model_ClientOrder();
+        $orderModel->loadBean(new \RedBeanPHP\OODBBean());
+        $dbMock->expects($this->atLeastOnce())
+            ->method('load')
+            ->willReturn($orderModel);
+
+
+        $di = new \Box_Di();
+        $di['mod_service'] = $di->protect(function ($serviceName) use($invoiceMock){
+            if ('Invoice' == $serviceName) {
+                return $invoiceMock;
+            }
+        });
+        $di['db'] = $dbMock;
+
+        $serviceMock->setDi($di);
+
+        $result =$serviceMock->generateInvoicesOnFirstDayOfTheMonth();
+        $this->assertEquals(0, $result);
+    }
 }
  

@@ -30,4 +30,9 @@ class Admin extends \Api_Abstract
         $orderModel = $this->di['db']->getExistingModelById('ClientOrder', $data['order_id'], 'Order not found');
         return $this->getService()->getOrderUsageTotalCost($orderModel);
     }
+
+    public function cron_generate_invoices()
+    {
+        return $this->getService()->generateInvoicesOnFirstDayOfTheMonth();
+    }
 }

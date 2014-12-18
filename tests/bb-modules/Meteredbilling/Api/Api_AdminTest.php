@@ -53,5 +53,17 @@ class AdminTest extends \PHPUnit_Framework_TestCase
         $result = $this->api->get_total_cost($data);
         $this->assertGreaterThan(0.00000000, $result);
     }
+
+    public function testcron_generate_invoices()
+    {
+        $serviceMock = $this->getMockBuilder('\Box\Mod\Meteredbilling\Service')->getMock();
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('generateInvoicesOnFirstDayOfTheMonth')
+            ->willReturn(0);
+        $this->api->setService($serviceMock);
+
+        $result = $this->api->cron_generate_invoices();
+        $this->assertInternalType('int', $result);
+    }
 }
  

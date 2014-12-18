@@ -211,4 +211,40 @@ class Service implements InjectionAwareInterface
         array_push($usages, $elem);
         return $usages;
     }
+
+    public function generateInvoicesOnFirstDayOfTheMonth()
+    {
+        if (!$this->isFirstDayOfTheMonth()){
+            return -1;
+        }
+        $sql = 'SELECT order_id
+                FROM metered_usage
+                WHERE invoice_id == 0
+                GROUP BY order_id';
+        $invoiceService = $this->di['mod_service']('Invoice');
+        $invoicesGenerated = 0;
+        foreach($this->di['db']->getAll($sql) as $meteredUsage){
+            $orderModel = $this->di['db']->load('ClientOrder', $meteredUsage['order_id']);
+            try{
+                $invoiceService->generateForOrderWithMeteredBilling($orderModel);
+                $invoicesGenerated  ++;
+            }
+            catch (\Box_Exception $e){
+                if ($e->getCode() != 1157){
+                    throw $e;
+                }
+            }
+        }
+        return $invoicesGenerated;
+    }
+
+    public function isFirstDayOfTheMonth()
+    {
+        if (date('Y-m-01') == date('Y-m-d')){
+            return true;
+        }
+        return false;
+    }
+
+
 }
