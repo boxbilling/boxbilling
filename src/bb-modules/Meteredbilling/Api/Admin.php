@@ -35,4 +35,9 @@ class Admin extends \Api_Abstract
     {
         return $this->getService()->generateInvoicesOnFirstDayOfTheMonth();
     }
+
+    public function cron_suspend_orders()
+    {
+        return $this->getService()->suspendOrdersWithUnpaidInvoices();
+    }
 }

@@ -246,5 +246,44 @@ class Service implements InjectionAwareInterface
         return false;
     }
 
+    public function suspendOrdersWithUnpaidInvoices()
+    {
+        $suspendedOrders = 0;
+        $mod = $this->di['mod']('meteredbilling');
+        $config = $mod->getConfig();
+
+        $days = isset($config['metered_order_suspend']) ? $config['metered_order_suspend'] : 15;
+
+        $sql = 'SELECT metered_usage.order_id, metered_usage.invoice_id
+                FROM metered_usage
+                  LEFT JOIN client_order on metered_usage.order_id = client_order.id
+                  LEFT JOIN invoice on metered_usage.invoice_id = invoice.id
+                WHERE metered_usage.invoice_id > 0
+                  AND client_order.status = :order_status
+                  AND invoice.status = :invoice_status
+                  AND invoice.created_at < :invoice_days
+                GROUP BY metered_usage.order_id';
+
+        $bindings = array(
+            ':order_status' => \Model_ClientOrder::STATUS_ACTIVE,
+            ':invoice_status' => \Model_Invoice::STATUS_UNPAID,
+            ':invoice_days' => date('c', strtotime("-$days days")),
+        );
+
+        $orders = $this->di['db']->getAll($sql, $bindings);
+
+        if (empty($orders)) {
+            return -1;
+        }
+
+        $orderService = $this->di['mod_service']('Order');
+        foreach($orders as $order){
+            $orderModel = $this->di['db']->load('ClientOrder', $order['id']);
+            $orderService->suspendFromOrder($orderModel, sprintf('Reason: Unpaid invoice#%d', $order['invoice_id']));
+            $suspendedOrders ++;
+        }
+        return $suspendedOrders;
+    }
+
 
 }

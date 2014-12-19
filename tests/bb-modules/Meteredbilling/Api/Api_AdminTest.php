@@ -65,5 +65,17 @@ class AdminTest extends \PHPUnit_Framework_TestCase
         $result = $this->api->cron_generate_invoices();
         $this->assertInternalType('int', $result);
     }
+
+    public function testcron_suspend_orders()
+    {
+        $serviceMock = $this->getMockBuilder('\Box\Mod\Meteredbilling\Service')->getMock();
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('suspendOrdersWithUnpaidInvoices')
+            ->willReturn(0);
+        $this->api->setService($serviceMock);
+
+        $result = $this->api->cron_suspend_orders();
+        $this->assertInternalType('int', $result);
+    }
 }
  

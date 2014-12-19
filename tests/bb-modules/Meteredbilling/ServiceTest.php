@@ -368,5 +368,80 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $result =$serviceMock->generateInvoicesOnFirstDayOfTheMonth();
         $this->assertEquals(0, $result);
     }
+
+    public function testsuspendOrdersWithUnpaidInvoices_SqlEmptyResult()
+    {
+        $config = array('metered_order_suspend' => 10);
+        $boxModMock = $this->getMockBuilder('\Box_Mod')->disableOriginalConstructor()->getMock();
+        $boxModMock->expects($this->atLeastOnce())
+            ->method('getConfig')
+            ->willReturn($config);
+
+        $getAllResult = array();
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('getAll')
+            ->willReturn($getAllResult);
+
+        $di = new \Box_Di();
+        $di['mod'] = $di->protect(function ($extensionName) use($boxModMock) {
+            if ($extensionName == 'meteredbilling'){
+                return $boxModMock;
+            }
+            return null;
+        });
+        $di['db'] = $dbMock;
+        $this->service->setDi($di);
+
+        $result = $this->service->suspendOrdersWithUnpaidInvoices();
+        $this->assertEquals(-1, $result);
+    }
+
+    public function testsuspendOrdersWithUnpaidInvoices()
+    {
+        $config = array('metered_order_suspend' => 10);
+        $boxModMock = $this->getMockBuilder('\Box_Mod')->disableOriginalConstructor()->getMock();
+        $boxModMock->expects($this->atLeastOnce())
+            ->method('getConfig')
+            ->willReturn($config);
+
+        $getAllResult = array(
+            array('id' => 1,));
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+
+        $dbMock->expects($this->atLeastOnce())
+            ->method('getAll')
+            ->willReturn($getAllResult);
+
+        $orderModel = new \Model_ClientOrder();
+        $orderModel->loadBean(new \RedBeanPHP\OODBBean());
+        $dbMock->expects($this->atLeastOnce())
+            ->method('load')
+            ->willReturn($orderModel);
+
+        $orderServiceMock = $this->getMockBuilder('\Box\Mod\Order\Service')->getMock();
+        $orderServiceMock->expects($this->atLeastOnce())
+            ->method('suspendFromOrder')
+            ->with($orderModel);
+
+        $di = new \Box_Di();
+        $di['mod'] = $di->protect(function ($extensionName) use($boxModMock) {
+            if ($extensionName == 'meteredbilling'){
+                return $boxModMock;
+            }
+            return null;
+        });
+        $di['db'] = $dbMock;
+        $di['mod_service'] = $di->protect(function ($serviceName) use($orderServiceMock){
+            if ($serviceName == 'Order'){
+                return $orderServiceMock;
+            }
+            return null;
+        });
+        $this->service->setDi($di);
+
+        $result = $this->service->suspendOrdersWithUnpaidInvoices();
+        $this->assertEquals(1, $result);
+    }
 }
  
