@@ -406,7 +406,11 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             ->willReturn($config);
 
         $getAllResult = array(
-            array('id' => 1,));
+            array(
+                'id' => 1,
+                'invoice_id' => 1,
+                )
+        );
         $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
 
         $dbMock->expects($this->atLeastOnce())
