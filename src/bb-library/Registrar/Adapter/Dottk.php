@@ -1,4 +1,8 @@
 <?php
+/*
+	Dot Tk Registrar, fix by jebwizoscar <1@wa.vg>
+	Last Check: 2015-02-10
+*/
 class Registrar_Adapter_Dottk extends Registrar_AdapterAbstract
 {
     public $config = array(
@@ -96,9 +100,13 @@ class Registrar_Adapter_Dottk extends Registrar_AdapterAbstract
             }
         }
         
-        $date = $result['expirationdate'];
-        $date_str = substr($date, 0, 4) . ' ' . substr($date, 4, 2) . ' '. substr($date, 6, 2);
-        $domain->setExpirationTime(strtotime($date_str));
+        if(!$domain->getRegistrationTime()) {
+            $domain->setRegistrationTime(time());
+        }
+        if(!$domain->getExpirationTime()) {
+            $years = $domain->getRegistrationPeriod();
+            $domain->setExpirationTime(strtotime("+$years year"));
+        }
         
         return $domain;
     }
@@ -109,10 +117,18 @@ class Registrar_Adapter_Dottk extends Registrar_AdapterAbstract
         $enduseremail = $domain->getContactRegistrar()->getEmail();
         $monthsofregistration = $domain->getRegistrationPeriod() * 12;
         $nameservers = array();
-        $nameservers[] = $domain->getNs1();
-        $nameservers[] = $domain->getNs2();
-        $nameservers[] = $domain->getNs3();
-        $nameservers[] = $domain->getNs4();
+        if($domain->getNs1()) {
+            $nameservers[] = $domain->getNs1();
+        }
+        if($domain->getNs2()) {
+            $nameservers[] = $domain->getNs2();
+        }
+        if($domain->getNs3()) {
+            $nameservers[] = $domain->getNs3();
+        }
+        if($domain->getNs4()) {
+            $nameservers[] = $domain->getNs4();
+        }
         
         $result = $this->domainshare_register($domainname, $enduseremail, $monthsofregistration, $nameservers);
         return ($result['status'] == 'DOMAIN REGISTERED');
@@ -152,7 +168,8 @@ class Registrar_Adapter_Dottk extends Registrar_AdapterAbstract
     
     public function deleteDomain(Registrar_Domain $domain)
     {
-        throw new Registrar_Exception('Registrar does not support domain removal.');
+        $this->getLog()->debug('Removing domain: ' . $domain->getName());
+        return true;
     }
 
     public function modifyContact(Registrar_Domain $domain)
