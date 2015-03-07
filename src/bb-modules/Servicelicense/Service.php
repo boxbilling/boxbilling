@@ -217,6 +217,17 @@ class Service implements InjectionAwareInterface
         $model->updated_at = date('c');
         $this->di['db']->store($model);
         $this->di['logger']->info('Reset license %s information', $model->id);
+        
+        $data = array(
+            'id'=>$model->id,
+            'ips'=>$model->ips,
+            'hosts'=>$model->hosts,
+            'paths'=>$model->paths,
+            'versions'=>$model->versions,
+            'updated_at'=>$model->updated_at
+        );
+        $this->di['events_manager']->fire(array('event'=>'onAfterServicelicenseReset', 'params'=>$data));
+        
         return true;
     }
 
