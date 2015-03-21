@@ -262,19 +262,28 @@ class Registrar_Adapter_Dottk extends Registrar_AdapterAbstract
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
 
 		$output = curl_exec($ch);
-		$pos = strrpos($output, "<!DOCTYPE");
-		if($pos !== false) {
-		  $output = substr($output,0,$pos);
+		if($output) {
+			$pos = strrpos($output, "<!DOCTYPE");
+			if($pos !== false) {
+			  $output = substr($output,0,$pos);
+			}
+			$response = json_decode($output,true);
+	 
+			if($this->_testMode){
+				error_log("DotTk Response: " . print_r($response, 1));
+			}
+			
+			if($response['status'] == 'NOT OK') {
+				throw new Registrar_Exception($response['reason']);
+			}
+		} else {
+			$error = curl_error($ch);
+			if($error) {
+				throw new Registrar_Exception("CURL ERROR: " . $error);
+			} else {
+				throw new Registrar_Exception("Unable to reach server.");
+			}
 		}
-        $response = json_decode($output,true);
- 
-        if($this->_testMode){
-            error_log("DotTk Response: " . print_r($response, 1));
-        }
-        
-        if($response['status'] == 'NOT OK') {
-            throw new Registrar_Exception($response['reason']);
-        }
         
         return $response;
     }
