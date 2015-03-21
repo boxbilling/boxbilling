@@ -61,18 +61,7 @@ class Box_License implements \Box\InjectionAwareInterface
 
     private function getBBType()
     {
-        $prefixes = array(
-            'PRO-',
-            'HOSTING24-',
-        );
-        $bb_license = $this->getKey();
-        foreach($prefixes as $prefix){
-            if(substr($bb_license, 0, strlen($prefix)) == $prefix) {
-                return \Box_Version::TYPE_PRO;
-            }
-        }
-
-        return \Box_Version::TYPE_FREE;
+        return \Box_Version::TYPE_PRO;
     }
 
     public function getDetails($from_server = false)
