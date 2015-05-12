@@ -165,14 +165,34 @@ class Service implements \Box\InjectionAwareInterface
         $mail->setFrom($data['from'], $data['from_name']);
         $mail->addTo($data['to'], $data['to_name']);
 
+        $settings        = $this->getEmailConfig();
+        $transport       = $this->di['array_get']($settings, 'mailer', 'sendmail');
+
         if (APPLICATION_ENV != 'production') {
             if($this->di['config']['debug'])
                 error_log('Skip email sending. Application ENV: '.APPLICATION_ENV);
             return true;
         }
-        $mail->send('sendmail');
+        $mail->send($transport, $settings);
 
         return true;
+    }
+
+    /**
+     * Get the e-mail settings from mod_email
+     * @return array the email settings from mod_email
+     */
+    public function getEmailConfig(){
+        $db = $this->di['db'];
+        $bb_config = $this->di['config'];
+        $config = array();
+
+        $c = $db->findOne('extension_meta', 'extension = "mod_email" AND meta_key = "config"');
+        if($c) {
+            $config = $this->di['crypt']->decrypt($c->meta_value, $bb_config['salt']);
+            $config = $this->di['tools']->decodeJ($config);
+        }
+        return $config;
     }
     
     public function toApiArray($row)
