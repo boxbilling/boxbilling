@@ -155,9 +155,6 @@ class Registrar_Adapter_Resellerclub extends Registrar_AdapterAbstract
 
     public function modifyContact(Registrar_Domain $domain)
     {
--        $customer = $this->_getCustomerDetails($domain);
--        $cdetails = $this->_getDefaultContactDetails($domain, $customer['customerid']);
--        $contact_id = $cdetails['Contact']['registrant'];
 
 +        $orderid = $this->_getDomainOrderId($domain);
 +        $domaindetails = array(
