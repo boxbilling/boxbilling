@@ -158,4 +158,17 @@ class Client extends \Api_Abstract
 
         return $this->getService()->closeTicket($ticket, $this->getIdentity());
     }
+    
+        public function ticket_get_count($data)
+    {
+	$identity          = $this->getIdentity();
+	$data['client_id'] = $identity->id;
+	$support_helpdesk_id =  $data['support_helpdesk_id'];
+	$updated_at =  $data['updated_at'];
+	list($sql, $bindings) = $this->getService()->getSearchQuery($data);
+	$query = "SELECT COUNT(id) as counter FROM support_ticket WHERE support_helpdesk_id = ' $support_helpdesk_id ' and status = 'open'and updated_at <= ' $updated_at ' ";
+	$query = $this->di['db']->getCell($query);
+	$query = $query -1;
+	return $query;
+    }
 }

@@ -31,6 +31,14 @@
                         <td>{% trans 'Help desk' %}</td>
                         <td>{{ticket.helpdesk.name}}</td>
                     </tr>
+                    
+			{% set tickets_counter = client.support_ticket_get_count({"support_helpdesk_id":ticket.helpdesk.id, "updated_at":ticket.updated_at}) %}
+			{% if ticket.status=='open' and tickets_counter != 0  %}
+			<tr>
+			<td>{% trans 'Tickets to be served' %}</td>
+			<td><b>{{ tickets_counter }}</b></td>
+			 </tr>
+			{%endif%}
 
                     <tr>
                         <td>{% trans 'Status' %}</td>
