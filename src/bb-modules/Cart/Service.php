@@ -734,6 +734,7 @@ class Service implements InjectionAwareInterface
             'form_id'       => $product->form_id,
             'title'         => $this->getItemTitle($model),
             'type'          => $product->type,
+            'config'        => $config,
             'quantity'      => $qty,
             'unit'          => $repo->getUnit($product),
             'price'         => $price,
