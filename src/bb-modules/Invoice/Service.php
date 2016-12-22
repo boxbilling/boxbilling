@@ -773,7 +773,7 @@ class Service implements InjectionAwareInterface
             $model->paid_at = date('Y-m-d H:i:s', strtotime($paid_at));
         }
 
-        $due_at = $this->di['array_get']($data, 'due_at', null);
+        $due_at = $this->di['array_get']($data, 'due_at', $model->due_at);
         if(empty($due_at)) {
             $model->due_at = null;
         } else {
