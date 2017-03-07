@@ -8,6 +8,14 @@ BoxBilling [![Download Latest](http://i.imgur.com/djy4ExU.png)](https://github.c
 Open Source billing software
 
 Requirements
+------------
+You must clone the repository and then install dependencies using composer:
+
+```bash
+php composer.phar install
+```
+
+Requirements
 ================================================================================
 
 * PHP >=5.3.3
@@ -18,6 +26,7 @@ Requirements
   * PDO
   * gettext
 * MySQL or any PDO compatible SQL server
+* 
 
 Getting started
 ================================================================================
