@@ -561,15 +561,46 @@ class Service implements InjectionAwareInterface
         $required = $this->getTotalWithTax($invoice);
         $epsilon = 0.05;
 
+		/* See if a transaction record already exists for this invoice. */
+		$values = array(
+			'invoice_id' => $invoice->id,
+		);
+        $rec = $this->di['db']->findOne('transaction', 'invoice_id = :invoice_id', $values);                    
+        if (!$rec) {
+			/* Set up transaction record. */
+			$transaction = $this->di['db']->dispense('Transaction');
+			$transaction->invoice_id    = $invoice->id;
+			$transaction->txn_id        = uniqid();
+			$transaction->status        = 'received';
+			$transaction->amount        = $required;
+			$transaction->currency      = $invoice->currency;
+			$transaction->type			= 'Payment applied from client credits';
+			$transaction->created_at    = date('Y-m-d H:i:s');
+			$transaction->updated_at    = date('Y-m-d H:i:s');
+			$insert_transaction			= TRUE;
+		} else {
+			$insert_transaction			= FALSE;
+		}
+
         if(abs($balance-$required) < $epsilon) {
             if($this->di['config']['debug']) error_log(sprintf('Setting invoice %s as paid with credits', $invoice->id));
             $this->markAsPaid($invoice);
+	
+	        /* Insert transaction record for invoices paid with client credits. */
+			if ($insert_transaction) {
+				$this->di['db']->store($transaction);
+			}
             return true;
         }
 
         if($balance-$required > 0.00001) {
             if($this->di['config']['debug']) error_log(sprintf('Setting invoice %s as paid with credits', $invoice->id));
             $this->markAsPaid($invoice);
+	
+	        /* Insert transaction record for invoices paid with client credits. */
+			if ($insert_transaction) {
+				$this->di['db']->store($transaction);
+			}
             return true;
         }
         if($this->di['config']['debug']) error_log(sprintf('Invoice %s could not be paid with credits. Money in balance %s Required: %s', $invoice->id, $balance, $required));
@@ -773,7 +804,7 @@ class Service implements InjectionAwareInterface
             $model->paid_at = date('Y-m-d H:i:s', strtotime($paid_at));
         }
 
-        $due_at = $this->di['array_get']($data, 'due_at', null);
+        $due_at = $this->di['array_get']($data, 'due_at', $model->due_at);
         if(empty($due_at)) {
             $model->due_at = null;
         } else {
