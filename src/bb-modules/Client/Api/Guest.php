@@ -276,4 +276,4 @@ class Guest extends \Api_Abstract
         $config = $this->di['mod_config']('client');
         return isset($config['custom_fields']) ? $config['custom_fields'] : array();
     }
-}}
+}
