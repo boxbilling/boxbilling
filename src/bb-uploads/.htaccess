@@ -1,2 +1,5 @@
-php_flag engine off
+# If we know how to do it safely, disable the PHP engine entirely.
+<IfModule mod_php5.c>
+  php_flag engine off
+</IfModule>
 Options -Indexes
