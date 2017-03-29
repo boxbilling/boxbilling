@@ -212,7 +212,7 @@ class Guest extends \Api_Abstract
 
         $reset = $this->di['db']->findOne('ClientPasswordReset', 'hash = ?', array($data['hash']));
         if(!$reset instanceof \Model_ClientPasswordReset) {
-            throw new \Box_Exception('The link have expired or you have already confirmed password reset.');
+            throw new \Box_Exception('The link has expired or you have already confirmed password reset.');
         }
 
         $new_pass = substr(md5(time() . uniqid()), 0, 10);
