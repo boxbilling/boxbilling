@@ -214,6 +214,15 @@ class Payment_Adapter_PayPalEmail implements \Box\InjectionAwareInterface
         if($currency == 'HUF') {
             return number_format($amount, 0);
         }
+        //RSD to USD conversion
+        if($currency == 'RSD') {
+            $json = file_get_contents('https://www.leo-host.com/come/duo_json.php'); //get rates
+            $array = json_decode($json);
+            $kurs = $array[11]->rate * 0.046859533 + $array[11]->rate; // Rate + 4.6859533005958784%
+            
+            $amount_convert = $amount / $kurs;
+            return number_format($amount_convert, 2, '.', '');
+        }
         return number_format($amount, 2, '.', '');
     }
 
@@ -341,14 +350,16 @@ class Payment_Adapter_PayPalEmail implements \Box\InjectionAwareInterface
 
     public function getSubscriptionFields(array $invoice)
     {
+        if($invoice['currency'] == 'RSD') { $valuta = 'USD'; } else { $valuta = $invoice['currency']; } //Convert to USD if RSD
+        
         $data = array();
         $subs = $invoice['subscription'];
-
+        
         $data['item_name']          = $this->getInvoiceTitle($invoice);
         $data['item_number']        = $invoice['nr'];
         $data['no_shipping']        = '1';
         $data['no_note']            = '1'; // Do not prompt payers to include a note with their payments. Allowable values for Subscribe buttons:
-        $data['currency_code']      = $invoice['currency'];
+        $data['currency_code']      = $valuta;
         $data['return']             = $this->config['return_url'];
         $data['cancel_return']      = $this->config['cancel_url'];
         $data['notify_url']         = $this->config['notify_url'];
@@ -358,7 +369,7 @@ class Payment_Adapter_PayPalEmail implements \Box\InjectionAwareInterface
         $data['rm']                 = '2';
 
         $data['invoice_id']         = $invoice['id'];
-
+        
         // Recurrence info
         $data['a3']                 = $this->moneyFormat($invoice['total'], $invoice['currency']); // Regular subscription price.
         $data['p3']                 = $subs['cycle']; //Subscription duration. Specify an integer value in the allowable range for the units of duration that you specify with t3.
@@ -391,12 +402,14 @@ class Payment_Adapter_PayPalEmail implements \Box\InjectionAwareInterface
 
     public function getOneTimePaymentFields(array $invoice)
     {
+        if($invoice['currency'] == 'RSD') { $valuta = 'USD'; } else { $valuta = $invoice['currency']; } //Convert to USD if RSD
+        
         $data = array();
         $data['item_name']          = $this->getInvoiceTitle($invoice);
         $data['item_number']        = $invoice['nr'];
         $data['no_shipping']        = '1';
         $data['no_note']            = '1';
-        $data['currency_code']      = $invoice['currency'];
+        $data['currency_code']      = $valuta;
         $data['rm']                 = '2';
         $data['return']             = $this->config['return_url'];
         $data['cancel_return']      = $this->config['cancel_url'];
