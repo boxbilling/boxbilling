@@ -260,7 +260,11 @@ class Service implements \Box\InjectionAwareInterface
         list($domain, $adapter) = $this->_getD($model);
         $adapter->renewDomain($domain);
 
-        $this->syncWhois($model, $order);
+        try {
+            $this->syncWhois($model, $order);
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+        }
 
         return true;
     }
