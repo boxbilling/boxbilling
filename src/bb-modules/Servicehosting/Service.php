@@ -456,6 +456,7 @@ class Service implements InjectionAwareInterface
             'sld'           =>  $model->sld,
             'tld'           =>  $model->tld,
             'domain'        =>  $model->sld.$model->tld,
+			'cpanel_url'    =>  'http://' . ($model->sld.$model->tld ? $model->sld.$model->tld : $model->ip) . '/cpanel',
             'username'      =>  $model->username,
             'reseller'      =>  $model->reseller,
             'server'        =>  $server,

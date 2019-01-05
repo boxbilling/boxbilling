@@ -66,7 +66,7 @@
                             {% if service.domain_order_id %}
                                     <a class="btn btn-primary" href="{{ '/order/service/manage'|link }}/{{service.domain_order_id}}">{% trans 'Manage domain' %}</a>
                             {% endif %}
-                                    <a class="btn btn-primary" href="{{ server.cpanel_url }}" target="_blank">{% trans 'Jump to cPanel' %}</a>
+                                    <a class="btn btn-primary" href="{{ service.cpanel_url }}" target="_blank">{% trans 'Jump to cPanel' %}</a>
                             {% if service.reseller %}
                                     <a class="btn btn-primary" href="{{ server.reseller_cpanel_url }}" target="_blank">{% trans 'Reseller control panel' %}</a>
                             {% endif %}
