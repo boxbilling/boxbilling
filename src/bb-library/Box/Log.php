@@ -83,7 +83,7 @@ class Box_Log
         }
     }
 
-    public function log($message, $priority, $extras = null)
+    public function log($message, $priority = self::DEBUG, $extras = null)
     {
         // sanity checks
         if (empty($this->_writers)) {
