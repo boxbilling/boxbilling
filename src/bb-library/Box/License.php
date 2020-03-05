@@ -112,6 +112,7 @@ class Box_License implements \Box\InjectionAwareInterface
         if(!$cache || $from_server) {
             try {
                 $servers = array(
+                    'https://www.boxbilling.com/api/guest/servicelicense/check',
                     'http://www.boxbilling.com/api/guest/servicelicense/check',
                 );
                 $l = $this->_getLicenseDetailsFromServer($servers);
