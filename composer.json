@@ -16,7 +16,10 @@
             "echo Copying Heroku config file",
             "cp -r src/bb-config-heroku.php src/bb-config.php",
             "echo Removing install dir",
-            "rm -rf src/install"
+            "rm -rf src/install",
+            "echo Removing dist files",
+            "rm -rf src/bb-config-heroku.php",
+            "rm -rf src/bb-config-sample.php"
         ]
     },
     "require": {
