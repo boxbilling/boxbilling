@@ -15,9 +15,11 @@
         "post-install-cmd": [
             "echo Copying Heroku config file",
             "cp -r src/bb-config-heroku.php src/bb-config.php",
+            "cp -r src/htaccess.txt src/.htaccess",
             "echo Removing install dir",
             "rm -rf src/install",
             "echo Removing dist files",
+            "rm -rf src/htaccess.txt",
             "rm -rf src/bb-config-heroku.php",
             "rm -rf src/bb-config-sample.php"
         ]
