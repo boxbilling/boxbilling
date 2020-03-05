@@ -1,18 +1,38 @@
 {
-  "name": "BoxBilling on Heroku",
-  "description": "BoxBilling runs on Heroku",
+  "name": "BoxBilling",
+  "description": "Open source billing and client management software",
   "repository": "https://github.com/boxbilling/boxbilling",
   "logo": "https://www.boxbilling.com/bb-themes/bb2015/assets/images/open/logo.png",
   "keywords": ["php", "billing", "crm", "open-source"],
-  "website": "http://www.boxbilling.com",
+  "website": "https://www.boxbilling.com",
   "addons": [
     "cleardb:ignite",
     "scheduler:standard"
   ],
   "env": {
-    "SETUP_BY": {
-      "description": "Who initiated this setup",
-      "value": "BoxBilling Github Link"
+    "BB_DB_DSN": {
+      "description": "Database connection string",
+      "value": "ClearDB DSN value"
+    },
+    "BB_LICENSE": {
+      "description": "Free BoxBilling License",
+      "value": "FREE-5RTY-POI8-0UYT-IUYT-TGH6"
+    },
+    "BB_SALT": {
+      "description": "Encryption Salt for this installation",
+      "value": "FREE-5RTY-POI8-0UYT-IUYT-TGH6"
+    },
+    "BB_SEF_URLS": {
+      "description": "Pretty urls",
+      "value": "0"
+    },
+    "BB_URL": {
+      "description": "Installtion URL",
+      "value": "https://your.installation-url.com"
+    },
+    "BB_DEBUG": {
+      "description": "Debug mode",
+      "value": "0"
     }
   },
   "buildpacks": [
