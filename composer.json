@@ -48,8 +48,8 @@
         "vendor-dir": "src/bb-vendor"
     },
     "autoload": {
-        "psr-0": {"": "bb-library"},
-        "psr-4": {"Box\\Mod\\": "bb-modules"}
+        "psr-0": {"": "src/bb-library"},
+        "psr-4": {"Box\\Mod\\": "src/bb-modules"}
     },
     "require-dev": {
         "phpunit/phpunit": "4.6.9",
@@ -58,6 +58,6 @@
 
     },
     "autoload-dev": {
-        "psr-0": { "": "../tests/bb-library" }
+        "psr-0": { "": "tests/bb-library" }
     }
 }
