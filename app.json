@@ -1,0 +1,26 @@
+{
+  "name": "BoxBilling on Heroku",
+  "description": "BoxBilling runs on Heroku",
+  "repository": "https://github.com/boxbilling/boxbilling",
+  "logo": "https://www.boxbilling.com/bb-themes/bb2015/assets/images/open/logo.png",
+  "keywords": ["php", "billing", "crm", "open-source"],
+  "website": "http://www.boxbilling.com",
+  "addons": [
+    "cleardb:ignite",
+    "scheduler:standard"
+  ],
+  "env": {
+    "SETUP_BY": {
+      "description": "Who initiated this setup",
+      "value": "BoxBilling Github Link"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/php"
+    }
+  ],
+  "scripts": {
+    "postdeploy": "bundle exec rake db:migrate"
+  }
+}

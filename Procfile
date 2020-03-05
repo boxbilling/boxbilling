@@ -1,0 +1,1 @@
+web: src/bb-vendor/bin/heroku-php-apache2 src/
