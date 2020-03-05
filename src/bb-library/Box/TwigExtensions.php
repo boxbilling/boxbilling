@@ -201,14 +201,14 @@ function twig_gravatar_filter($email, $size = null)
 function twig_autolink_filter($text)
 {
    $pattern  = '#\b(([\w-]+://?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/)))#';
-   $callback = create_function('$matches', '
+   $callback = function($matches) {
        $url       = array_shift($matches);
        $url_parts = parse_url($url);
        if(!isset($url_parts["scheme"])) {
           $url = "http://".$url;
        }
-       return sprintf(\'<a target="_blank" href="%s">%s</a>\', $url, $url);
-   ');
+       return sprintf('<a target="_blank" href="%s">%s</a>', $url, $url);
+   };
    return preg_replace_callback($pattern, $callback, $text);
 }
 
