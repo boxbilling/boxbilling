@@ -106,11 +106,7 @@ final class Box_Installer
 
                     //license
                     $license = $_POST['license'];
-                    if (!$this->isValidLicense($license)) {
-                        throw new Exception('License Key is not valid');
-                    } else {
-                        $this->session->set('license', $license);
-                    }
+                    $this->session->set('license', $license);
 
                     $this->makeInstall($this->session);
                     $this->generateEmailTemplates();
