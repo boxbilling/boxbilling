@@ -30,7 +30,7 @@
         "ext-mbstring" : "*",
 
         "pimple/pimple": "v2.0.0",
-        "twig/twig": "v1.15.1",
+        "twig/twig": "v1.42.5",
         "twig/extensions": "1.0.0",
         "rev42/tfpdf": "v1.24",
         "geoip2/geoip2": "v2.1.0",
