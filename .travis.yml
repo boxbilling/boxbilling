@@ -2,14 +2,14 @@
 
 language: php
 
+os: linux
+
 dist: trusty
 
 php:
   - 7.2
   - 7.3
   - 7.4
-
-sudo: false
 
 install:
   - ant
@@ -33,7 +33,6 @@ after_script:
 
 notifications:
   email: false
-  slack: boxbilling:vsdKszFU9Pm308ye5rNSpr8n
 
 before_deploy:
   - npm install -g grunt-cli
@@ -46,8 +45,7 @@ deploy:
   api-key:
     secure: tVzZ+3U0ndBGvoUpFqA6ikg6fDKnPgMoNqK1pvTdEp0xmrFtjMP/fuc8+awObhj89iEC+MyzfsOP57CZbHR/UjmUSHPQew+BvTwxYmTUzgUeyUrYsTEI7WJgB7tsL35aRgrpxk102tlSmlX7EonufUT0svPOAQ1p4NgZRm3GI3A=
   file: ./build/distribution/BoxBilling.zip
-  skip_cleanup: true
   on:
     tags: true
     all_branches: true
-    php: 5.6
+    php: 7.4
