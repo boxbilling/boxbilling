@@ -40,7 +40,8 @@
         "phpmailer/phpmailer": "5.2.4",
         "mustangostang/spyc": "0.5.1",
         "michelf/php-markdown": "1.9.0",
-        "stripe/stripe-php": "2.1.1"
+        "stripe/stripe-php": "2.1.1",
+        "noprotocol/php-mysql-aes-crypt": "^2.0"
     },
 
     "suggest": {

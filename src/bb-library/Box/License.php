@@ -79,7 +79,6 @@ class Box_License implements \Box\InjectionAwareInterface
     {
         $license = $this->getKey();
         $systemService = $this->di['mod_service']('system');
-        $salt = 'IJ2bspsxk1U1INr';
         $key = md5('_lc_'.$license);
         $cache = $systemService->getParamValue($key);
 
@@ -92,7 +91,7 @@ class Box_License implements \Box\InjectionAwareInterface
         if(!$v) {
             $from_server = true;
         } else {
-            $checkd = $this->di['crypt']->decrypt($v, $salt);
+            $checkd = $this->di['crypt']->decrypt($v);
             if(is_numeric($checkd)) {
                 $last_check = $checkd;
             }
@@ -103,7 +102,7 @@ class Box_License implements \Box\InjectionAwareInterface
         }
 
         if($cache && !$from_server) {
-            $data = @unserialize($this->di['crypt']->decrypt($cache, $salt));
+            $data = @unserialize($this->di['crypt']->decrypt($cache));
             if ($data === false) {
                 $from_server = true;
             }
@@ -123,13 +122,13 @@ class Box_License implements \Box\InjectionAwareInterface
 
             $data = $l;
 
-            $systemService->setParamValue($key, $this->di['crypt']->encrypt(serialize($l), $salt), true);
-            $systemService->setParamValue($check_key, $this->di['crypt']->encrypt(time(), $salt), true);
+            $systemService->setParamValue($key, $this->di['crypt']->encrypt(serialize($l)));
+            $systemService->setParamValue($check_key, $this->di['crypt']->encrypt(time()));
         } else {
-            $data = @unserialize($this->di['crypt']->decrypt($cache, $salt));
+            $data = @unserialize($this->di['crypt']->decrypt($cache));
             if (!is_array($data)) {
                 error_log('Invalid response from licensing server. 9115');
-                $systemService->setParamValue($key, $this->di['crypt']->encrypt(serialize(false), $salt), true);
+                $systemService->setParamValue($key, $this->di['crypt']->encrypt(serialize(false)));
             }
         }
 

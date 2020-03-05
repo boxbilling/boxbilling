@@ -243,7 +243,7 @@ class Box_Mod
         $modName = 'mod_'.strtolower($this->mod);
         $c = $db->findOne('extension_meta', 'extension = :ext AND meta_key = :key', array(':ext'=>$modName, ':key'=>'config'));
         if($c) {
-            $config = $this->di['crypt']->decrypt($c->meta_value, $bb_config['salt']);
+            $config = $this->di['crypt']->decrypt($c->meta_value);
             $config = $this->di['tools']->decodeJ($config);
         }
         return $config;

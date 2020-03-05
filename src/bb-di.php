@@ -40,9 +40,8 @@ $di['logger'] = function () use ($di) {
     return $log;
 };
 $di['crypt'] = function() use ($di) {
-    $crypt =  new Box_Crypt();
-    $crypt->setDi($di);
-    return $crypt;
+    $salt = $di['config']['salt'];
+    return new NoProtocol\Encryption\MySQL\AES\Crypter($salt);
 };
 $di['pdo'] = function() use ($di) {
     $c = $di['config']['db'];

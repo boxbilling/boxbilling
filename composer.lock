@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "43d6edf12781f04c1d2bdc80cd3723f4",
+    "content-hash": "746f57d3eadfe43e394f112700eb6bdc",
     "packages": [
         {
             "name": "geoip2/geoip2",
@@ -351,6 +351,66 @@
                 "yml"
             ],
             "time": "2013-02-21T10:52:01+00:00"
+        },
+        {
+            "name": "noprotocol/php-mysql-aes-crypt",
+            "version": "v2.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/noprotocol/php-mysql-aes-crypt.git",
+                "reference": "c70c88cdfc81796d0fd2c92113a568bb6f00fc66"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/noprotocol/php-mysql-aes-crypt/zipball/c70c88cdfc81796d0fd2c92113a568bb6f00fc66",
+                "reference": "c70c88cdfc81796d0fd2c92113a568bb6f00fc66",
+                "shasum": ""
+            },
+            "require": {
+                "ext-openssl": "*"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "6.0.*",
+                "symfony/stopwatch": "^3.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "NoProtocol\\Encryption\\MySQL\\AES\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Bob Fanger",
+                    "email": "bob.fanger@noprotocol.nl"
+                },
+                {
+                    "name": "Anne Jan Brouwer",
+                    "email": "anne.jan.brouwer@noprotocol.nl"
+                },
+                {
+                    "name": "Govert Verschuur",
+                    "email": "govert.verschuur@noprotocol.nl"
+                },
+                {
+                    "name": "Renan Martins Pimentel",
+                    "email": "renan.pimentel@gmail.com"
+                }
+            ],
+            "description": "Encrypt/decrypt data in PHP to a format compatible with MySQL AES_ENCRYPT & AES_DECRYPT functions.",
+            "keywords": [
+                "aes",
+                "decryption",
+                "encryption",
+                "mysql",
+                "noprotocol",
+                "php"
+            ],
+            "time": "2019-12-02T14:43:14+00:00"
         },
         {
             "name": "phpmailer/phpmailer",

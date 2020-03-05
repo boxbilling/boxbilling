@@ -570,7 +570,7 @@ class Service implements InjectionAwareInterface
             $this->di['db']->store($c);
             $config = array();
         } else {
-            $config = $this->di['crypt']->decrypt($c->meta_value, $this->_getSalt());
+            $config = $this->di['crypt']->decrypt($c->meta_value);
             $config = $this->di['tools']->decodeJ($config);
         }
         return $config;
@@ -590,7 +590,7 @@ class Service implements InjectionAwareInterface
         ";;
 
         $config = json_encode($data);
-        $config = $this->di['crypt']->encrypt($config, $this->_getSalt());
+        $config = $this->di['crypt']->encrypt($config);
 
         $params = array(
             'ext'        => $data['ext'],

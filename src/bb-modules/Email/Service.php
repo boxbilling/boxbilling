@@ -104,7 +104,7 @@ class Service implements \Box\InjectionAwareInterface
 
     public function setVars($t, $vars)
     {
-        $t->vars = $this->di['crypt']->encrypt(json_encode($vars), 'v8JoWZph12DYSY4aq8zpvWdzC');
+        $t->vars = $this->di['crypt']->encrypt(json_encode($vars));
         $this->di['db']->store($t);
 
         return true;
@@ -115,7 +115,7 @@ class Service implements \Box\InjectionAwareInterface
      */
     public function getVars($t)
     {
-        $json = $this->di['crypt']->decrypt($t->vars, 'v8JoWZph12DYSY4aq8zpvWdzC');
+        $json = $this->di['crypt']->decrypt($t->vars);
 
         return $this->di['tools']->decodeJ($json);
     }

@@ -53,7 +53,7 @@ class Service implements \Box\InjectionAwareInterface
             $row = $row->export();
         }
         
-        $row['pass'] = $this->di['crypt']->decrypt($row['pass'], $this->_salt);
+        $row['pass'] = $this->di['crypt']->decrypt($row['pass']);
         return $row;
     }
     
@@ -365,7 +365,7 @@ class Service implements \Box\InjectionAwareInterface
     private function _apiServerCall($model, $method, $arguments = array(), $admin = false)
     {
         $account_username = $model->username;
-        $account_password = $this->di['crypt']->decrypt($model->pass, $this->_salt);
+        $account_password = $this->di['crypt']->decrypt($model->pass);
         $server             = $this->getServer($model->server_id);
         
         $centovacast_url    = $server['url'];
@@ -407,6 +407,6 @@ class Service implements \Box\InjectionAwareInterface
     
     public function encryptPass($password)
     {
-        return $this->di['crypt']->encrypt($password, $this->_salt);
+        return $this->di['crypt']->encrypt($password);
     }
 }
