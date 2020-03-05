@@ -12,7 +12,12 @@
         }
     ],
     "scripts": {
-        "post-install-cmd": "echo This runs afterwards."
+        "post-install-cmd": [
+            "echo Copying Heroku config file",
+            "cp -r src/bb-config-heroku.php src/bb-config.php",
+            "echo Removing install dir",
+            "rm -rf src/install"
+        ]
     },
     "require": {
         "php": "^7.2.0",
