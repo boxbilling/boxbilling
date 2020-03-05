@@ -107,7 +107,7 @@ class Service implements InjectionAwareInterface
         $db = $this->di['db'];
         $default = $db->findOne('Currency', 'is_default = 1');
 
-        if (count($default) == 0) {
+        if (!$default) {
             $default = $db->load('Currency', '1');
         }
 
