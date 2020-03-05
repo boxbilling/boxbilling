@@ -47,6 +47,15 @@ $di['crypt'] = function() use ($di) {
 $di['pdo'] = function() use ($di) {
     $c = $di['config']['db'];
 
+    if(isset($c['dsn']) && !empty($c['dsn'])) {
+        $details = parse_url($c['dsn']);
+        $c['type'] = $details['scheme'];
+        $c['host'] = $details['host'];
+        $c['name'] = ltrim($details['path'], '/');
+        $c['user'] = $details['user'];
+        $c['password'] = $details['pass'];
+    }
+
     $pdo = new PDO($c['type'].':host='.$c['host'].';dbname='.$c['name'],
         $c['user'],
         $c['password'],

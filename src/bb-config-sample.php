@@ -71,6 +71,12 @@ return array(
 
     'db'    =>  array(
         /**
+         * Database DSN. All config in one string mysql://user:pass@hostname?param=value
+         * If BB_DB_DSN is defined, all other params will be ignored
+         */
+        'dsn'   =>getenv('BB_DB_DSN'),
+
+        /**
          * Database type. Don't change this if in doubt.
          */
         'type'   =>'mysql',
