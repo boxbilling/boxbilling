@@ -61,13 +61,22 @@ class Box_Translate implements \Box\InjectionAwareInterface
         $locale = $this->getLocale();
         $codeset = "UTF-8";
         if(!function_exists('gettext')) {
+
+            function gettext($msgid) {
+                return $msgid;
+            }
+
+            /*
             require_once BB_PATH_LIBRARY . '/php-gettext/gettext.inc';
             T_setlocale(LC_MESSAGES, $locale.'.'.$codeset);
             T_setlocale(LC_TIME, $locale.'.'.$codeset);
             T_bindtextdomain($this->domain, BB_PATH_LANGS);
             T_bind_textdomain_codeset($this->domain, $codeset);
             T_textdomain($this->domain);
+            */
         } else {
+
+            /*
             @putenv('LANG='.$locale.'.'.$codeset);
             @putenv('LANGUAGE='.$locale.'.'.$codeset);
             // set locale
@@ -78,14 +87,15 @@ class Box_Translate implements \Box\InjectionAwareInterface
             bindtextdomain($this->domain, BB_PATH_LANGS);
             if(function_exists('bind_textdomain_codeset')) bind_textdomain_codeset($this->domain, $codeset);
             textdomain($this->domain);
+            */
+        }
 
-            if (!function_exists('__')) {
-                function __($msgid, array $values = NULL)
-                {
-                    if (empty($msgid)) return null;
-                    $string = gettext($msgid);
-                    return empty($values) ? $string : strtr($string, $values);
-                }
+        if (!function_exists('__')) {
+            function __($msgid, array $values = NULL)
+            {
+                if (empty($msgid)) return null;
+                $string = gettext($msgid);
+                return empty($values) ? $string : strtr($string, $values);
             }
         }
     }
