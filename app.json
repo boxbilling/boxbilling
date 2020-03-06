@@ -10,9 +10,9 @@
     "scheduler:standard"
   ],
   "env": {
-    "BB_DB_DSN": {
-      "description": "Database connection string",
-      "value": "ClearDB DSN value"
+    "BB_URL": {
+      "description": "Installation URL",
+      "value": "https://your.installation-url.com"
     },
     "BB_LICENSE": {
       "description": "Free BoxBilling License",
@@ -21,10 +21,6 @@
     "BB_SEF_URLS": {
       "description": "Pretty urls",
       "value": "1"
-    },
-    "BB_URL": {
-      "description": "Installation URL",
-      "value": "https://your.installation-url.com"
     },
     "BB_SALT": {
       "description": "Encryption Salt for this installation",
