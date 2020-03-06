@@ -1,6 +1,8 @@
 #!/bin/bash
 cd "$(dirname "$0")"
 
+#heroku run sh bin/heroku.sh --app <appname>
+
 cp -r ../src/bb-config-heroku.php ../src/bb-config.php
 php prepare.php
 cp -r ../src/htaccess.txt ../src/.htaccess
