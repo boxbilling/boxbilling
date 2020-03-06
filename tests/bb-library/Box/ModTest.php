@@ -2,7 +2,7 @@
 /**
  * @group Core
  */
-class Box_ModTest extends PHPUnit_Framework_TestCase
+class Box_ModTest extends PHPUnit\Framework\TestCase
 {
     public function testEmptyConfig()
     {

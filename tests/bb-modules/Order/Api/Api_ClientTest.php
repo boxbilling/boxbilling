@@ -6,7 +6,7 @@
  * Date: 8/5/14
  * Time: 4:52 PM
  */
-class ClientTest extends PHPUnit_Framework_TestCase
+class ClientTest extends PHPUnit\Framework\TestCase
 {
     /**
      * @var \Box\Mod\Order\Api\Client

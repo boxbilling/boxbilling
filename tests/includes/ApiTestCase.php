@@ -1,5 +1,5 @@
 <?php
-class ApiTestCase extends PHPUnit_Framework_TestCase
+class ApiTestCase extends PHPUnit\Framework\TestCase
 {
     protected $di = NULL;
     protected $session = NULL;

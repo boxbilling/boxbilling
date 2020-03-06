@@ -1,5 +1,6 @@
 <?php
-class Box_ConfigTest extends PHPUnit_Framework_TestCase
+
+class Box_ConfigTest extends PHPUnit\Framework\TestCase
 {
     public function testConfig()
     {

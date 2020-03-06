@@ -2,7 +2,7 @@
 /**
  * @group Core
  */
-class Box_ExceptionTest extends PHPUnit_Framework_TestCase
+class Box_ExceptionTest extends PHPUnit\Framework\TestCase
 {
 
     public function testException()

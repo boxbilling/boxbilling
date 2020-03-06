@@ -2,7 +2,7 @@
 /**
  * @group Core
  */
-class Mode_ThemeTest extends PHPUnit_Framework_TestCase
+class Mode_ThemeTest extends PHPUnit\Framework\TestCase
 {
     private $model;
 

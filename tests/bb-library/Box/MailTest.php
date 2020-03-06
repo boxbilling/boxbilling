@@ -2,7 +2,7 @@
 /**
  * @group Core
  */
-class Box_MailTest extends PHPUnit_Framework_TestCase
+class Box_MailTest extends PHPUnit\Framework\TestCase
 {
 
     public function testsend_TransportSendMail()

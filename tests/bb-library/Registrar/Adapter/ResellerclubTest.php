@@ -2,7 +2,7 @@
 /**
  * @group Core
  */
-class Registrar_Adapter_ResellerclubTest extends PHPUnit_Framework_TestCase
+class Registrar_Adapter_ResellerclubTest extends PHPUnit\Framework\TestCase
 {
     private function getAdapter()
     {

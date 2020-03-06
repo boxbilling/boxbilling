@@ -2,7 +2,7 @@
 /**
  * @group Core
  */
-class Box_RequestTest extends PHPUnit_Framework_TestCase
+class Box_RequestTest extends PHPUnit\Framework\TestCase
 {
     public function testDi()
     {

@@ -4,7 +4,7 @@
  */
 
 
-class Box_TwigLoaderTest extends PHPUnit_Framework_TestCase
+class Box_TwigLoaderTest extends PHPUnit\Framework\TestCase
 {
 
     public function testTemplates()

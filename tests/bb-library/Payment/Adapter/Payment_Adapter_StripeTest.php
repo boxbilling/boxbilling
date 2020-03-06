@@ -1,7 +1,7 @@
 <?php
 
 
-class Payment_Adapter_StripeTest extends PHPUnit_Framework_TestCase {
+class Payment_Adapter_StripeTest extends PHPUnit\Framework\TestCase {
 
     private $defaultConfig = array();
 

@@ -2,7 +2,7 @@
 /**
  * @group Core
  */
-class Box_LogTest extends PHPUnit_Framework_TestCase
+class Box_LogTest extends PHPUnit\Framework\TestCase
 {
     public function testLog()
     {

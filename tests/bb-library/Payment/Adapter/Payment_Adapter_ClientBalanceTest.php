@@ -1,7 +1,7 @@
 <?php
 
 
-class Payment_Adapter_ClientBalanceTest extends PHPUnit_Framework_TestCase {
+class Payment_Adapter_ClientBalanceTest extends PHPUnit\Framework\TestCase {
 
     public function testDi()
     {

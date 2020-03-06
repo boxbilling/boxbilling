@@ -3,7 +3,7 @@
 /**
  * @group Core
  */
-class Box_ValidateTest extends PHPUnit_Framework_TestCase
+class Box_ValidateTest extends PHPUnit\Framework\TestCase
 {
     public static function domains()
     {

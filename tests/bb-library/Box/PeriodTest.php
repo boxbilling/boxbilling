@@ -2,7 +2,7 @@
 /**
  * @group Core
  */
-class Box_PeriodTest extends PHPUnit_Framework_TestCase
+class Box_PeriodTest extends PHPUnit\Framework\TestCase
 {
     /**
      * @expectedException \Box_Exception

@@ -2,7 +2,7 @@
 /**
  * @group Core
  */
-class Box_SessionTestCase extends PHPUnit_Framework_TestCase
+class Box_SessionTestCase extends PHPUnit\Framework\TestCase
 {
     public function testSession()
     {
