@@ -1,56 +1,21 @@
-BoxBilling [![Download Latest](http://i.imgur.com/djy4ExU.png)](https://github.com/boxbilling/boxbilling/releases/latest) [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+# BoxBilling 
 
-================================================================================
-*If you want to download BoxBilling for use please click on `Download BoxBilling` button above instead of `git pull` command or GitHub's `Download ZIP` button!*
+[![Download Latest](http://i.imgur.com/djy4ExU.png)](https://github.com/boxbilling/boxbilling/releases/latest) 
 
-Open Source billing software
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
-Requirements
-================================================================================
-
-* PHP 5.6 | Does not support PHP 7.x
-* Linux Operating System (64-bit) | Does not support Windows Operating Systems.
-* PHP extensions:
-  * mcrypt
-  * curl
-  * zlib
-  * PDO
-  * gettext
-* MySQL or any PDO compatible SQL server
-
-Recommended
-================================================================================
-
-* PHP 5.6
-* CentOS 64-bit Operating System
-* PHP Extensions
-  * mcrypt
-  * curl
-  * zlib
-  * PDO
-  * gettext
-* MySQL or any PDO compatible SQL server
-
-Getting started
-================================================================================
+Open source billing and client management software
 
 Please read our installation instructions located at http://docs.boxbilling.com to get started
 with BoxBilling
 
-Contributing
-================================================================================
+## Contributing
 
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request to **develop** branch
-
-Roadmap
-================================================================================
-
-* [ ] Support latest PHP version 7.3
-* [ ] Add support for composer package manager
 
 Using Vagrant
 ================================================================================
