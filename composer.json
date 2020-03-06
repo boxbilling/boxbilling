@@ -14,14 +14,7 @@
     "scripts": {
         "test-unit": "src/bb-vendor/bin/phpunit tests/bb-library/",
         "test-modules": "src/bb-vendor/bin/phpunit src/bb-modules/",
-        "post-install-cmd": [
-            "cp -r src/bb-config-heroku.php src/bb-config.php",
-            "cp -r src/htaccess.txt src/.htaccess",
-            "rm -rf src/install",
-            "rm -rf src/htaccess.txt",
-            "rm -rf src/bb-config-heroku.php",
-            "rm -rf src/bb-config-sample.php"
-        ]
+        "post-install-cmd": ""
     },
     "require": {
         "php": "^7.2.0",
