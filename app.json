@@ -37,6 +37,6 @@
     }
   ],
   "scripts": {
-    "postdeploy": "php bin/prepare.php"
+    "postdeploy": "sh bin/heroku.sh"
   }
 }

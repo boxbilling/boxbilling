@@ -1,69 +1,51 @@
 <?php
 
-$pathApp = realpath(dirname(__FILE__) . '/..');
-$pathAppRoot = $pathApp . '/src';
-$pathAppInstall = $pathApp . '/src/install';
-$config = include $pathAppRoot . '/bb-config.php';
+require_once dirname(__FILE__) . '/../src/bb-load.php';
+$di = include dirname(__FILE__) . '/../src/bb-di.php';
+$pdo = $di['pdo'];
 
-$structureSql = '/structure.sql';
-$contentSql = '/content_test.sql';
-if (isset($argv[1]) && $argv[1] = 'production') {
-    $contentSql = '/content.sql';
+$installPath = BB_PATH_ROOT . '/install';
+$structureSql = $installPath.'/structure.sql';
+$contentSql = $installPath.'/content_test.sql';
+
+/*
+if (APPLICATION_ENV == 'production') {
+    $contentSql = $installPath.'/content.sql';
     echo "Production content" . PHP_EOL;
 }
+*/
 
-$type = $config['db']['type'];
-$host = $config['db']['host'];
-$dbname = $config['db']['name'];
-$user = $config['db']['user'];
-$password = $config['db']['password'];
+$sth = $pdo->prepare("SELECT DATABASE();");
+$sth->execute();
+$dbname = $sth->fetchColumn();
 
-echo sprintf("Connecting to database %s@%s/%s", $user, $host, $dbname) . PHP_EOL;
-$dbh = new PDO($type . ':host=' . $host, $user, $password,        array(
-    PDO::MYSQL_ATTR_USE_BUFFERED_QUERY         => true,
-    PDO::ATTR_ERRMODE                          => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE               => PDO::FETCH_ASSOC,
-));
-
-echo sprintf("Dropping database %s", $dbname) . PHP_EOL;
-$sql = sprintf("DROP DATABASE IF EXISTS %s;", $dbname);
-$dbh->exec($sql);
-$error = $dbh->errorInfo();
-if ($error[2]) {
-    var_dump($dbh->errorInfo());
-    exit;
+$sth = $pdo->prepare("SHOW TABLES FROM $dbname");
+$sth->execute();
+$tables = array();
+while($row = $sth->fetch()) {
+    $tables[] = array_pop(array_reverse($row));
 }
 
-echo sprintf("Creating database %s", $dbname) . PHP_EOL;
-$sql = sprintf("CREATE DATABASE %s;", $dbname);
-$dbh->exec($sql);
-$error = $dbh->errorInfo();
-if ($error[2]) {
-    var_dump($dbh->errorInfo());
-    exit;
-}
-
-echo sprintf("Connecting to %s database with user %s", $dbname, $user) . PHP_EOL;
-$sql = sprintf("use %s;", $dbname);
-$dbh->exec($sql);
-$error = $dbh->errorInfo();
-if ($error[2]) {
-    var_dump($dbh->errorInfo());
-    exit;
+if(!empty($tables)) {
+    foreach($tables as $table) {
+        echo "Dropping table {$table}" . PHP_EOL;
+        $stmt = $pdo->prepare("DROP TABLE {$table};");
+        $stmt->execute();
+    }
 }
 
 echo sprintf("Create SQL database structure from file %s", $structureSql) . PHP_EOL;
-$sql = file_get_contents($pathAppInstall . $structureSql);
-$dbh->exec($sql);
-$error = $dbh->errorInfo();
+$sql = file_get_contents($structureSql);
+$pdo->exec($sql);
+$error = $pdo->errorInfo();
 if ($error[2]) {
-    var_dump($dbh->errorInfo());
+    var_dump($pdo->errorInfo());
     exit;
 }
 
 echo sprintf("Import content to database from file %s", $contentSql) . PHP_EOL;
-$sql = file_get_contents($pathAppInstall . $contentSql);
-$stmt = $dbh->prepare($sql);
+$sql = file_get_contents($contentSql);
+$stmt = $pdo->prepare($sql);
 $stmt->execute();
 $i = 0;
 do{
