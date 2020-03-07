@@ -25,6 +25,8 @@ git clone git@github.com:boxbilling/boxbilling.git
 cd boxbilling
 composer install
 docker-compose up -d --build --force-recreate
+docker exec <php container id> php /var/www/html/bin/prepare.php
+
 ```
 
 Using Grunt
