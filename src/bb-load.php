@@ -71,8 +71,10 @@ function handler_exception(Throwable $e)
     }
 }
 
-set_exception_handler("handler_exception");
-set_error_handler('handler_error');
+if(APPLICATION_ENV != 'testing') {
+    set_exception_handler("handler_exception");
+    set_error_handler('handler_error');
+}
 
 // multisite support. Load new config depending on current host
 // if run from cli first param must be hostname
@@ -122,7 +124,7 @@ if($config['sef_urls']) {
     define('BB_URL_API',    $config['url'] . 'index.php?_url=/api/');
 }
 
-if($config['debug']) {
+if($config['debug'] || APPLICATION_ENV == 'testing') {
     error_reporting( E_ALL );
     ini_set('display_errors', '1');
     ini_set('display_startup_errors', '1');

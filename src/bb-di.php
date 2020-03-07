@@ -150,7 +150,7 @@ $di['twig'] = function () use ($di) {
     $options = $config['twig'];
 
     $loader = new \Twig\Loader\ArrayLoader();
-    $twig = new Twig_Environment($loader, $options);
+    $twig = new Twig\Environment($loader, $options);
 
     $box_extensions = new Box_TwigExtensions();
     $box_extensions->setDi($di);
