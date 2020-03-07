@@ -39,34 +39,34 @@ class Box_TwigExtensions extends Twig_Extension implements \Box\InjectionAwareIn
     public function getFilters()
     {
         return array(
-            'alink'     => new Twig_Filter_Function(array($this, 'twig_bb_admin_link_filter'), array('is_safe' => array('html'))),
-            'link'      => new Twig_Filter_Function(array($this, 'twig_bb_client_link_filter'), array('is_safe' => array('html'))),
-            'gravatar'  => new Twig_Filter_Function('twig_gravatar_filter'),
-            'markdown'  => new Twig_Filter_Function('twig_markdown_filter', array('needs_environment' => true, 'is_safe' => array('html'))),
-            'truncate'  => new Twig_Filter_Function('twig_truncate_filter', array('needs_environment' => true)),
-            'timeago'   => new Twig_Filter_Function('twig_timeago_filter'),
-            'daysleft'  => new Twig_Filter_Function('twig_daysleft_filter'),
-            'size'      => new Twig_Filter_Function('twig_size_filter'),
-            'ipcountryname' => new Twig_Filter_Function(array($this, 'twig_ipcountryname_filter')),
-            'number' => new Twig_Filter_Function('twig_number_filter'),
-            'period_title' => new Twig_Filter_Function('twig_period_title', array('needs_environment' => true, 'is_safe' => array('html'))),
-            'autolink' => new Twig_Filter_Function('twig_autolink_filter'),
-            'bbmd' => new Twig_Filter_Function('twig_bbmd_filter', array('needs_environment' => true, 'is_safe' => array('html'))),
+            'alink'     => new \Twig_SimpleFilter(array($this, 'twig_bb_admin_link_filter'), array('is_safe' => array('html'))),
+            'link'      => new \Twig_SimpleFilter(array($this, 'twig_bb_client_link_filter'), array('is_safe' => array('html'))),
+            'gravatar'  => new \Twig_SimpleFilter('twig_gravatar_filter'),
+            'markdown'  => new \Twig_SimpleFilter('twig_markdown_filter', array('needs_environment' => true, 'is_safe' => array('html'))),
+            'truncate'  => new \Twig_SimpleFilter('twig_truncate_filter', array('needs_environment' => true)),
+            'timeago'   => new \Twig_SimpleFilter('twig_timeago_filter'),
+            'daysleft'  => new \Twig_SimpleFilter('twig_daysleft_filter'),
+            'size'      => new \Twig_SimpleFilter('twig_size_filter'),
+            'ipcountryname' => new \Twig_SimpleFilter(array($this, 'twig_ipcountryname_filter')),
+            'number' => new \Twig_SimpleFilter('twig_number_filter'),
+            'period_title' => new \Twig_SimpleFilter('twig_period_title', array('needs_environment' => true, 'is_safe' => array('html'))),
+            'autolink' => new \Twig_SimpleFilter('twig_autolink_filter'),
+            'bbmd' => new \Twig_SimpleFilter('twig_bbmd_filter', array('needs_environment' => true, 'is_safe' => array('html'))),
 
-            'bb_date' => new Twig_Filter_Function(array($this, 'twig_bb_date')),
-            'bb_datetime' => new Twig_Filter_Function(array($this, 'twig_bb_datetime')),
+            'bb_date' => new \Twig_SimpleFilter(array($this, 'twig_bb_date')),
+            'bb_datetime' => new \Twig_SimpleFilter(array($this, 'twig_bb_datetime')),
 
-            'img_tag' => new Twig_Filter_Function('twig_img_tag', array('needs_environment' => false, 'is_safe' => array('html'))),
-            'script_tag' => new Twig_Filter_Function('twig_script_tag', array('needs_environment' => false, 'is_safe' => array('html'))),
-            'stylesheet_tag' => new Twig_Filter_Function('twig_stylesheet_tag', array('needs_environment' => false, 'is_safe' => array('html'))),
+            'img_tag' => new \Twig_SimpleFilter('twig_img_tag', array('needs_environment' => false, 'is_safe' => array('html'))),
+            'script_tag' => new \Twig_SimpleFilter('twig_script_tag', array('needs_environment' => false, 'is_safe' => array('html'))),
+            'stylesheet_tag' => new \Twig_SimpleFilter('twig_stylesheet_tag', array('needs_environment' => false, 'is_safe' => array('html'))),
 
-            'mod_asset_url' => new Twig_Filter_Function('twig_mod_asset_url'),
-            'asset_url' => new Twig_Filter_Function('twig_asset_url', array('needs_environment' => true, 'is_safe' => array('html'))),
+            'mod_asset_url' => new \Twig_SimpleFilter('twig_mod_asset_url'),
+            'asset_url' => new \Twig_SimpleFilter('twig_asset_url', array('needs_environment' => true, 'is_safe' => array('html'))),
 
-            'money' => new Twig_Filter_Function('twig_money', array('needs_environment' => true, 'is_safe' => array('html'))),
-            'money_without_currency' => new Twig_Filter_Function('twig_money_without_currency', array('needs_environment' => true, 'is_safe' => array('html'))),
-            'money_convert' => new Twig_Filter_Function('twig_money_convert', array('needs_environment' => true, 'is_safe' => array('html'))),
-            'money_convert_without_currency' => new Twig_Filter_Function('money_convert_without_currency', array('needs_environment' => true, 'is_safe' => array('html'))),
+            'money' => new \Twig_SimpleFilter('twig_money', array('needs_environment' => true, 'is_safe' => array('html'))),
+            'money_without_currency' => new \Twig_SimpleFilter('twig_money_without_currency', array('needs_environment' => true, 'is_safe' => array('html'))),
+            'money_convert' => new \Twig_SimpleFilter('twig_money_convert', array('needs_environment' => true, 'is_safe' => array('html'))),
+            'money_convert_without_currency' => new \Twig_SimpleFilter('money_convert_without_currency', array('needs_environment' => true, 'is_safe' => array('html'))),
         );
     }
 
