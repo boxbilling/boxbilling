@@ -148,18 +148,17 @@ $di['twig'] = function () use ($di) {
     $config = $di['config'];
     $options = $config['twig'];
 
-    $loader = new Twig_Loader_String();
+    $loader = new \Twig\Loader\ArrayLoader();
     $twig = new Twig_Environment($loader, $options);
 
     $box_extensions = new Box_TwigExtensions();
     $box_extensions->setDi($di);
 
-    $twig->addExtension(new Twig_Extension_Optimizer());
     $twig->addExtension(new Twig_Extensions_Extension_I18n());
     $twig->addExtension(new Twig_Extensions_Extension_Debug());
     $twig->addExtension($box_extensions);
-    $twig->getExtension('core')->setDateFormat($config['locale_date_format']);
-    $twig->getExtension('core')->setTimezone($config['timezone']);
+    $twig->getExtension(Twig_Extension_Core::class)->setDateFormat($config['locale_date_format']);
+    $twig->getExtension(Twig_Extension_Core::class)->setTimezone($config['timezone']);
 
     // add globals
     if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest') {
