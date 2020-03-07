@@ -64,7 +64,7 @@ class Payment_Adapter_InterkassaTest extends PHPUnit\Framework\TestCase {
             ->method('getParam')
             ->with('ik_co_id');
 
-        $this->setExpectedException('Payment_Exception', 'Shop ID is missing in gateway configuration');
+        $this->expectException('Payment_Exception', 'Shop ID is missing in gateway configuration');
         $adapterMock->init();
     }
 
@@ -79,7 +79,7 @@ class Payment_Adapter_InterkassaTest extends PHPUnit\Framework\TestCase {
             ->withConsecutive(array('ik_co_id'), array('ik_secret_key'))
             ->willReturnOnConsecutiveCalls('shop_id_value', null);
 
-        $this->setExpectedException('Payment_Exception', 'Secret key is missing in gateway configuration');
+        $this->expectException('Payment_Exception', 'Secret key is missing in gateway configuration');
         $adapterMock->init();
     }
 
@@ -201,7 +201,7 @@ class Payment_Adapter_InterkassaTest extends PHPUnit\Framework\TestCase {
         $paymentInvoiceMock = $this->getMockBuilder('Payment_Invoice')
             ->getMock();
 
-        $this->setExpectedException('Payment_Exception', 'Interkassa payment gateway do not support recurrent payments');
+        $this->expectException('Payment_Exception', 'Interkassa payment gateway do not support recurrent payments');
         $adapterMock->recurrentPayment($paymentInvoiceMock);
     }
 
@@ -333,7 +333,7 @@ class Payment_Adapter_InterkassaTest extends PHPUnit\Framework\TestCase {
             ->method('isIpnValid')
             ->willReturn(false);
 
-        $this->setExpectedException('Exception', 'IPN is not valid');
+        $this->expectException('Exception', 'IPN is not valid');
 
         $adminModel = new \Model_Admin();
         $api_admin = new \Api_Handler($adminModel);
@@ -503,7 +503,7 @@ class Payment_Adapter_InterkassaTest extends PHPUnit\Framework\TestCase {
             )
         );
         $gateway_id = 1;
-        $this->setExpectedException('Payment_Exception', 'IPN is duplicate');
+        $this->expectException('Payment_Exception', 'IPN is duplicate');
         $adapterMock->processTransaction($api_admin, $transaction_id, $data, $gateway_id);
     }
 

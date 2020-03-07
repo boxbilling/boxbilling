@@ -101,7 +101,7 @@ class ServiceTest extends \BBTestCase
         $service = new \Box\Mod\Staff\Service();
         $service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Check your login details', 403);
+        $this->expectException('\Box_Exception', 'Check your login details', 403);
         $service->login($email, $password, $ip);
     }
 
@@ -1007,7 +1007,7 @@ class ServiceTest extends \BBTestCase
 
         $service = new \Box\Mod\Staff\Service();
 
-        $this->setExpectedException('\Box_Exception', 'This administrator account is protected and can not be removed');
+        $this->expectException('\Box_Exception', 'This administrator account is protected and can not be removed');
         $service->delete($adminModel);
     }
 
@@ -1152,7 +1152,7 @@ class ServiceTest extends \BBTestCase
         $service = new \Box\Mod\Staff\Service();
         $service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', sprintf('Staff member with email %s is already registered', $data['email']), 788954);
+        $this->expectException('\Box_Exception', sprintf('Staff member with email %s is already registered', $data['email']), 788954);
         $service->create($data);
     }
 
@@ -1354,7 +1354,7 @@ class ServiceTest extends \BBTestCase
 
         $service = new \Box\Mod\Staff\Service();
 
-        $this->setExpectedException('\Box_Exception', 'Administrators group can not be removed');
+        $this->expectException('\Box_Exception', 'Administrators group can not be removed');
         $service->deleteGroup($adminGroupModel);
     }
 
@@ -1374,7 +1374,7 @@ class ServiceTest extends \BBTestCase
         $service = new \Box\Mod\Staff\Service();
         $service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Can not remove group which has staff members');
+        $this->expectException('\Box_Exception', 'Can not remove group which has staff members');
         $service->deleteGroup($adminGroupModel);
     }
 

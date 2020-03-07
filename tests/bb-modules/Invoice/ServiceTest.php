@@ -1046,7 +1046,7 @@ class ServiceTest extends \BBTestCase
 
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', sprintf("Invoice is related to order #%d. Please cancel order first.", $rel_id));
+        $this->expectException('\Box_Exception', sprintf("Invoice is related to order #%d. Please cancel order first.", $rel_id));
         $this->service->deleteInvoiceByClient($invoiceModel);
     }
 
@@ -1205,7 +1205,7 @@ class ServiceTest extends \BBTestCase
         $clientOrder->loadBean(new \RedBeanPHP\OODBBean());
         $clientOrder->price = 0;
 
-        $this->setExpectedException('\Box_Exception', 'Invoices are not generated for 0 amount orders');
+        $this->expectException('\Box_Exception', 'Invoices are not generated for 0 amount orders');
         $this->service->generateForOrder($clientOrder);
     }
 
@@ -1444,7 +1444,7 @@ class ServiceTest extends \BBTestCase
         $clientModel = new \Model_Client();
         $clientModel->loadBean(new \RedBeanPHP\OODBBean());
 
-        $this->setExpectedException('\Box_Exception', 'You must have at least one active order before you can add funds so you cannot proceed at the current time!');
+        $this->expectException('\Box_Exception', 'You must have at least one active order before you can add funds so you cannot proceed at the current time!');
         $this->service->generateFundsInvoice($clientModel, 10);
     }
 
@@ -1467,7 +1467,7 @@ class ServiceTest extends \BBTestCase
 
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Amount is not valid', 981);
+        $this->expectException('\Box_Exception', 'Amount is not valid', 981);
         $this->service->generateFundsInvoice($clientModel, $fundsAmount);
     }
 
@@ -1490,7 +1490,7 @@ class ServiceTest extends \BBTestCase
 
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Amount is not valid', 982);
+        $this->expectException('\Box_Exception', 'Amount is not valid', 982);
         $this->service->generateFundsInvoice($clientModel, $fundsAmount);
     }
 
@@ -1563,7 +1563,7 @@ class ServiceTest extends \BBTestCase
 
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Invoice not found', 812);
+        $this->expectException('\Box_Exception', 'Invoice not found', 812);
         $this->service->processInvoice($data);
     }
 
@@ -1590,7 +1590,7 @@ class ServiceTest extends \BBTestCase
 
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Payment method not found', 813);
+        $this->expectException('\Box_Exception', 'Payment method not found', 813);
         $this->service->processInvoice($data);
     }
 
@@ -1620,7 +1620,7 @@ class ServiceTest extends \BBTestCase
 
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Payment method not enabled', 814);
+        $this->expectException('\Box_Exception', 'Payment method not enabled', 814);
         $this->service->processInvoice($data);
     }
 

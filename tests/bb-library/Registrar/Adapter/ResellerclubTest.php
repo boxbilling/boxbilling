@@ -16,7 +16,7 @@ class Registrar_Adapter_ResellerclubTest extends PHPUnit\Framework\TestCase
     public function testConstruction_MissingUserId()
     {
         $options = array();
-        $this->setExpectedException('Registrar_Exception', 'Domain registrar "ResellerClub" is not configured properly. Please update configuration parameter "ResellerClub Reseller ID" at "Configuration -> Domain registration".');
+        $this->expectException('Registrar_Exception', 'Domain registrar "ResellerClub" is not configured properly. Please update configuration parameter "ResellerClub Reseller ID" at "Configuration -> Domain registration".');
         $adapter = new \Registrar_Adapter_Resellerclub($options);
     }
 
@@ -25,7 +25,7 @@ class Registrar_Adapter_ResellerclubTest extends PHPUnit\Framework\TestCase
         $options = array(
             'userid' => '12345',
         );
-        $this->setExpectedException('Registrar_Exception', 'Domain registrar "ResellerClub" is not configured properly. Please update configuration parameter "ResellerClub API Key" at "Configuration -> Domain registration".');
+        $this->expectException('Registrar_Exception', 'Domain registrar "ResellerClub" is not configured properly. Please update configuration parameter "ResellerClub API Key" at "Configuration -> Domain registration".');
         new \Registrar_Adapter_Resellerclub($options);
     }
 

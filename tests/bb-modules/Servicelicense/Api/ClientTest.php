@@ -112,7 +112,7 @@ class ClientTest extends \BBTestCase {
         $clientModel->loadBean(new \RedBeanPHP\OODBBean());
         $this->api->setIdentity($clientModel);
 
-        $this->setExpectedException('\Box_Exception', 'Order is not activated');
+        $this->expectException('\Box_Exception', 'Order is not activated');
         $this->api->_getService($data);
     }
 }

@@ -44,7 +44,7 @@ class AdminTest extends \BBTestCase
         $di['validator'] = $validatorMock;
 
         $this->api->setDi($di);
-        $this->setExpectedException('\Box_Exception', 'File was not uploaded');
+        $this->expectException('\Box_Exception', 'File was not uploaded');
         $this->api->upload($data);
     }
 
@@ -104,7 +104,7 @@ class AdminTest extends \BBTestCase
         $di['validator']   = $validatorMock;
 
         $this->api->setDi($di);
-        $this->setExpectedException('\Box_Exception', 'Order is not activated');
+        $this->expectException('\Box_Exception', 'Order is not activated');
         $this->api->update($data);
     }
 

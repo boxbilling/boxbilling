@@ -48,7 +48,7 @@ class ServiceTest extends \BBTestCase {
 
         unset ($data [ $field ]);
 
-        $this->setExpectedException('\Box_Exception', $exceptionMessage, $excCode);
+        $this->expectException('\Box_Exception', $exceptionMessage, $excCode);
         $this->service->validateOrderData($data);
     }
 
@@ -197,7 +197,7 @@ class ServiceTest extends \BBTestCase {
         $di['mod_service'] = $di->protect(function() use ($orderServiceMock) {return $orderServiceMock;});
 
         $this->service->setDi($di);
-        $this->setExpectedException('\Box_Exception', sprintf('Order %d has no active service', $orderModel->id));
+        $this->expectException('\Box_Exception', sprintf('Order %d has no active service', $orderModel->id));
         $this->service->action_renew($orderModel);
 
     }
@@ -254,7 +254,7 @@ class ServiceTest extends \BBTestCase {
         $di['mod_service'] = $di->protect(function() use ($orderServiceMock) {return $orderServiceMock;});
 
         $this->service->setDi($di);
-        $this->setExpectedException('\Box_Exception', sprintf('Order %d has no active service', $orderModel->id));
+        $this->expectException('\Box_Exception', sprintf('Order %d has no active service', $orderModel->id));
         $this->service->action_suspend($orderModel);
 
     }
@@ -311,7 +311,7 @@ class ServiceTest extends \BBTestCase {
         $di['mod_service'] = $di->protect(function() use ($orderServiceMock) {return $orderServiceMock;});
 
         $this->service->setDi($di);
-        $this->setExpectedException('\Box_Exception', sprintf('Order %d has no active service', $orderModel->id));
+        $this->expectException('\Box_Exception', sprintf('Order %d has no active service', $orderModel->id));
         $this->service->action_unsuspend($orderModel);
 
     }
@@ -367,7 +367,7 @@ class ServiceTest extends \BBTestCase {
         $di['mod_service'] = $di->protect(function() use ($orderServiceMock) {return $orderServiceMock;});
 
         $this->service->setDi($di);
-        $this->setExpectedException('\Box_Exception', sprintf('Order %d has no active service', $orderModel->id));
+        $this->expectException('\Box_Exception', sprintf('Order %d has no active service', $orderModel->id));
         $this->service->action_cancel($orderModel);
     }
 
@@ -555,7 +555,7 @@ class ServiceTest extends \BBTestCase {
         $model->loadBean(new \RedBeanPHP\OODBBean());
         $data = array();
 
-        $this->setExpectedException('\Box_Exception', 'Account password is missing or is not valid');
+        $this->expectException('\Box_Exception', 'Account password is missing or is not valid');
         $this->service->changeAccountUsername($orderModel, $model, $data);
     }
 
@@ -607,7 +607,7 @@ class ServiceTest extends \BBTestCase {
         $model = new \Model_ServiceHosting();
         $model->loadBean(new \RedBeanPHP\OODBBean());
 
-        $this->setExpectedException('\Box_Exception', 'Account ip is missing or is not valid');
+        $this->expectException('\Box_Exception', 'Account ip is missing or is not valid');
         $this->service->changeAccountIp($orderModel, $model, $data);
     }
 
@@ -660,7 +660,7 @@ class ServiceTest extends \BBTestCase {
         $model = new \Model_ServiceHosting();
         $model->loadBean(new \RedBeanPHP\OODBBean());
 
-        $this->setExpectedException('\Box_Exception', 'Domain sld or tld is missing');
+        $this->expectException('\Box_Exception', 'Domain sld or tld is missing');
         $this->service->changeAccountDomain($orderModel, $model, $data);
     }
 
@@ -713,7 +713,7 @@ class ServiceTest extends \BBTestCase {
         $model = new \Model_ServiceHosting();
         $model->loadBean(new \RedBeanPHP\OODBBean());
 
-        $this->setExpectedException('\Box_Exception', 'Account password is missing or is not valid');
+        $this->expectException('\Box_Exception', 'Account password is missing or is not valid');
         $this->service->changeAccountPassword($orderModel, $model, $data);
     }
 
@@ -996,7 +996,7 @@ class ServiceTest extends \BBTestCase {
         $hostingServerModel = new \Model_ServiceHostingServer();
         $hostingServerModel->loadBean(new \RedBeanPHP\OODBBean());
 
-        $this->setExpectedException('\Box_Exception', 'Invalid server manager. Server was not configured properly', 654);
+        $this->expectException('\Box_Exception', 'Invalid server manager. Server was not configured properly', 654);
         $this->service->getServerManager($hostingServerModel);
     }
 
@@ -1012,7 +1012,7 @@ class ServiceTest extends \BBTestCase {
         });
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', sprintf('Server manager %s is not valid', $hostingServerModel->manager));
+        $this->expectException('\Box_Exception', sprintf('Server manager %s is not valid', $hostingServerModel->manager));
         $this->service->getServerManager($hostingServerModel);
     }
 

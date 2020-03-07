@@ -41,7 +41,7 @@ class Box_MailTest extends PHPUnit\Framework\TestCase
 
         $mail = new Box_Mail();
 
-        $this->setExpectedException('\Box_Exception', sprintf('Unknown mail transport: %s', $transport));
+        $this->expectException('\Box_Exception', sprintf('Unknown mail transport: %s', $transport));
         $mail->send($transport);
     }
 

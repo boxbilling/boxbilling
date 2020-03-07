@@ -8,7 +8,7 @@ class Api_Client_ServiceDownloadableTest extends BBDbApiTestCase
 
     public function testServiceDownload()
     {
-        $this->setExpectedException('Box_Exception');
+        $this->expectException('Box_Exception');
         $data = array(
             'order_id'    =>  1,
         );

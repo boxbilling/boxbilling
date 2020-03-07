@@ -2627,7 +2627,7 @@ class ServiceTest extends \BBTestCase
     public function testCanClientSubmitNewTicket($ticket, $hours, $expected)
     {
         if (!$expected) {
-            $this->setExpectedException('\Box_Exception');
+            $this->expectException('\Box_Exception');
         }
         $dbMock = $this->getMockBuilder('\Box_Database')->disableOriginalConstructor()->getMock();
         $dbMock->expects($this->atLeastOnce())

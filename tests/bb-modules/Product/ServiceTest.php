@@ -253,7 +253,7 @@ class ServiceTest extends \BBTestCase
         $modelProduct = new \Model_Product();
         $modelProduct->loadBean(new \RedBeanPHP\OODBBean());
 
-        $this->setExpectedException('\Box_Exception', 'Pricing type is required');
+        $this->expectException('\Box_Exception', 'Pricing type is required');
         $serviceMock->updateProduct($modelProduct, $data);
     }
 
@@ -478,7 +478,7 @@ class ServiceTest extends \BBTestCase
 
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Can not remove product which has active orders.');
+        $this->expectException('\Box_Exception', 'Can not remove product which has active orders.');
         $this->service->deleteProduct($model);
     }
 
@@ -585,7 +585,7 @@ class ServiceTest extends \BBTestCase
 
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Can not remove product category with products');
+        $this->expectException('\Box_Exception', 'Can not remove product category with products');
         $this->service->removeProductCategory($modelProductCategory);
 
     }

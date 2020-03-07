@@ -159,7 +159,7 @@ class ServiceTest extends \BBTestCase
         $di['request'] = $requestMock;
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Error uploading file');
+        $this->expectException('\Box_Exception', 'Error uploading file');
         $this->service->uploadProductFile($productModel);
 
     }
@@ -267,7 +267,7 @@ class ServiceTest extends \BBTestCase
         $di['request'] = $requestMock;
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Error uploading file');
+        $this->expectException('\Box_Exception', 'Error uploading file');
         $this->service->updateProductFile($serviceDownloadableModel, $orderModel);
     }
 
@@ -332,7 +332,7 @@ class ServiceTest extends \BBTestCase
 
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'File can not be downloaded at the moment. Please contact support', 404);
+        $this->expectException('\Box_Exception', 'File can not be downloaded at the moment. Please contact support', 404);
         $this->service->sendFile($serviceDownloadableModel);
     }
 

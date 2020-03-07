@@ -212,7 +212,7 @@ class Api_Admin_ProductTest extends ApiTestCase
             'type'                  => Model_ProductTable::DOMAIN,
         );
 
-        $this->setExpectedException('\Box_Exception', 'You have already created domain product.', 413);
+        $this->expectException('\Box_Exception', 'You have already created domain product.', 413);
         for($i = 0; $i< 2; $i++){
             $id = $this->api_admin->product_prepare($data);
         }

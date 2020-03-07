@@ -65,7 +65,7 @@ class AdminTest extends \BBTestCase
     {
         $data = array();
 
-        $this->setExpectedException('\Box_Exception', 'plan_id is missing');
+        $this->expectException('\Box_Exception', 'plan_id is missing');
         $this->api->change_plan($data);
     }
 
@@ -655,7 +655,7 @@ class AdminTest extends \BBTestCase
 
         $this->api->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Order is not activated');
+        $this->expectException('\Box_Exception', 'Order is not activated');
         $this->api->_getService($data);
     }
 

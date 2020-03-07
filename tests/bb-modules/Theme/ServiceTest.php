@@ -448,7 +448,7 @@ class ServiceTest extends \BBTestCase {
                 'error' => UPLOAD_ERR_CANT_WRITE
             ),
         );
-        $this->setExpectedException('\Box_Exception', sprintf("Error uploading file %s Error code: %d", 'test0', UPLOAD_ERR_CANT_WRITE));
+        $this->expectException('\Box_Exception', sprintf("Error uploading file %s Error code: %d", 'test0', UPLOAD_ERR_CANT_WRITE));
         $this->service->uploadAssets($themeMock, $files);
     }
 

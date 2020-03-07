@@ -104,7 +104,7 @@ class AdminTest extends \BBTestCase {
         $di['is_admin_logged']  = true;
 
         $controller->setDi($di);
-        $this->setExpectedException('\Box_Exception', 'File does not exist', 404);
+        $this->expectException('\Box_Exception', 'File does not exist', 404);
         $controller->get_editor($boxAppMock);
     }
 
@@ -126,7 +126,7 @@ class AdminTest extends \BBTestCase {
         $di['is_admin_logged']  = true;
 
         $controller->setDi($di);
-        $this->setExpectedException('\Box_Exception', 'File does not exist', 405);
+        $this->expectException('\Box_Exception', 'File does not exist', 405);
         $controller->get_editor($boxAppMock);
     }
 

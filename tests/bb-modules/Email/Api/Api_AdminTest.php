@@ -205,7 +205,7 @@ class AdminTest extends \BBTestCase
         $di['validator'] = $validatorMock;
         $adminApi->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Email not found');
+        $this->expectException('\Box_Exception', 'Email not found');
         $adminApi->email_resend($data);
     }
 
@@ -233,7 +233,7 @@ class AdminTest extends \BBTestCase
         $di['validator'] = $validatorMock;
         $adminApi->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Email not found');
+        $this->expectException('\Box_Exception', 'Email not found');
         $adminApi->email_delete($data);
     }
 
@@ -407,7 +407,7 @@ class AdminTest extends \BBTestCase
         $di['validator'] = $validatorMock;
         $adminApi->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Email template not found');
+        $this->expectException('\Box_Exception', 'Email template not found');
         $adminApi->template_delete($data);
     }
 

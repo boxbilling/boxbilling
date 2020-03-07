@@ -160,7 +160,7 @@ class ServiceTransactionTest extends \BBTestCase
             'bb_gateway_id'   => 1,
         );
 
-        $this->setExpectedException('\Box_Exception', 'Transaction invoice id is missing');
+        $this->expectException('\Box_Exception', 'Transaction invoice id is missing');
         $this->service->create($data);
     }
 
@@ -180,7 +180,7 @@ class ServiceTransactionTest extends \BBTestCase
             'bb_invoice_id'   => 2,
         );
 
-        $this->setExpectedException('\Box_Exception', 'Payment gateway id is missing');
+        $this->expectException('\Box_Exception', 'Payment gateway id is missing');
         $this->service->create($data);
     }
 
@@ -479,7 +479,7 @@ class ServiceTransactionTest extends \BBTestCase
         $di['db'] = $dbMock;
         $serviceMock->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', $exceptionMessage);
+        $this->expectException('\Box_Exception', $exceptionMessage);
         $serviceMock->preProcessTransaction($transactionModel);
     }
 
@@ -532,7 +532,7 @@ class ServiceTransactionTest extends \BBTestCase
         $di['api_admin']   = new \Api_Handler(new \Model_Admin());
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', sprintf("Payment adapter %s does not support action %s", $payGatewayModel->name, 'processTransaction'));
+        $this->expectException('\Box_Exception', sprintf("Payment adapter %s does not support action %s", $payGatewayModel->name, 'processTransaction'));
         $this->service->processTransaction($id);
     }
 

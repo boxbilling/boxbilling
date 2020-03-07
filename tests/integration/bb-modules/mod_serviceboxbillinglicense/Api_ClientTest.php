@@ -38,7 +38,7 @@ class Api_Client_ServiceBoxBillinglicenseTest extends BBDbApiTestCase
         $clientApi = new Box\Mod\Serviceboxbillinglicense\Api\Client();
         $clientApi->setDi($this->di);
 
-        $this->setExpectedException('\Box_Exception', 'Order id is required');
+        $this->expectException('\Box_Exception', 'Order id is required');
         $bool = $clientApi->reset($data);
     }
 
@@ -57,7 +57,7 @@ class Api_Client_ServiceBoxBillinglicenseTest extends BBDbApiTestCase
         $clientApi->setDi($this->di);
         $clientApi->setIdentity($client);
 
-        $this->setExpectedException('\Box_Exception', 'BoxBilling license order not found');
+        $this->expectException('\Box_Exception', 'BoxBilling license order not found');
         $bool = $clientApi->reset($data);
     }
 
@@ -75,7 +75,7 @@ class Api_Client_ServiceBoxBillinglicenseTest extends BBDbApiTestCase
         $clientApi->setDi($this->di);
         $clientApi->setIdentity($client);
 
-        $this->setExpectedException('\Box_Exception', 'Order is not activated');
+        $this->expectException('\Box_Exception', 'Order is not activated');
         $bool = $clientApi->reset($data);
     }
 }

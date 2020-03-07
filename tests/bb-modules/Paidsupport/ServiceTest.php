@@ -92,7 +92,7 @@ class ServiceTest extends \BBTestCase {
         });
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', $paidSupportConfig['error_msg']);
+        $this->expectException('\Box_Exception', $paidSupportConfig['error_msg']);
         $this->service->enoughInBalanceToOpenTicket($clientModel);
     }
 

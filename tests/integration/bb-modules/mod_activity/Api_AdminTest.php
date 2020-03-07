@@ -23,13 +23,13 @@ class Api_Admin_ActivityTest extends BBDbApiTestCase
 
     public function testLogDeleteIdNotSetException()
     {
-        $this->setExpectedException('Box_Exception');
+        $this->expectException('Box_Exception');
         $this->api_admin->activity_log_delete(array());
     }
 
     public function testLogNotFoundException()
     {
-        $this->setExpectedException('Box_Exception');
+        $this->expectException('Box_Exception');
         $this->api_admin->activity_log_delete(array('id' => 100));
     }
 

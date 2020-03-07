@@ -224,7 +224,7 @@ class ServiceTest extends \BBTestCase
         });
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', sprintf('License plugin %s was not found', $serviceLicenseModel->plugin));
+        $this->expectException('\Box_Exception', sprintf('License plugin %s was not found', $serviceLicenseModel->plugin));
         $this->service->action_activate($clientOrderModel);
     }
 
@@ -248,7 +248,7 @@ class ServiceTest extends \BBTestCase
         });
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Could not activate order. Service was not created');
+        $this->expectException('\Box_Exception', 'Could not activate order. Service was not created');
         $this->service->action_activate($clientOrderModel);
     }
 

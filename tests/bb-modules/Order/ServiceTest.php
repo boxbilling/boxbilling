@@ -1303,7 +1303,7 @@ class ServiceTest extends \BBTestCase
         $di['license'] = $licenseMock;
 
         $this->service->setDi($di);
-        $this->setExpectedException('\Box_Exception', 'This feature is available in BoxBilling PRO version.', 876);
+        $this->expectException('\Box_Exception', 'This feature is available in BoxBilling PRO version.', 876);
         $this->service->createOrder($modelClient, $modelProduct, array());
     }
 
@@ -1334,7 +1334,7 @@ class ServiceTest extends \BBTestCase
         });
 
         $this->service->setDi($di);
-        $this->setExpectedException('\Box_Exception', 'Currency could not be determined for order');
+        $this->expectException('\Box_Exception', 'Currency could not be determined for order');
         $this->service->createOrder($modelClient, $modelProduct, array());
     }
 
@@ -1387,7 +1387,7 @@ class ServiceTest extends \BBTestCase
         $di['events_manager'] = $eventMock;
 
         $this->service->setDi($di);
-        $this->setExpectedException('\Box_Exception', 'Product 1 is out of stock.', 831);
+        $this->expectException('\Box_Exception', 'Product 1 is out of stock.', 831);
         $this->service->createOrder($modelClient, $modelProduct, array());
     }
 
@@ -1441,7 +1441,7 @@ class ServiceTest extends \BBTestCase
         $di['events_manager'] = $eventMock;
 
         $this->service->setDi($di);
-        $this->setExpectedException('\Box_Exception', 'Group ID parameter is missing for addon product order', 832);
+        $this->expectException('\Box_Exception', 'Group ID parameter is missing for addon product order', 832);
         $this->service->createOrder($modelClient, $modelProduct, array());
     }
 
@@ -1501,7 +1501,7 @@ class ServiceTest extends \BBTestCase
             ->willReturn(null);
 
         $serviceMock->setDi($di);
-        $this->setExpectedException('\Box_Exception', 'Parent order 1 was not found');
+        $this->expectException('\Box_Exception', 'Parent order 1 was not found');
         $serviceMock->createOrder($modelClient, $modelProduct, array('group_id' => 1));
     }
 
@@ -1610,7 +1610,7 @@ class ServiceTest extends \BBTestCase
         $clientOrderModel = new \Model_ClientOrder();
         $clientOrderModel->loadBean(new \RedBeanPHP\OODBBean());
         $clientOrderModel->status = \Model_ClientOrder::STATUS_CANCELED;
-        $this->setExpectedException('\Box_Exception', 'Only pending setup or failed orders can be activated');
+        $this->expectException('\Box_Exception', 'Only pending setup or failed orders can be activated');
         $this->service->activateOrder($clientOrderModel);
     }
 
@@ -1846,7 +1846,7 @@ class ServiceTest extends \BBTestCase
         $di['events_manager'] = $eventMock;
 
         $this->service->setDi($di);
-        $this->setExpectedException('\Box_Exception', 'Only active orders can be suspended');
+        $this->expectException('\Box_Exception', 'Only active orders can be suspended');
         $this->service->suspendFromOrder($clientOrderModel);
     }
 

@@ -237,7 +237,7 @@ class ServiceTest extends \BBTestCase {
         $serviceMock->expects($this->atLeastOnce())
             ->method('getField');
 
-        $this->setExpectedException('\Box_Exception', 'Unfortunately field with this name exists in this form already. Form must have different field names.', 7628);
+        $this->expectException('\Box_Exception', 'Unfortunately field with this name exists in this form already. Form must have different field names.', 7628);
         $serviceMock->updateField($data);
     }
 
@@ -264,7 +264,7 @@ class ServiceTest extends \BBTestCase {
         $serviceMock->expects($this->atLeastOnce())
             ->method('getField');
 
-        $this->setExpectedException('\Box_Exception', ucfirst($data['type']).' values must be unique', 1597);
+        $this->expectException('\Box_Exception', ucfirst($data['type']).' values must be unique', 1597);
         $serviceMock->updateField($data);
     }
 
@@ -291,7 +291,7 @@ class ServiceTest extends \BBTestCase {
         $serviceMock->expects($this->atLeastOnce())
             ->method('getField');
 
-        $this->setExpectedException('\Box_Exception', ucfirst($data['type']).' labels must be unique', 1598);
+        $this->expectException('\Box_Exception', ucfirst($data['type']).' labels must be unique', 1598);
         $serviceMock->updateField($data);
     }
 
@@ -320,7 +320,7 @@ class ServiceTest extends \BBTestCase {
         $serviceMock->expects($this->atLeastOnce())
             ->method('getField');
 
-        $this->setExpectedException('\Box_Exception', 'Textarea size options must be integer values', 3510);
+        $this->expectException('\Box_Exception', 'Textarea size options must be integer values', 3510);
         $serviceMock->updateField($data);
     }
 

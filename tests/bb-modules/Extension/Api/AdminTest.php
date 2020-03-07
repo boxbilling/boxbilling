@@ -157,7 +157,7 @@ class AdminTest extends \BBTestCase {
 
         $this->api->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'You have latest version of BoxBilling. You do not need to update', 930);
+        $this->expectException('\Box_Exception', 'You have latest version of BoxBilling. You do not need to update', 930);
         $result = $this->api->update_core(array());
         $this->assertTrue($result);
     }
@@ -210,7 +210,7 @@ class AdminTest extends \BBTestCase {
         $this->api->setDi($di);
 
         $this->api->setService($serviceMock);
-        $this->setExpectedException('\Box_Exception', 'Extension not found');
+        $this->expectException('\Box_Exception', 'Extension not found');
         $this->api->update($data);
     }
 

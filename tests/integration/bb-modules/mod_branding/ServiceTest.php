@@ -23,7 +23,7 @@ class Box_Mod_Branding_ServiceTest extends ApiTestCase
     public function testUninstallNotPro()
     {
         $this->configLicense = $this->di['config']['license'];
-        $this->setExpectedException('Exception');
+        $this->expectException('Exception');
         $service = $this->di['mod_service']('branding');
         $this->di['config']['license'] = 'invalidLicense';
         $service->uninstall();

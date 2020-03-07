@@ -78,7 +78,7 @@ class ClientTest extends \BBTestCase {
         $di['validator'] = $validatorMock;
         $client->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Passwords do not match.');
+        $this->expectException('\Box_Exception', 'Passwords do not match.');
         $client->change_password($data);
     }
 

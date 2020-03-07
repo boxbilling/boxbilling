@@ -332,7 +332,7 @@ class ServiceTest extends \BBTestCase {
         $di['extension'] = $extensionMock;
 
         $this->service->setDi($di);
-        $this->setExpectedException('\Box_Exception', 'Visit extension site for update information.', 252);
+        $this->expectException('\Box_Exception', 'Visit extension site for update information.', 252);
         $this->service->update($model);
     }
 
@@ -358,7 +358,7 @@ class ServiceTest extends \BBTestCase {
         $di['extension'] = $extensionMock;
 
         $this->service->setDi($di);
-        $this->setExpectedException('\Box_Exception', sprintf('Could not retrieve %s information', $model->name), 744);
+        $this->expectException('\Box_Exception', sprintf('Could not retrieve %s information', $model->name), 744);
         $this->service->update($model);
     }
 
@@ -380,7 +380,7 @@ class ServiceTest extends \BBTestCase {
         $di['extension'] = $extensionMock;
 
         $this->service->setDi($di);
-        $this->setExpectedException('\Box_Exception', sprintf('Latest %s version installed. No need to update', $model->name), 785);
+        $this->expectException('\Box_Exception', sprintf('Latest %s version installed. No need to update', $model->name), 785);
         $this->service->update($model);
     }
 
@@ -400,7 +400,7 @@ class ServiceTest extends \BBTestCase {
         $di['extension'] = $extensionMock;
 
         $this->service->setDi($di);
-        $this->setExpectedException('\Box_Exception', 'Could not retrieve version information for extension '.$model->name, 745);
+        $this->expectException('\Box_Exception', 'Could not retrieve version information for extension '.$model->name, 745);
         $this->service->update($model);
 
     }
@@ -503,7 +503,7 @@ class ServiceTest extends \BBTestCase {
 
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'BoxBilling core modules can not be managed');
+        $this->expectException('\Box_Exception', 'BoxBilling core modules can not be managed');
         $this->service->deactivate($ext);
     }
 
@@ -530,7 +530,7 @@ class ServiceTest extends \BBTestCase {
 
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', $exceptionMessage);
+        $this->expectException('\Box_Exception', $exceptionMessage);
         $this->service->deactivate($ext);
     }
 
@@ -654,7 +654,7 @@ class ServiceTest extends \BBTestCase {
         $di['zip_archive'] = $zipArchiveMock;
 
         $this->service->setDi($di);
-        $this->setExpectedException('\Box_Exception', 'Extension does not support auto-install feature. Extension must be installed manually');
+        $this->expectException('\Box_Exception', 'Extension does not support auto-install feature. Extension must be installed manually');
         $this->service->downloadAndExtract('notDefinedType', 'extensionId');
     }
 
@@ -700,7 +700,7 @@ class ServiceTest extends \BBTestCase {
         $di['tools'] = $toolsMock;
 
         $this->service->setDi($di);
-        $this->setExpectedException('\Box_Exception', 'Extension can not be moved. Make sure your server write permissions to bb-locale folder.', 440);
+        $this->expectException('\Box_Exception', 'Extension can not be moved. Make sure your server write permissions to bb-locale folder.', 440);
         $this->service->downloadAndExtract('translation', 'extensionId');
     }
 
@@ -742,7 +742,7 @@ class ServiceTest extends \BBTestCase {
         $di['tools'] = $toolsMock;
 
         $this->service->setDi($di);
-        $this->setExpectedException('\Box_Exception', 'Extension can not be moved. Make sure your server write permissions to bb-themes folder.', 439);
+        $this->expectException('\Box_Exception', 'Extension can not be moved. Make sure your server write permissions to bb-themes folder.', 439);
         $this->service->downloadAndExtract('theme', 'extensionId');
     }
 
@@ -784,7 +784,7 @@ class ServiceTest extends \BBTestCase {
         $di['tools'] = $toolsMock;
 
         $this->service->setDi($di);
-        $this->setExpectedException('\Box_Exception', 'Extension can not be moved. Make sure your server write permissions to bb-modules folder.', 437);
+        $this->expectException('\Box_Exception', 'Extension can not be moved. Make sure your server write permissions to bb-modules folder.', 437);
         $this->service->downloadAndExtract('mod', 'extensionId');
     }
 
@@ -823,7 +823,7 @@ class ServiceTest extends \BBTestCase {
         $di['tools'] = $toolsMock;
 
         $this->service->setDi($di);
-        $this->setExpectedException('\Box_Exception', 'Module already installed.', 436);
+        $this->expectException('\Box_Exception', 'Module already installed.', 436);
         $this->service->downloadAndExtract('mod', 'extensionId');
     }
 
@@ -850,7 +850,7 @@ class ServiceTest extends \BBTestCase {
         $di['zip_archive'] = $zipArchiveMock;
 
         $this->service->setDi($di);
-        $this->setExpectedException('\Box_Exception', 'Could not extract extension zip file');
+        $this->expectException('\Box_Exception', 'Could not extract extension zip file');
         $this->service->downloadAndExtract('mod', 'extensionId');
     }
 
@@ -866,7 +866,7 @@ class ServiceTest extends \BBTestCase {
         $di['extension'] = $extensionMock;
 
         $this->service->setDi($di);
-        $this->setExpectedException('\Exception', 'Extensions download url is not valid');
+        $this->expectException('\Exception', 'Extensions download url is not valid');
         $this->service->downloadAndExtract('mod', 'extensionId');
     }
 
@@ -966,7 +966,7 @@ class ServiceTest extends \BBTestCase {
 
         $serviceMock->setDi($di);
 
-        $this->setExpectedException('\Exception');
+        $this->expectException('\Exception');
         $serviceMock->activateExistingExtension($data);
     }
 

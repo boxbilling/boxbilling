@@ -111,7 +111,7 @@ class GuestTest extends \BBTestCase {
         $client->setDi($di);
         $client->setService($serviceMock);
 
-        $this->setExpectedException('\Box_Exception', 'Email is already registered. You may want to login instead of registering.');
+        $this->expectException('\Box_Exception', 'Email is already registered. You may want to login instead of registering.');
         $client->create($data);
     }
 
@@ -133,7 +133,7 @@ class GuestTest extends \BBTestCase {
         $di['mod_config'] = $di->protect(function ($name) use($configArr) { return $configArr;  });
         $client->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'New registrations are temporary disabled');
+        $this->expectException('\Box_Exception', 'New registrations are temporary disabled');
         $client->create($data);
     }
 
@@ -158,7 +158,7 @@ class GuestTest extends \BBTestCase {
         $di['validator'] = $validatorMock;
         $client->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Passwords do not match.');
+        $this->expectException('\Box_Exception', 'Passwords do not match.');
         $client->create($data);
     }
 
@@ -285,7 +285,7 @@ class GuestTest extends \BBTestCase {
         $client = new \Box\Mod\Client\Api\Guest();
         $client->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Email not found in our database');
+        $this->expectException('\Box_Exception', 'Email not found in our database');
         $client->reset_password($data);
     }
 
@@ -361,7 +361,7 @@ class GuestTest extends \BBTestCase {
         $client = new \Box\Mod\Client\Api\Guest();
         $client->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'The link have expired or you have already confirmed password reset.');
+        $this->expectException('\Box_Exception', 'The link have expired or you have already confirmed password reset.');
         $client->confirm_reset($data);
     }
 

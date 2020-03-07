@@ -47,7 +47,7 @@ class ServiceTest extends \BBTestCase {
         $clientService = new \Box\Mod\Client\Service();
         $clientService->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Invalid email confirmation link');
+        $this->expectException('\Box_Exception', 'Invalid email confirmation link');
         $clientService->approveClientEmailByHash('');
     }
 
@@ -429,7 +429,7 @@ class ServiceTest extends \BBTestCase {
         $clientService = new \Box\Mod\Client\Service();
         $clientService->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Currency can not be changed. Client already have invoices issued.');
+        $this->expectException('\Box_Exception', 'Currency can not be changed. Client already have invoices issued.');
         $clientService->canChangeCurrency($model, $currency);
     }
 
@@ -456,7 +456,7 @@ class ServiceTest extends \BBTestCase {
         $clientService = new \Box\Mod\Client\Service();
         $clientService->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Currency can not be changed. Client already have orders.');
+        $this->expectException('\Box_Exception', 'Currency can not be changed. Client already have orders.');
         $clientService->canChangeCurrency($model, $currency);
     }
 
@@ -550,7 +550,7 @@ class ServiceTest extends \BBTestCase {
 
         $clientService = new \Box\Mod\Client\Service();
 
-        $this->setExpectedException('\Box_Exception', 'Define clients currency before adding funds.');
+        $this->expectException('\Box_Exception', 'Define clients currency before adding funds.');
         $clientService->addFunds($modelClient, $amount, $description);
 
     }
@@ -567,7 +567,7 @@ class ServiceTest extends \BBTestCase {
 
         $clientService = new \Box\Mod\Client\Service();
 
-        $this->setExpectedException('\Box_Exception', 'Funds amount is not valid');
+        $this->expectException('\Box_Exception', 'Funds amount is not valid');
         $clientService->addFunds($modelClient, $amount, $description);
     }
 
@@ -584,7 +584,7 @@ class ServiceTest extends \BBTestCase {
 
         $clientService = new \Box\Mod\Client\Service();
 
-        $this->setExpectedException('\Box_Exception', 'Funds description is not valid');
+        $this->expectException('\Box_Exception', 'Funds description is not valid');
         $result = $clientService->addFunds($modelClient, $amount, $description);
         $this->assertTrue($result);
     }
@@ -765,7 +765,7 @@ class ServiceTest extends \BBTestCase {
         $service->setDi($di);
 
         $data = array('id' => 0);
-        $this->setExpectedException('\Box_Exception', 'Client not found');
+        $this->expectException('\Box_Exception', 'Client not found');
         $service->get($data);
     }
 
@@ -1004,7 +1004,7 @@ class ServiceTest extends \BBTestCase {
 
         $model = new \Model_ClientGroup();
         $model->loadBean(new \RedBeanPHP\OODBBean());
-        $this->setExpectedException('\Box_Exception', 'Can not remove group with clients');
+        $this->expectException('\Box_Exception', 'Can not remove group with clients');
         $service->deleteGroup($model);
     }
 
@@ -1220,7 +1220,7 @@ class ServiceTest extends \BBTestCase {
         $service = new \Box\Mod\Client\Service();
         $service->setDi($di);
 
-        $this->setExpectedException('Box_Exception', 'Email can not be changed');
+        $this->expectException('Box_Exception', 'Email can not be changed');
         $service->canChangeEmail($clientModel, $email);
     }
 
@@ -1239,7 +1239,7 @@ class ServiceTest extends \BBTestCase {
         });
         $service = new \Box\Mod\Client\Service();
         $service->setDi($di);
-        $this->setExpectedException('Box_Exception', 'It is required that you provide details for field "Id"');
+        $this->expectException('Box_Exception', 'It is required that you provide details for field "Id"');
         $service->checkExtraRequiredFields($data);
     }
 
@@ -1263,7 +1263,7 @@ class ServiceTest extends \BBTestCase {
         $data = array();
         $service = new \Box\Mod\Client\Service();
         $service->setDi($di);
-        $this->setExpectedException('Box_Exception', 'It is required that you provide details for field "custom_field_title"');
+        $this->expectException('Box_Exception', 'It is required that you provide details for field "custom_field_title"');
         $service->checkCustomFields($data);
 
     }

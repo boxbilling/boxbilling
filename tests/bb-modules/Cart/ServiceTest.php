@@ -819,7 +819,7 @@ class ServiceTest extends \BBTestCase
         $serviceMock->setDi($di);
         $productModel->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Period parameter not passed');
+        $this->expectException('\Box_Exception', 'Period parameter not passed');
         $serviceMock->addItem($cartModel, $productModel, $data);
     }
 
@@ -861,7 +861,7 @@ class ServiceTest extends \BBTestCase
         $serviceMock->setDi($di);
         $productModel->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Selected billing period is not valid');
+        $this->expectException('\Box_Exception', 'Selected billing period is not valid');
         $serviceMock->addItem($cartModel, $productModel, $data);
     }
 
@@ -901,7 +901,7 @@ class ServiceTest extends \BBTestCase
         $serviceMock->setDi($di);
         $productModel->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', "I'm afraid we are out of stock.");
+        $this->expectException('\Box_Exception', "I'm afraid we are out of stock.");
         $serviceMock->addItem($cartModel, $productModel, $data);
     }
 

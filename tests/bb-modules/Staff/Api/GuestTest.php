@@ -78,7 +78,7 @@ class GuestTest extends \BBTestCase
             'password' => 'EasyToGuess',
         );
 
-        $this->setExpectedException('\Box_Exception', 'Administrator account already exists', 55);
+        $this->expectException('\Box_Exception', 'Administrator account already exists', 55);
         $this->api->create($data);
     }
 
@@ -166,7 +166,7 @@ class GuestTest extends \BBTestCase
         $ip = '192.168.0.1';
         $guestApi->setIp($ip);
 
-        $this->setExpectedException('\Box_Exception', sprintf('You are not allowed to login to admin area from %s address', $ip), 403);
+        $this->expectException('\Box_Exception', sprintf('You are not allowed to login to admin area from %s address', $ip), 403);
 
         $data = array(
             'email'    => 'email@domain.com',

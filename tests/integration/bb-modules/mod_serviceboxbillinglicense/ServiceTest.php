@@ -34,19 +34,19 @@ class ServiceBoxBillinglicenseTest extends BBDbApiTestCase
         $model = $service->create($order);
         $this->assertInstanceOf('RedBeanPHP\OODBBean', $model);
 
-        $this->setExpectedException('\Box_Exception', 'Could not activate order. Service was not created', 7456);
+        $this->expectException('\Box_Exception', 'Could not activate order. Service was not created', 7456);
         $service->activate($order, null);
 
         $result = $service->activate($order, $model);
         $this->assertTrue($result);
 
-        $this->setExpectedException('\Box_Exception', 'Could not activate order. Service was not created', 7456);
+        $this->expectException('\Box_Exception', 'Could not activate order. Service was not created', 7456);
         $service->suspend($order, null);
 
         $result = $service->suspend($order, $model);
         $this->assertTrue($result);
 
-        $this->setExpectedException('\Box_Exception', 'Could not activate order. Service was not created', 7456);
+        $this->expectException('\Box_Exception', 'Could not activate order. Service was not created', 7456);
         $service->unsuspend($order, null);
 
         $result = $service->unsuspend($order, $model);

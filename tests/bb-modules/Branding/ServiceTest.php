@@ -33,7 +33,7 @@ class ServiceTest extends \BBTestCase
         $brandingService = new \Box\Mod\Branding\Service();
         $brandingService->setDi($di);
 
-        $this->setExpectedException('\Exception', 'Branding module can only be disabled for PRO license owners', 509);
+        $this->expectException('\Exception', 'Branding module can only be disabled for PRO license owners', 509);
         $brandingService->uninstall();
 
     }

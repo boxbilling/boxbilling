@@ -15,7 +15,7 @@ class ServiceTest extends \BBTestCase {
     public function testgetParamValueMissingKeyParam()
     {
         $param = array();
-        $this->setExpectedException('\Box_Exception', 'Parameter key is missing');
+        $this->expectException('\Box_Exception', 'Parameter key is missing');
 
         $this->service->getParamValue($param);
     }
@@ -283,7 +283,7 @@ class ServiceTest extends \BBTestCase {
         $di['api_client'] = new \Model_Client();
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Twig_Error_Syntax');
+        $this->expectException('\Twig_Error_Syntax');
         $this->service->renderString('test', false, $vars);
     }
 
@@ -513,7 +513,7 @@ class ServiceTest extends \BBTestCase {
 
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'You have reached free version limit. Upgrade to PRO version of BoxBilling if you want this limit removed.', 875);
+        $this->expectException('\Box_Exception', 'You have reached free version limit. Upgrade to PRO version of BoxBilling if you want this limit removed.', 875);
         $this->service->checkLimits($modelName, $limit);
     }
 
@@ -550,7 +550,7 @@ class ServiceTest extends \BBTestCase {
 
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'You have reached free version limit. Upgrade to PRO version of BoxBilling if you want this limit removed.', 875);
+        $this->expectException('\Box_Exception', 'You have reached free version limit. Upgrade to PRO version of BoxBilling if you want this limit removed.', 875);
         $this->service->checkLimits($modelName, $limit);
     }
 

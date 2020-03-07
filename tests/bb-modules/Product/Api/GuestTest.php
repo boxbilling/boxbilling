@@ -66,7 +66,7 @@ class GuestTest extends \BBTestCase {
     {
         $data = array();
 
-        $this->setExpectedException('\Box_Exception', 'Product ID or slug is missing');
+        $this->expectException('\Box_Exception', 'Product ID or slug is missing');
         $this->api->get($data);
     }
 
@@ -141,7 +141,7 @@ class GuestTest extends \BBTestCase {
         $this->api->setDi($di);
         $this->api->setService($serviceMock);
 
-        $this->setExpectedException('\Box_Exception', 'Product not found');
+        $this->expectException('\Box_Exception', 'Product not found');
         $this->api->get($data);
     }
 

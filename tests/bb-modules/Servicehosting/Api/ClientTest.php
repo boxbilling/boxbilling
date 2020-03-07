@@ -169,7 +169,7 @@ class ClientTest extends \BBTestCase {
         $clientModel->id = 1;
         $this->api->setIdentity($clientModel);
 
-        $this->setExpectedException('\Box_Exception', 'Order is not activated');
+        $this->expectException('\Box_Exception', 'Order is not activated');
         $this->api->_getService($data);
     }
 
@@ -195,7 +195,7 @@ class ClientTest extends \BBTestCase {
         $clientModel->id = 1;
         $this->api->setIdentity($clientModel);
 
-        $this->setExpectedException('\Box_Exception', 'Order not found');
+        $this->expectException('\Box_Exception', 'Order not found');
         $this->api->_getService($data);
 
     }
@@ -204,7 +204,7 @@ class ClientTest extends \BBTestCase {
     {
         $data = array();
 
-        $this->setExpectedException('\Box_Exception', 'Order id is required');
+        $this->expectException('\Box_Exception', 'Order id is required');
         $this->api->_getService($data);
     }
 }

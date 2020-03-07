@@ -185,7 +185,7 @@ class Box_ValidateTest extends PHPUnit\Framework\TestCase
         );
 
         $v = new Box_Validate();
-        $this->setExpectedException('\Box_Exception', $required['message']);
+        $this->expectException('\Box_Exception', $required['message']);
         $v->checkRequiredParamsForArray($required, $data);
     }
 
@@ -200,7 +200,7 @@ class Box_ValidateTest extends PHPUnit\Framework\TestCase
         );
 
         $v = new Box_Validate();
-        $this->setExpectedException('\Box_Exception', $required['message']);
+        $this->expectException('\Box_Exception', $required['message']);
         $v->checkRequiredParamsForArray($required, $data);
     }
 

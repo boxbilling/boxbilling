@@ -171,7 +171,7 @@ class ServiceTest extends \BBTestCase {
             ->method('getDi')
             ->willReturn($di);
 
-        $this->setExpectedException('\Box_Exception', sprintf("IP %s is blocked", $clientIp), 403);
+        $this->expectException('\Box_Exception', sprintf("IP %s is blocked", $clientIp), 403);
         $this->service->isBlockedIp($boxEventMock);
     }
 
@@ -275,7 +275,7 @@ class ServiceTest extends \BBTestCase {
 
         $data = array();
         $this->service->setDi($di);
-        $this->setExpectedException('Box_Exception', $exceptionMessage);
+        $this->expectException('Box_Exception', $exceptionMessage);
         $this->service->isInStopForumSpamDatabase($data);
     }
 

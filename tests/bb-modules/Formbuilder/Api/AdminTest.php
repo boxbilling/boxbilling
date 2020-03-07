@@ -72,7 +72,7 @@ class AdminTest extends \BBTestCase {
             ->will($this->returnValue(null));
         $di['validator'] = $validatorMock;
         $this->api->setDi($di);
-        $this->setExpectedException('\Box_Exception', 'Form style was not found in predefined list', 3657);
+        $this->expectException('\Box_Exception', 'Form style was not found in predefined list', 3657);
         $this->api->create_form($data);
     }
 
@@ -108,7 +108,7 @@ class AdminTest extends \BBTestCase {
     public function testadd_fieldMissingType()
     {
         $data = array();
-        $this->setExpectedException('\Box_Exception', 'Form field type is not valid', 2684);
+        $this->expectException('\Box_Exception', 'Form field type is not valid', 2684);
         $this->api->add_field($data);
     }
 
@@ -120,7 +120,7 @@ class AdminTest extends \BBTestCase {
         );
 
         $this->api->setService($this->service);
-        $this->setExpectedException('\Box_Exception', 'This input type must have unique values', 3658);
+        $this->expectException('\Box_Exception', 'This input type must have unique values', 3658);
         $this->api->add_field($data);
     }
 
@@ -133,7 +133,7 @@ class AdminTest extends \BBTestCase {
 
         $this->api->setService($this->service);
 
-        $this->setExpectedException('\Box_Exception', 'Form id was not passed', 9846);
+        $this->expectException('\Box_Exception', 'Form id was not passed', 9846);
         $this->api->add_field($data);
     }
 
@@ -325,7 +325,7 @@ class AdminTest extends \BBTestCase {
     {
         $data = array();
 
-        $this->setExpectedException('\Box_Exception', 'Form id was not passed', 9958);
+        $this->expectException('\Box_Exception', 'Form id was not passed', 9958);
         $this->api->copy_form($data);
     }
 
@@ -333,7 +333,7 @@ class AdminTest extends \BBTestCase {
     {
         $data = array('form_id' => 1);
 
-        $this->setExpectedException('\Box_Exception', 'Form name was not passed', 9842);
+        $this->expectException('\Box_Exception', 'Form name was not passed', 9842);
         $this->api->copy_form($data);
     }
 
@@ -380,7 +380,7 @@ class AdminTest extends \BBTestCase {
         );
         unset($data[ $missingField ]);
 
-        $this->setExpectedException('\Box_Exception', $exceptionMessage, $exceptionCode);
+        $this->expectException('\Box_Exception', $exceptionMessage, $exceptionCode);
         $this->api->update_form_settings($data);
     }
 

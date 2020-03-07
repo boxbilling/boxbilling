@@ -173,7 +173,7 @@ class Payment_Adapter_StripeTest extends PHPUnit\Framework\TestCase {
     {
         $config = $this->defaultConfig;
         $adapter = new Payment_Adapter_Stripe($config);
-        $this->setExpectedException('Payment_Exception', 'Payment gateway "Stripe" is not configured properly. Please update configuration parameter "test_pub_key" at "Configuration -> Payments".');
+        $this->expectException('Payment_Exception', 'Payment gateway "Stripe" is not configured properly. Please update configuration parameter "test_pub_key" at "Configuration -> Payments".');
         $adapter->get_test_pub_key();
 
     }
@@ -191,7 +191,7 @@ class Payment_Adapter_StripeTest extends PHPUnit\Framework\TestCase {
     {
         $config = $this->defaultConfig;
         $adapter = new Payment_Adapter_Stripe($config);
-        $this->setExpectedException('Payment_Exception', 'Payment gateway "Stripe" is not configured properly. Please update configuration parameter "test_api_key" at "Configuration -> Payments".');
+        $this->expectException('Payment_Exception', 'Payment gateway "Stripe" is not configured properly. Please update configuration parameter "test_api_key" at "Configuration -> Payments".');
         $adapter->get_test_api_key();
 
     }
