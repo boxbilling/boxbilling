@@ -17,20 +17,15 @@ with BoxBilling
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request to **develop** branch
 
-Using Vagrant
+Docker Based Development environment
 ================================================================================
-Vagrant is [very well documented](https://docs.vagrantup.com/v2/) but here are a few common commands:
 
-* `vagrant up` starts the virtual machine and provisions it
-* `vagrant suspend` will essentially put the machine to 'sleep' with `vagrant resume` waking it back up
-* `vagrant halt` attempts a graceful shutdown of the machine and will need to be brought back with `vagrant up`
-* `vagrant ssh` gives you shell access to the virtual machine
-
-Install vagrant-hostmanager plugin
-    
-    $ vagrant plugin install vagrant-hostmanager
-    
-to update /etc/hosts file 
+```console
+git clone git@github.com:boxbilling/boxbilling.git
+cd boxbilling
+composer install
+docker-compose up -d --build --force-recreate
+```
 
 Using Grunt
 ===========

@@ -15,6 +15,7 @@ build
 composer.phar
 public
 report/*
+data/db
 
 ### Vagrant & puphpet ###
 .vagrant/

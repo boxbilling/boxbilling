@@ -1,0 +1,27 @@
+nginx:
+  image: nginx:1.13.3
+  volumes:
+    - ./docker-nginx.conf:/etc/nginx/nginx.conf
+  volumes_from:
+    - php
+  links:
+    - php
+  ports:
+    - 80:80
+php:
+  image: chialab/php:7.4-fpm
+  links:
+    - mysql
+  volumes:
+    - ./:/var/www/html/
+mysql:
+  image: mysql:5.7.20
+  ports:
+    - 3306:3306
+  environment:
+    MYSQL_ROOT_PASSWORD: root
+    MYSQL_DATABASE: boxbilling
+    MYSQL_USER: default
+    MYSQL_PASSWORD: secret
+  volumes:
+    - ./data/db:/var/lib/mysql
