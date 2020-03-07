@@ -23,10 +23,8 @@ abstract class BBDbApiTestCase extends BBDatabaseTestCase
         $this->di['updater'] = $updatedMock;
     }
 
-    public function setUp()
+    public function onSetUp()
     {
-        parent::setUp();
-
         global $di;
         $this->di = $di;
         $this->setBoxUpdateMock();
@@ -40,10 +38,8 @@ abstract class BBDbApiTestCase extends BBDatabaseTestCase
         //$this->api_admin->hook_batch_connect();
     }
 
-    protected function tearDown()
+    protected function onTearDown()
     {
-        parent::tearDown();
-        
         $refl = new ReflectionObject($this);
         foreach ($refl->getProperties() as $prop) {
             if (!$prop->isStatic() && 0 !== strpos($prop->getDeclaringClass()->getName(), 'PHPUnit_')) {

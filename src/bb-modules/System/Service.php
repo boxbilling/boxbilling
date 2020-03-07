@@ -35,7 +35,7 @@ class Service
             throw new \Box_Exception('Parameter key is missing');
         }
 
-        $query = "SELECT value
+        $query = "SELECT `value`
                 FROM setting
                 WHERE param = :param
                ";
@@ -54,12 +54,12 @@ class Service
         $pdo = $this->di['pdo'];
 
         if($this->paramExists($param)) {
-            $query="UPDATE setting SET value = :value WHERE param = :param";
+            $query="UPDATE setting SET `value` = :value WHERE param = :param";
             $stmt = $pdo->prepare($query);
             $stmt->execute(array('param'=>$param, 'value'=>$value));
         } else if($createIfNotExists) {
             try {
-                $query="INSERT INTO setting (param, value, created_at, updated_at) VALUES (:param, :value, :created_at, :updated_at)";
+                $query="INSERT INTO setting (param, `value`, created_at, updated_at) VALUES (:param, :value, :created_at, :updated_at)";
                 $stmt = $pdo->prepare($query);
                 $stmt->execute(array('param'=>$param, 'value'=>$value, 'created_at'=>date('Y-m-d H:i:s'), 'updated_at'=>date('Y-m-d H:i:s')));
             } catch(\Exception $e) {

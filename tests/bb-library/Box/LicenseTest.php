@@ -13,7 +13,7 @@ class Box_LicenseTest extends PHPUnit\Framework\TestCase
     public function testLicense()
     {
         $license = $this->di['license'];
-//        $license->getDetails();
-//        $license->getDetails(true);
+        $details = $license->getDetails();
+        $this->assertTrue(is_array($details));
     }
 }

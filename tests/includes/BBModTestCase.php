@@ -2,8 +2,8 @@
 class BBModTestCase extends BBDbApiTestCase
 {
     protected $_mod = null;
-    
-    public function setUp()
+
+    protected function setUp(): void
     {
         global $di;
         $mod = $di['mod']($this->_mod);
