@@ -20,14 +20,26 @@ with BoxBilling
 Docker Based Development environment
 ================================================================================
 
+Add these lines to `/etc/hosts` file:
+
+```console
+127.0.0.1 localhost mysql
+```
+
+Type these commands on project dir
+
 ```console
 git clone git@github.com:boxbilling/boxbilling.git
 cd boxbilling
 composer install
 docker-compose up -d --build --force-recreate
-docker exec <php container id> php /var/www/html/bin/prepare.php
-
+php bin/prepare.php
 ```
+
+After these installation steps your good to go!
+
+User control panel link [localhost](http://localhost/)
+
 
 Using Grunt
 ===========
@@ -37,17 +49,6 @@ To create minified js and css files for theme admin_default run:
 If you want to use not minified versions of admin_default theme:
 * [separate JS files in layout](https://github.com/boxbilling/boxbilling/blob/5e19912e7287b76e6b760899a7f9d2a4f3c1125c/src/bb-themes/admin_default/html/layout_default.phtml#L17-L24)
 * [separate CSS](https://github.com/boxbilling/boxbilling/blob/2636cae130a94cdd827fb5f4acf46b0cdfebbb30/src/bb-themes/admin_default/html/partial_styles.phtml)
-
-----
-##### Virtual Machine Specifications #####
-
-* OS     - Ubuntu 12.04
-* PHP    - 5.4.* 
-* Apache
-* MySQL 5.6
-* IP - 10.20.30.12
-* servername - boxbilling.test
-* target folder - /var/www/boxbilling
 
 Support
 ================================================================================
@@ -70,5 +71,5 @@ End User License Agreement & Other Restrictions
    notice. All modified releases of BoxBilling must release the software under 
    the same license as the BoxBilling software (Apache License 2.0)
    
-   Copyright © 2011-2018 BoxBilling. All rights reserved.
+   Copyright © 2011-2020 BoxBilling. All rights reserved.
    www.boxbilling.com
