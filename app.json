@@ -12,7 +12,7 @@
   "env": {
     "BB_URL": {
       "description": "Installation URL",
-      "value": "https://your.installation-url.com"
+      "value": "https://heroku-app-name.herokuapp.com"
     },
     "BB_LICENSE": {
       "description": "Free BoxBilling License",
