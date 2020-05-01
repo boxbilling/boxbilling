@@ -73,3 +73,13 @@ End User License Agreement & Other Restrictions
    
    Copyright © 2011-2020 BoxBilling. All rights reserved.
    www.boxbilling.com
+
+
+Todo
+================================================================================
+
+* [ ] Fix Travis build to pass on PHP version 7.1 7.2 7.3 7.4 
+* [ ] Fix Heroku deployment
+* [ ] Create downloadable releases with GitHub actions
+
+
