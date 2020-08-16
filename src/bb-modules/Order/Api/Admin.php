@@ -450,4 +450,24 @@ class Admin extends \Api_Abstract
 
         return true;
     }
+
+    public function change_order_product($data)
+    {
+        $orderModel  = $this->_getOrder($data);
+
+        $required = array(
+            'product_id' => 'Product id not passed',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
+
+        $productModel = $this->di['db']->getExistingModelById('Product', $data['product_id'], 'Product not found');
+
+        return $this->getService()->changeOrderProduct($orderModel, $productModel);
+    }
+
+    public function is_metered($data)
+    {
+        $orderModel = $this->_getOrder($data);
+        return $this->getService()->haveMeteredBilling($orderModel);
+    }
 }

@@ -128,4 +128,81 @@ class Client extends \Api_Abstract
 
         return $order;
     }
+
+    public function is_metered($data)
+    {
+        $orderModel = $this->_getOrder($data);
+        return $this->getService()->haveMeteredBilling($orderModel);
+    }
+
+
+    /**
+     * Suspend order
+     *
+     * @param int $id - Order id
+     *
+     * @optional string $reason - Suspendation reason message
+     * @optional bool $skip_event - Skip calling event hooks
+     *
+     * @return bool
+     */
+    public function suspend($data)
+    {
+        $order      = $this->_getOrder($data);
+        $skip_event = false;
+
+        if ($order->client_id != $this->getIdentity()->id){
+            throw new \Box_Exception('Order was not found');
+        }
+
+        $reason = 'Client suspended order';
+
+        return $this->getService()->suspendFromOrder($order, $reason, $skip_event);
+    }
+
+    /**
+     * Unsuspend suspended order
+     *
+     * @param int $id - Order id
+     *
+     * @return bool
+     */
+    public function unsuspend($data)
+    {
+        $order = $this->_getOrder($data);
+        if ($order->status != \Model_ClientOrder::STATUS_SUSPENDED) {
+            throw new \Box_Exception('Only suspended orders can be unsuspended');
+        }
+
+        if ($order->client_id != $this->getIdentity()->id){
+            throw new \Box_Exception('Order was not found');
+        }
+
+        $whereStatment = 'client_order_id = :order_id ORDER BY id desc';
+        $bindings = array(
+            ':order_id' => $order->id,
+        );
+        $orderStatusModel = $this->di['db']->findOne('ClientOrderStatus', $whereStatment, $bindings);
+        if (strpos($orderStatusModel->notes, 'Client suspended order') === false){
+            throw new \Box_Exception('Order was suspended by administrator');
+        }
+
+        return $this->getService()->unsuspendFromOrder($order);
+    }
+
+
+    public function change_order_product($data)
+    {
+        $orderModel  = $this->_getOrder($data);
+
+        $required = array(
+            'product_id' => 'Product id not passed',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
+
+
+        $productModel = $this->di['db']->getExistingModelById('Product', $data['product_id'], 'Product not found');
+
+        return $this->getService()->changeOrderProduct($orderModel, $productModel);
+    }
 }

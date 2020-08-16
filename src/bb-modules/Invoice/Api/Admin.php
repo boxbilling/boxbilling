@@ -229,7 +229,8 @@ class Admin extends \Api_Abstract
         $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
         $model = $this->di['db']->getExistingModelById('ClientOrder', $data['id'], 'Order not found');
-        if($model->price <= 0) {
+        $orderService = $this->di['mod_service']('Order');
+        if($model->price <= 0 && !$orderService->haveMeteredBilling($model)) {
             throw new \Box_Exception('Order :id is free. No need to generate invoice.', array(':id'=>$model->id));
         }
 

@@ -41,6 +41,39 @@ class BBPatch_22 extends BBPatchAbstract
 }
 
 /**
+
+ * Version 4.12.1
+ */
+class BBPatch_20 extends BBPatchAbstract
+{
+    public function patch()
+    {
+        $q="ALTER TABLE product_payment ADD metered_price DECIMAL(18, 2) DEFAULT '0.00';";
+        $this->execSql($q);
+        $q="ALTER TABLE product_payment ADD metered_setup_price DECIMAL(18,2) DEFAULT '0.00';";
+        $this->execSql($q);
+        $q = "CREATE TABLE iF NOT EXISTS metered_usage
+                (
+                    id bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                    client_id bigint(20) NOT NULL,
+                    order_id bigint(20) NOT NULL,
+                    plan_id bigint(20) NOT NULL,
+                    product_id bigint(20) NOT NULL,
+                    invoice_id bigint(20) NOT NULL DEFAULT '0',
+                    quantity int NOT NULL COMMENT 'Duration in seconds',
+                    price double(18,8) NOT NULL COMMENT 'Price for 1 duration item',
+                    created_at DATETIME NOT NULL,
+                    stopped_at DATETIME,
+                    KEY `order_id` (`order_id`)
+                ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;";
+        $this->execSql($q);
+
+    }
+
+}
+/**
+ * Version X.XX.X
+=======
  * Version 4.14
  */
 class BBPatch_21 extends BBPatchAbstract
@@ -148,6 +181,7 @@ class BBPatch_20 extends BBPatchAbstract
 
 /**
  * Version 4.12
+
  */
 class BBPatch_19 extends BBPatchAbstract
 {
@@ -156,6 +190,9 @@ class BBPatch_19 extends BBPatchAbstract
         $q="ALTER TABLE `client` MODIFY  `birthday` date;";
         $this->execSql($q);
     }
+}
+
+
 }
 
 /**

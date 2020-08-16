@@ -927,9 +927,17 @@ class Service implements InjectionAwareInterface
             }
         }
 
+        if ($this->di['mod_service']('Order')->haveMeteredBilling($order)){
+            return $this->generateForOrderWithMeteredBilling($order);
+        }
+
         if($order->price <= 0) {
             throw new \Box_Exception('Invoices are not generated for 0 amount orders');
         }
+
+
+
+        $proforma = $this->create($order);
 
         $client = $this->di['db']->getExistingModelById('Client', $order->client_id, 'Client not found');
 
@@ -942,6 +950,7 @@ class Service implements InjectionAwareInterface
         $proforma->created_at = date('Y-m-d H:i:s');
         $proforma->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($proforma);
+
 
         $this->setInvoiceDefaults($proforma);
 
@@ -960,6 +969,10 @@ class Service implements InjectionAwareInterface
         $invoiceItemService->generateFromOrder($proforma, $order, \Model_InvoiceItem::TASK_RENEW, $price);
 
         // invoice due date
+
+        $proforma->due_at = ($due_days > 0) ? date('c', strtotime('+'.$due_days.' days')) : $order->expires_at;
+        $this->di['db']->store($proforma);
+
         if($due_days > 0) {
             $proforma->due_at = date('Y-m-d H:i:s', strtotime('+'.$due_days.' days'));
             $this->di['db']->store($proforma);
@@ -967,6 +980,7 @@ class Service implements InjectionAwareInterface
             $proforma->due_at = $order->expires_at;
             $this->di['db']->store($proforma);
         }
+
 
         return $proforma;
     }
@@ -1492,6 +1506,56 @@ class Service implements InjectionAwareInterface
         }
     }
 
+
+
+    /**
+     * @param \Model_ClientOrder $clientOrder
+     * @return \Model_Invoice
+     * @throws \Box_Exception
+     */
+    public function generateForOrderWithMeteredBilling(\Model_ClientOrder $clientOrder)
+    {
+        $orderTypeService = $this->di['mod_service']('service' . $clientOrder->service_type);
+        $orderTypeService->stopUsage($clientOrder);
+
+        $meteredBillingService = $this->di['mod_service']('Meteredbilling');
+        $price = $meteredBillingService->getOrderUsageTotalCost($clientOrder);
+        if ($price < 0.01){
+            $orderTypeService->setUsage($clientOrder);
+            throw new \Box_Exception('Invoices are not generated for 0 amount orders', null, 1157);
+        }
+        $proforma = $this->create($clientOrder);
+        $this->setInvoiceDefaults($proforma);
+
+        $invoiceItemService = $this->di['mod_service']('Invoice', "InvoiceItem");
+        $invoiceItemService->generateFromOrder($proforma, $clientOrder, \Model_InvoiceItem::TASK_RENEW, $price);
+        $this->di['mod_service']('Order')->setUnpaidInvoice($clientOrder, $proforma);
+        $proforma->due_at = $clientOrder->expires_at;
+        $this->di['db']->store($proforma);
+        $meteredBillingService->setInvoiceForUsage($clientOrder, $proforma->id);
+        $orderTypeService->setUsage($clientOrder);
+
+        return $proforma;
+    }
+
+    /**
+     * @param \Model_ClientOrder $clientOrder
+     * @return \Model_Invoice
+     */
+    public function create(\Model_ClientOrder $clientOrder)
+    {
+        $proforma = $this->di['db']->dispense('Invoice');
+        $proforma->client_id = $clientOrder->client_id;
+        $proforma->status = \Model_Invoice::STATUS_UNPAID;
+        $proforma->currency = $clientOrder->currency;
+        $proforma->approved = false;
+        $proforma->created_at = date('c');
+        $proforma->updated_at = date('c');
+        $this->di['db']->store($proforma);
+        return $proforma;
+    }
+}
+
     /**
      * @param \Model_Invoice $invoice
      * @return bool
@@ -1507,3 +1571,4 @@ class Service implements InjectionAwareInterface
         return false;
     }
 }
+

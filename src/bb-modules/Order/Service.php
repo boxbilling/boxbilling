@@ -14,6 +14,7 @@
 namespace Box\Mod\Order;
 
 use Box\InjectionAwareInterface;
+use Box\MeteredInterface;
 
 class Service implements InjectionAwareInterface
 {
@@ -76,6 +77,7 @@ class Service implements InjectionAwareInterface
 
             $emailService = $di['mod_service']('email');
             $emailService->sendTemplate($email);
+
         } catch (\Exception $exc) {
             error_log($exc->getMessage());
         }
@@ -744,6 +746,11 @@ class Service implements InjectionAwareInterface
             error_log(sprintf('Order without product ID detected Order #%s', $order->id));
         }
 
+        if ($this->haveMeteredBilling($order)){
+            $orderTypeService = $this->di['mod_service']('service' . $order->service_type);
+            $orderTypeService->setUsage($order);
+        }
+
         $this->saveStatusChange($order, 'Order activated');
 
         return $result;
@@ -973,6 +980,11 @@ class Service implements InjectionAwareInterface
         $note = (NULL === $reason) ? "Order suspeded" : 'Order suspended for ' . $reason;
         $this->saveStatusChange($order, $note);
 
+        if ($this->haveMeteredBilling($order)){
+            $orderTypeService = $this->di['mod_service']('service' . $order->service_type);
+            $orderTypeService->stopUsage($order);
+        }
+
         if (!$skipEvent) $this->di['events_manager']->fire(array('event' => 'onAfterAdminOrderSuspend', 'params' => array('id' => $order->id)));
 
         $this->di['logger']->info('Suspended order #%s', $order->id);
@@ -994,6 +1006,11 @@ class Service implements InjectionAwareInterface
         $this->di['db']->store($order);
 
         $this->saveStatusChange($order, 'Order unsuspended');
+
+        if ($this->haveMeteredBilling($order)){
+            $orderTypeService = $this->di['mod_service']('service' . $order->service_type);
+            $orderTypeService->setUsage($order);
+        }
 
         $this->di['events_manager']->fire(array('event' => 'onAfterAdminOrderUnsuspend', 'params' => array('id' => $order->id)));
 
@@ -1022,6 +1039,11 @@ class Service implements InjectionAwareInterface
 
         $note = (NULL === $reason) ? "Order canceled" : 'Canceled order for ' . $reason;
         $this->saveStatusChange($order, $note);
+
+        if ($this->haveMeteredBilling($order)){
+            $orderTypeService = $this->di['mod_service']('service' . $order->service_type);
+            $orderTypeService->stopUsage($order);
+        }
 
         if (!$skipEvent) $this->di['events_manager']->fire(array('event' => 'onAfterAdminOrderCancel', 'params' => array('id' => $order->id)));
 
@@ -1053,6 +1075,11 @@ class Service implements InjectionAwareInterface
         $this->di['db']->store($order);
 
         $this->saveStatusChange($order, 'Activated canceled order');
+
+        if ($this->haveMeteredBilling($order)){
+            $orderTypeService = $this->di['mod_service']('service' . $order->service_type);
+            $orderTypeService->setUsage($order);
+        }
 
         $this->di['events_manager']->fire(array('event' => 'onAfterAdminOrderUncancel', 'params' => array('id' => $order->id)));
 
@@ -1102,6 +1129,11 @@ class Service implements InjectionAwareInterface
 
         if ($order->status == \Model_ClientOrder::STATUS_PENDING_SETUP) {
             $this->rmInvoiceItemByOrder($order);
+        }
+
+        if ($this->haveMeteredBilling($order)){
+            $orderTypeService = $this->di['mod_service']('service' . $order->service_type);
+            $orderTypeService->stopUsage($order);
         }
 
         $this->_callOnService($order, \Model_ClientOrder::ACTION_DELETE);
@@ -1329,4 +1361,65 @@ class Service implements InjectionAwareInterface
         $stmt->execute(array('id'=>$client->id));
     }
 
+
+    public function haveMeteredBilling(\Model_ClientOrder $order)
+    {
+        $orderTypeService = $this->di['mod_service']('service' . $order->service_type);
+        if (!$orderTypeService instanceof \Box\MeteredInterface ) {
+            return false;
+        }
+
+        $sql = 'SELECT pp.type
+                FROM product_payment as pp
+                  LEFT JOIN product as p on p.product_payment_id = pp.id
+                  LEFT JOIN client_order as co on co.product_id = p.id
+                WHERE co.id = :order_id
+                LIMIT 1';
+        $bindings = array(
+            ':order_id' => $order->id
+        );
+        $paymentType = $this->di['db']->getCell($sql, $bindings);
+
+        if ($paymentType == \Model_ProductPayment::METERED){
+            return true;
+        }
+        return false;
+    }
+
+    public function changeOrderProduct(\Model_ClientOrder $clientOrder, \Model_Product $product)
+    {
+        $orderProduct = $this->di['db']->load('Product', $clientOrder->product_id);
+
+        $productService = $this->di['mod_service']('Product');
+        $changeableProducts = $productService->getChangeableProductPairs($orderProduct);
+
+        if (array_search($product->title, $changeableProducts) === false) {
+            throw new \Box_Exception("Order product can not be changed");
+        }
+
+        $productTypeService = $this->di['mod_service']('service'.$product->type);
+        if (!$productTypeService instanceof MeteredInterface){
+            throw new \Box_Exception('Product service does not support metered billing');
+        }
+
+        $orderTypeServiceModel = $this->getOrderService($clientOrder);
+        $productTypeService->stopUsage($clientOrder);
+
+        $productConfig = $this->di['tools']->decodeJ($product->config);
+        $orderTypeServiceModel->service_hosting_hp_id = isset($productConfig['hosting_plan_id']) ? $productConfig['hosting_plan_id'] : null;
+        $orderTypeServiceModel->service_hosting_server_id = isset($productConfig['server_id']) ? $productConfig['server_id'] : null;
+        $this->di['db']->store($orderTypeServiceModel);
+
+        $clientOrder->product_id = $product->id;
+        $clientOrder->title = str_replace($orderProduct->title, $product->title, $clientOrder->title);
+        $this->di['db']->store($clientOrder);
+
+        $productTypeService->setUsage($clientOrder);
+
+        return true;
+    }
+
 }
+
+}
+

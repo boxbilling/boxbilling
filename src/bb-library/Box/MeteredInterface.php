@@ -10,11 +10,12 @@
  * with this source code in the file LICENSE
  */
 
+namespace Box;
 
-class Model_ProductPayment extends RedBean_SimpleModel
+interface MeteredInterface
 {
-    const FREE      = 'free';
-    const ONCE      = 'once';
-    const RECURRENT = 'recurrent';
-    const METERED   = 'metered';
+    public function setUsage(\Model_ClientOrder $model);
+
+    public function stopUsage(\Model_ClientOrder $model);
+
 }
