@@ -7,7 +7,7 @@ Open Source billing software
 Requirements
 ================================================================================
 
-* PHP 7.x
+* PHP 7.4.8
 * Linux Operating System (64-bit) | Does not support Windows Operating Systems.
 * PHP extensions:
   * openssl
@@ -21,6 +21,7 @@ Recommended
 ================================================================================
 
 * PHP 7.4.8
+
 * CentOS 64-bit Operating System
 * PHP Extensions
   * openssl
@@ -44,6 +45,12 @@ Contributing
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request to **develop** branch
+
+Roadmap
+================================================================================
+
+* [ ] Support latest PHP version 7.3
+* [ ] Add support for composer package manager
 
 Using Vagrant
 ================================================================================
