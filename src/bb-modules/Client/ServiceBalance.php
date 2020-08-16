@@ -20,7 +20,7 @@ class ServiceBalance implements InjectionAwareInterface
     protected $di = null;
 
     /**
-     * @param null $di
+     * @param \Box_Di|null $di
      */
     public function setDi($di)
     {
@@ -28,7 +28,7 @@ class ServiceBalance implements InjectionAwareInterface
     }
 
     /**
-     * @return null
+     * @return \Box_Di|null
      */
     public function getDi()
     {
@@ -54,7 +54,7 @@ class ServiceBalance implements InjectionAwareInterface
 
     public function rmByClient(\Model_Client $client)
     {
-        $clientBalances = $this->di['db']->find('ClientBalance', 'client_id', array($client->id));
+        $clientBalances = $this->di['db']->find('ClientBalance', 'client_id = ?', array($client->id));
         foreach ($clientBalances as $balanceModel){
             $this->di['db']->trash($balanceModel);
         }
@@ -83,10 +83,10 @@ class ServiceBalance implements InjectionAwareInterface
               FROM client_balance as m
                 LEFT JOIN client as c on c.id = m.client_id';
 
-        $id         = isset($data['id']) ? $data['id'] : NULL;
-        $client_id  = isset($data['client_id']) ? $data['client_id'] : NULL;
-        $date_from  = isset($data['date_from']) ? $data['date_from'] : NULL;
-        $date_to    = isset($data['date_to']) ? $data['date_to'] : NULL;
+        $id         = $this->di['array_get']($data, 'id', NULL);
+        $client_id  = $this->di['array_get']($data, 'client_id', NULL);
+        $date_from  = $this->di['array_get']($data, 'date_from', NULL);
+        $date_to    = $this->di['array_get']($data, 'date_to', NULL);
 
         $where = array();
         $params = array();
@@ -117,5 +117,36 @@ class ServiceBalance implements InjectionAwareInterface
         $q .= ' ORDER by m.id DESC';
 
         return array($q, $params);
+    }
+
+    /**
+     * @param \Model_Client $client
+     * @param double        $amount
+     * @param string        $description
+     * @param array         $data
+     * @return \Model_ClientBalance
+     * @throws \Box_Exception
+     */
+    public function deductFunds(\Model_Client $client, $amount, $description, array $data = null)
+    {
+        if(!is_numeric($amount)) {
+            throw new \Box_Exception('Funds amount is not valid');
+        }
+
+        if(strlen(trim($description)) == 0) {
+            throw new \Box_Exception('Funds description is not valid');
+        }
+
+        $credit = $this->di['db']->dispense('ClientBalance');
+        $credit->client_id = $client->id;
+        $credit->type = $this->di['array_get']($data, 'type', 'default');
+        $credit->rel_id = $this->di['array_get']($data, 'rel_id', null);
+        $credit->description = $description;
+        $credit->amount = -$amount;
+        $credit->created_at = date('Y-m-d H:i:s');
+        $credit->updated_at = date('Y-m-d H:i:s');
+        $this->di['db']->store($credit);
+
+        return $credit;
     }
 }

@@ -4,7 +4,7 @@
 namespace Box\Mod\Servicehosting;
 
 
-class ServiceTest extends \PHPUnit_Framework_TestCase {
+class ServiceTest extends \BBTestCase {
     /**
      * @var \Box\Mod\Servicehosting\Service
      */
@@ -73,7 +73,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $hostingPlansModel->loadBean(new \RedBeanPHP\OODBBean());
         $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
         $dbMock->expects($this->atLeastOnce())
-            ->method('load')
+            ->method('getExistingModelById')
             ->will($this->onConsecutiveCalls($hostingServerModel, $hostingPlansModel));
 
         $servhostingModel = new \Model_ServiceHosting();
@@ -90,6 +90,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $di = new \Box_Di();
         $di['db'] = $dbMock;
         $di['mod_service'] = $di->protect(function() use ($orderServiceMock) {return $orderServiceMock;});
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
 
         $this->service->setDi($di);
         $this->service->action_create($orderModel);
@@ -384,13 +387,19 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
             ->method('getConfig')
             ->will($this->returnValue($confArr));
 
+        $model = new \Model_ServiceHosting();
+        $model->loadBean(new \RedBeanPHP\OODBBean());
+        $orderServiceMock->expects($this->atLeastOnce())
+            ->method('getOrderService')
+            ->will($this->returnValue($model));
+
         $hostingServerModel = new \Model_ServiceHostingServer();
         $hostingServerModel->loadBean(new \RedBeanPHP\OODBBean());
         $hostingPlansModel = new \Model_ServiceHostingHp();
         $hostingPlansModel->loadBean(new \RedBeanPHP\OODBBean());
         $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
         $dbMock->expects($this->atLeastOnce())
-            ->method('load')
+            ->method('getExistingModelById')
             ->will($this->onConsecutiveCalls($hostingServerModel, $hostingPlansModel));
 
         $servhostingModel = new \Model_ServiceHosting();
@@ -407,9 +416,26 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $di = new \Box_Di();
         $di['db'] = $dbMock;
         $di['mod_service'] = $di->protect(function() use ($orderServiceMock) {return $orderServiceMock;});
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
 
-        $this->service->setDi($di);
-        $this->service->action_uncancel($orderModel);
+
+        $serviceMock = $this->getMockBuilder('\Box\Mod\Servicehosting\Service')
+            ->setMethods(array('_getAM'))
+            ->getMock();
+
+        $serverManagerMock = $this->getMockBuilder('\Server_Manager_Custom')->disableOriginalConstructor()->getMock();
+        $serverManagerMock->expects($this->atLeastOnce())
+            ->method('createAccount');
+        $AMresultArray = array($serverManagerMock, new \Server_Account());
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('_getAM')
+            ->will($this->returnValue($AMresultArray));
+
+
+        $serviceMock->setDi($di);
+        $serviceMock->action_uncancel($orderModel);
     }
 
     public function testaction_delete()
@@ -876,6 +902,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $di = new \Box_Di();
         $di['db'] = $dbMock;
         $di['logger'] = new \Box_Log();
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $this->service->setDi($di);
 
         $name = 'newSuperFastServer';
@@ -935,6 +964,10 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $di = new \Box_Di();
         $di['db'] = $dbMock;
         $di['logger'] = new \Box_Log();
+
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $this->service->setDi($di);
 
         $result = $this->service->updateServer($hostingServerModel, $data);
@@ -1095,6 +1128,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $di = new \Box_Di();
         $di['db'] = $dbMock;
         $di['logger'] = new \Box_Log();
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $this->service->setDi($di);
 
 
@@ -1117,6 +1153,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $di = new \Box_Di();
         $di['db'] = $dbMock;
         $di['logger'] = new \Box_Log();
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $this->service->setDi($di);
 
         $result = $this->service->createHp('Free Plan', array());
@@ -1215,6 +1254,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $this->assertFalse($result[0]);
         $this->assertFalse($result[1]);
     }
+
 
     public function testsetUsage_OrderIsNotActive()
     {
@@ -1345,6 +1385,69 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $di['db'] = $dbMock;
 
         $this->service->setDi($di);
+=======
+    public function testgetFreeTlds_FreeTldsAreNotSet()
+    {
+        $config  = array();
+        $di = new \Box_Di();
+        $toolsMock = $this->getMockBuilder('\Box_Tools')->getMock();
+        $toolsMock->expects($this->atLeastOnce())
+            ->method('decodeJ')
+            ->willReturn($config);
+        $di['tools'] = $toolsMock;
+
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+
+        $tldArray = array('tld' => '.com');
+        $serviceDomainServiceMock = $this->getMockBuilder('\Box\Mod\Servicedomain\Service')->getMock();
+        $serviceDomainServiceMock->expects($this->atLeastOnce())
+            ->method('tldToApiArray')
+            ->willReturn($tldArray);
+        $di['mod_service'] = $di->protect(function() use ($serviceDomainServiceMock) {return $serviceDomainServiceMock;});
+
+        $tldModel = new \Model_Tld();
+        $tldModel->loadBean(new \RedBeanPHP\OODBBean());
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('find')
+            ->willReturn(array($tldModel));
+        $di['db'] = $dbMock;
+
+        $this->service->setDi($di);
+        $model = new \Model_Product();
+        $model->loadBean(new \RedBeanPHP\OODBBean());
+        $result = $this->service->getFreeTlds($model);
+        $this->assertInternalType('array', $result);
+
+    }
+
+    public function testgetFreeTlds()
+    {
+        $config  = array(
+            'free_tlds' => array('.com'),
+        );
+        $di = new \Box_Di();
+        $toolsMock = $this->getMockBuilder('\Box_Tools')->getMock();
+        $toolsMock->expects($this->atLeastOnce())
+            ->method('decodeJ')
+            ->willReturn($config);
+        $di['tools'] = $toolsMock;
+
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+
+        $this->service->setDi($di);
+        $model = new \Model_Product();
+        $model->loadBean(new \RedBeanPHP\OODBBean());
+        $result = $this->service->getFreeTlds($model);
+        $this->assertInternalType('array', $result);
+        $this->assertNotEmpty($result);
+    }
+
 
         $result = $this->service->stopUsage($orderModel);
         $this->assertTrue($result);

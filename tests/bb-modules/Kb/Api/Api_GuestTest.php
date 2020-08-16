@@ -1,7 +1,7 @@
 <?php
 namespace Box\Tests\Mod\Kb\Api;
 
-class GuestTest extends \PHPUnit_Framework_TestCase
+class GuestTest extends \BBTestCase
 {
     public function testArticle_get_list()
     {
@@ -23,6 +23,16 @@ class GuestTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue($willReturn));
         $guestApi->setService($kbService);
 
+        $pagerMock = $this->getMockBuilder('Box_Pagination')->getMock();
+        $pagerMock->expects($this->atLeastOnce())
+            ->method('getPer_page')
+            ->willReturn(100);
+        $di = new \Box_Di();
+        $di['pager'] = $pagerMock;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+        $guestApi->setDi($di);
         $result = $guestApi->article_get_list(array());
         $this->assertInternalType('array', $result);
         $this->assertEquals($result, $willReturn);
@@ -32,6 +42,12 @@ class GuestTest extends \PHPUnit_Framework_TestCase
     public function testArticle_getWithId()
     {
         $guestApi = new \Box\Mod\Kb\Api\Guest();
+
+        $di = new \Box_Di();
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+        $guestApi->setDi($di);
 
         $kbService = $this->getMockBuilder('Box\Mod\Kb\Service')->setMethods(array('findActiveArticleById', 'hitView', 'toApiArray', 'findActiveArticleBySlug'))->getMock();
         $kbService->expects($this->atLeastOnce())
@@ -58,6 +74,12 @@ class GuestTest extends \PHPUnit_Framework_TestCase
     public function testArticle_getWithSlug()
     {
         $guestApi = new \Box\Mod\Kb\Api\Guest();
+
+        $di = new \Box_Di();
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+        $guestApi->setDi($di);
 
         $kbService = $this->getMockBuilder('Box\Mod\Kb\Service')->setMethods(array('findActiveArticleById', 'hitView', 'toApiArray', 'findActiveArticleBySlug'))->getMock();
         $kbService->expects($this->never())
@@ -134,6 +156,11 @@ class GuestTest extends \PHPUnit_Framework_TestCase
             'id' => rand(1, 100)
         );
 
+        $di = new \Box_Di();
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+        $guestApi->setDi($di);
         $result = $guestApi->article_get($data);
         $this->assertInternalType('array', $result);
     }
@@ -159,6 +186,12 @@ class GuestTest extends \PHPUnit_Framework_TestCase
             ->method('toApiArray')
             ->will($this->returnValue(array()));
         $guestApi->setService($kbService);
+
+        $di = new \Box_Di();
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+        $guestApi->setDi($di);
 
         $data = array(
             'slug' => 'article-slug'
@@ -187,6 +220,9 @@ class GuestTest extends \PHPUnit_Framework_TestCase
 
         $di          = new \Box_Di();
         $di['pager'] = $pager;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $guestApi->setDi($di);
 
         $kbService = $this->getMockBuilder('Box\Mod\Kb\Service')->setMethods(array('categoryGetSearchQuery'))->getMock();
@@ -239,6 +275,12 @@ class GuestTest extends \PHPUnit_Framework_TestCase
         $data   = array(
             'id' => rand(1, 100)
         );
+
+        $di = new \Box_Di();
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+        $guestApi->setDi($di);
         $result = $guestApi->category_get($data);
         $this->assertInternalType('array', $result);
     }
@@ -258,6 +300,12 @@ class GuestTest extends \PHPUnit_Framework_TestCase
             ->method('categoryToApiArray')
             ->will($this->returnValue(array()));
         $guestApi->setService($kbService);
+
+        $di = new \Box_Di();
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+        $guestApi->setDi($di);
 
         $data   = array(
             'slug' => 'category-slug'
@@ -313,6 +361,12 @@ class GuestTest extends \PHPUnit_Framework_TestCase
             'id' => rand(1, 100)
         );
 
+        $di = new \Box_Di();
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+        $guestApi->setDi($di);
+
         $result = $guestApi->category_get($data);
         $this->assertInternalType('array', $result);
     }
@@ -339,6 +393,12 @@ class GuestTest extends \PHPUnit_Framework_TestCase
         $data = array(
             'slug' => 'article-slug'
         );
+
+        $di = new \Box_Di();
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+        $guestApi->setDi($di);
 
         $result = $guestApi->category_get($data);
         $this->assertInternalType('array', $result);

@@ -4,12 +4,12 @@ namespace Box\Tests\Mod\Profile;
 
 use Box\Mod\Profile\Service;
 
-class ServiceTest extends \PHPUnit_Framework_TestCase
+class ServiceTest extends \BBTestCase
 {
     public function testDi()
     {
         $service = new Service();
-        $di = new \Box_Di();
+        $di      = new \Box_Di();
         $service->setDi($di);
         $getDi = $service->getDi();
         $this->assertEquals($di, $getDi);
@@ -43,6 +43,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $di['logger']         = new \Box_Log();
         $di['events_manager'] = $emMock;
         $di['db']             = $dbMock;
+        $di['array_get']      = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
 
         $model = new \Model_Admin();
         $model->loadBean(new \RedBeanPHP\OODBBean());
@@ -92,7 +95,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
     public function testChangeAdminPassword()
     {
         $password = 'new_pass';
-        $emMock = $this->getMockBuilder('\Box_EventManager')
+        $emMock   = $this->getMockBuilder('\Box_EventManager')
             ->getMock();
         $emMock->expects($this->atLeastOnce())
             ->method('fire')
@@ -114,7 +117,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $di['logger']         = new \Box_Log();
         $di['events_manager'] = $emMock;
         $di['db']             = $dbMock;
-        $di['password'] = $passwordMock;
+        $di['password']       = $passwordMock;
 
         $model = new \Model_Admin();
         $model->loadBean(new \RedBeanPHP\OODBBean());
@@ -144,12 +147,12 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $modMock->expects($this->atLeastOnce())
             ->method('getConfig')
             ->will($this->returnValue(array(
-                'allow_change_email' => 1
-            )));
+                                          'allow_change_email' => 1
+                                      )));
 
         $clientServiceMock = $this->getMockBuilder('\Box\Mod\Client\Service')->getMock();
         $clientServiceMock->expects($this->atLeastOnce())->
-            method('emailAreadyRegistered')->will($this->returnValue(false));
+        method('emailAreadyRegistered')->will($this->returnValue(false));
 
         $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
         $validatorMock->expects($this->atLeastOnce())->method('isEmailValid');
@@ -169,7 +172,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $model = new \Model_Client();
         $model->loadBean(new \RedBeanPHP\OODBBean());
 
-        $data = array(
+        $data            = array(
             'email'          => 'email@example.com',
             'first_name'     => 'string',
             'last_name'      => 'string',
@@ -202,6 +205,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             'custom_9'       => 'string',
             'custom_10'      => 'string',
         );
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
 
         $service = new Service();
         $service->setDi($di);
@@ -230,12 +236,12 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $modMock->expects($this->atLeastOnce())
             ->method('getConfig')
             ->will($this->returnValue(array(
-                'allow_change_email' => 0
-            )));
+                                          'allow_change_email' => 0
+                                      )));
 
         $clientServiceMock = $this->getMockBuilder('\Box\Mod\Client\Service')->getMock();
         $clientServiceMock->expects($this->never())->
-            method('emailAreadyRegistered')->will($this->returnValue(false));
+        method('emailAreadyRegistered')->will($this->returnValue(false));
 
         $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
         $validatorMock->expects($this->never())->method('isEmailValid');
@@ -255,9 +261,12 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $model = new \Model_Client();
         $model->loadBean(new \RedBeanPHP\OODBBean());
 
-        $data = array(
+        $data            = array(
             'email' => 'email@example.com',
         );
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
 
         $service = new Service();
         $service->setDi($di);
@@ -287,12 +296,12 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $modMock->expects($this->atLeastOnce())
             ->method('getConfig')
             ->will($this->returnValue(array(
-                'allow_change_email' => 1
-            )));
+                                          'allow_change_email' => 1
+                                      )));
 
         $clientServiceMock = $this->getMockBuilder('\Box\Mod\Client\Service')->getMock();
         $clientServiceMock->expects($this->atLeastOnce())->
-            method('emailAreadyRegistered')->will($this->returnValue(true));
+        method('emailAreadyRegistered')->will($this->returnValue(true));
 
         $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
         $validatorMock->expects($this->atLeastOnce())->method('isEmailValid');
@@ -312,9 +321,12 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $model = new \Model_Client();
         $model->loadBean(new \RedBeanPHP\OODBBean());
 
-        $data = array(
+        $data            = array(
             'email' => 'email@example.com',
         );
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
 
         $service = new Service();
         $service->setDi($di);
@@ -362,18 +374,27 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
         $validatorMock->expects($this->atLeastOnce())->method('isPasswordStrong');
 
+        $password = 'new password';
+
+        $passwordMock = $this->getMockBuilder('\Box_Password')->getMock();
+        $passwordMock->expects($this->atLeastOnce())
+            ->method('hashIt')
+            ->with($password);
+
+
         $di                   = new \Box_Di();
         $di['logger']         = new \Box_Log();
         $di['events_manager'] = $emMock;
         $di['db']             = $dbMock;
         $di['validator']      = $validatorMock;
+        $di['password']       = $passwordMock;
 
         $model = new \Model_Client();
         $model->loadBean(new \RedBeanPHP\OODBBean());
 
         $service = new Service();
         $service->setDi($di);
-        $result = $service->changeClientPassword($model, 'new password');
+        $result = $service->changeClientPassword($model, $password);
         $this->assertTrue($result);
     }
 

@@ -4,7 +4,7 @@
 namespace Box\Mod\Invoice\Api;
 
 
-class ClientTest extends \PHPUnit_Framework_TestCase {
+class ClientTest extends \BBTestCase {
     /**
      * @var \Box\Mod\Invoice\Api\Client
      */
@@ -100,7 +100,9 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
         $di = new \Box_Di();
         $di['validator'] = $validatorMock;
         $di['db'] = $dbMock;
-
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $this->api->setDi($di);
         $this->api->setService($serviceMock);
         $this->api->setIdentity(new \Model_Admin());
@@ -357,6 +359,9 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
         $di = new \Box_Di();
         $di['pager'] = $paginatorMock;
         $di['mod_service'] = $di->protect(function () use($transactionService) {return $transactionService;});
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
 
         $this->api->setDi($di);
 
@@ -365,6 +370,33 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
         $this->api->setIdentity($identity);
         $result = $this->api->transaction_get_list(array());
         $this->assertInternalType('array', $result);
+    }
+
+    public function testget_tax_rate()
+    {
+        $client = new \Model_Client();
+        $client->loadBean(new \RedBeanPHP\OODBBean());
+
+        $taxRate = 20;
+
+        $invoiceTaxService = $this->getMockBuilder('\Box\Mod\Invoice\ServiceTax')
+            ->getMock();
+        $invoiceTaxService->expects($this->atLeastOnce())
+            ->method('getTaxRateForClient')
+            ->willReturn($taxRate);
+
+
+        $di = new \Box_Di();
+        $di['mod_service'] = $di->protect(function ($service, $sub) use($invoiceTaxService){
+            if ($service == 'Invoice' && $sub == 'Tax'){
+                return  $invoiceTaxService;
+            }
+        });
+        $this->api->setDi($di);
+        $this->api->setIdentity($client);
+
+        $result = $this->api->get_tax_rate();
+        $this->assertEquals($taxRate, $result);
     }
 
 

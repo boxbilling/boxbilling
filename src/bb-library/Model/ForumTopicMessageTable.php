@@ -41,8 +41,8 @@ class Model_ForumTopicMessageTable implements \Box\InjectionAwareInterface
         $search         = (isset($data['q']) && !empty($data['q'])) ? $data['q'] : NULL;
         $search2        = (isset($data['search']) && !empty($data['search'])) ? $data['search'] : NULL;
         $forum_topic_id = (isset($data['forum_topic_id']) && !empty($data['forum_topic_id'])) ? $data['forum_topic_id'] : NULL;
-        $forum_id       = isset($data['forum_id']) ? $data['forum_id'] : NULL;
-        $client_id      = isset($data['client_id']) ? $data['client_id'] : NULL;
+        $forum_id       = $this->di['array_get']($data, 'forum_id', NULL); 
+        $client_id      = $this->di['array_get']($data, 'client_id', NULL); 
 
         $where = $bindings = array();
 
@@ -99,7 +99,7 @@ class Model_ForumTopicMessageTable implements \Box\InjectionAwareInterface
                     FROM forum_topic_message ftm
                     LEFT JOIN client c ON c.id = ftm.client_id
                     LEFT JOIN forum_topic ft ON ft.id = ftm.forum_topic_id
-                    LEFT JOIN forum f ON f.id = fr.forum_id
+                    LEFT JOIN forum f ON f.id = ft.forum_id
                     WHERE ft.status IN ('active', 'locked')";
 
         $where = $bindings = array();
@@ -108,12 +108,9 @@ class Model_ForumTopicMessageTable implements \Box\InjectionAwareInterface
             $seconds                 = (int)$filter['match_date'] * 24 * 60 * 60;
             $where[]                 = "(UNIX_TIMESTAMP() - ftm.created_at) < :created_at";
             $bindings[':created_at'] = $seconds;
-            //$q->andWhere('(UNIX_TIMESTAMP() - m.created_at) < ?', $seconds);
         }
         $where[]              = "ftm.message LIKE :message";
         $bindings[':message'] = "%$searchQuery%";
-
-        //$q->andWhere('m.message LIKE ?', "%$searchQuery%");
 
         if (!empty($where)) {
             $query = $query . ' WHERE ' . implode(' AND ', $where);
@@ -256,15 +253,8 @@ class Model_ForumTopicMessageTable implements \Box\InjectionAwareInterface
 
     public function toApiArray(Model_ForumTopicMessage $model, $deep = false, $identity = null)
     {
-        $topic = null;
-        $forum = null;
         $topic = $this->di['db']->load('ForumTopic', $model->forum_topic_id);
-
-        if ($topic instanceof Model_ForumTopic) {
-            if ($topic->Forum instanceof Model_Forum) {
-                $topic = $this->di['db']->load('Forum', $topic->forum_id);
-            }
-        }
+        $forum = $this->di['db']->load('Forum', $topic->forum_id);
 
         $data = array(
             'id'             => $model->id,
@@ -275,17 +265,9 @@ class Model_ForumTopicMessageTable implements \Box\InjectionAwareInterface
             'author'         => $this->getAuthorDetails($model),
         );
 
-        if ($forum) {
-            $data['forum_slug'] = $forum->slug;
-        } else {
-            $data['forum_slug'] = null;
-        }
+        $data['forum_slug']       = ($forum) ? $forum->slug : null;
+        $data['forum_topic_slug'] = ($topic) ? $topic->slug : null;
 
-        if ($topic) {
-            $data['forum_topic_slug'] = $topic->slug;
-        } else {
-            $data['forum_topic_slug'] = null;
-        }
 
         if ($identity instanceof Model_Admin) {
             $data['ip'] = $model->ip;

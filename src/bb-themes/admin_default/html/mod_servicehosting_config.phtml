@@ -1,3 +1,4 @@
+{% import "macro_functions.phtml" as mf %}
 <div class="help">
     <h5>{% trans 'Hosting settings' %}</h5>
 </div>
@@ -34,6 +35,35 @@
         </div>
         <div class="fix"></div>
     </div>
+    <div class="rowElem free-tlds-row">
+        <label>{% trans 'Select free tlds' %}</label>
+        <div class="formRight">
+            {% set tlds = guest.serviceDomain_tlds({"allow_register":1}) %}
+            <select name="config[free_tlds][]" multiple="multiple" class="multiple" size="{{tlds|length}}" {% if product.config.free_domain %}required{% endif %}>
+                {% for id,tld in tlds %}
+                <option value="{{tld.tld}}" {% if tld.tld in product.config.free_tlds %}selected="selected"{% endif %}>{{tld.tld }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="fix"></div>
+    </div>
+		<!-- Select periods to offer free domains -->
+	   <div class="rowElem free-periods-row">
+        <label>{% trans 'Select free periods' %}</label>
+        <div class="formRight">
+            <select name="config[free_domain_periods][]" multiple="multiple" class="multiple" size="8" {% if product.config.free_domain %}required{% endif %}>
+                <option value="1M" {% if "1M" in product.config.free_domain_periods %}selected="selected"{% endif %}>1M</option>
+				<option value="3M" {% if "3M" in product.config.free_domain_periods %}selected="selected"{% endif %}>3M</option>
+				<option value="6M" {% if "6M" in product.config.free_domain_periods %}selected="selected"{% endif %}>6M</option>
+				<option value="1Y" {% if "1Y" in product.config.free_domain_periods %}selected="selected"{% endif %}>1Y</option>
+				<option value="2Y" {% if "2Y" in product.config.free_domain_periods %}selected="selected"{% endif %}>2Y</option>
+				<option value="3Y" {% if "3Y" in product.config.free_domain_periods %}selected="selected"{% endif %}>3Y</option>
+              
+            </select>
+        </div>
+        <div class="fix"></div>
+    </div>
+	
     <div class="rowElem">
         <label>{% trans 'Free domain transfer' %}:</label>
         <div class="formRight">
@@ -112,3 +142,33 @@
         </tr>
     </tfoot>
 </table>
+
+<script>
+    var free_domain_radios = $('input:radio[name="config[free_domain]"]');
+    var freeTldsRow = $('.free-tlds-row');
+	var freePerdsRow = $('.free-periods-row');
+
+    free_domain_radios.on('click', function(){
+        if ($(this).val() == 1){
+            freeTldsRow.fadeIn('slow');
+			freePerdsRow.fadeIn('slow');
+            $('select[name="config[free_tlds][]"]').prop('required', true);
+            $('select[name="config[free_domain_periods][]"]').prop('required', true);
+        }
+        if ($(this).val() == 0){
+            $('select[name="config[free_domain_periods][]"]').prop('required', false);
+            $('select[name="config[free_tlds][]"]').prop('required', false);
+            $('select[name="config[free_tlds][]"] option:selected').prop('selected', false);
+            $('select[name="config[free_domain_periods][]"] option:selected').prop('selected', false);
+            freeTldsRow.fadeOut('slow');
+			freePerdsRow.fadeOut('slow');
+        }
+    });
+
+    if (free_domain_radios.filter('[value=0]:checked').length > 0){
+        freeTldsRow.hide();
+		freePerdsRow.hide();
+    }
+
+
+</script>

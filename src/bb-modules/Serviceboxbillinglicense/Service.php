@@ -82,8 +82,8 @@ class Service implements InjectionAwareInterface
             $c->extension = 'mod_serviceboxbillinglicense';
             $c->meta_key = 'config';
             $c->meta_value = null;
-            $c->created_at = date('c');
-            $c->updated_at = date('c');
+            $c->created_at = date('Y-m-d H:i:s');
+            $c->updated_at = date('Y-m-d H:i:s');
             $this->di['db']->store($c);
         }
         $config = json_decode($c->meta_value, 1);
@@ -101,15 +101,15 @@ class Service implements InjectionAwareInterface
     {
         $model = $this->di['db']->dispense('service_boxbillinglicense');
         $model->client_id    = $order->client_id;
-        $model->created_at   = date('c');
-        $model->updated_at   = date('c');
+        $model->created_at   = date('Y-m-d H:i:s');
+        $model->updated_at   = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
         return $model;
     }
 
     /**
      * @param $order
-     * @return void
+     * @return boolean
      */
     public function activate($order, $model)
     {
@@ -120,7 +120,7 @@ class Service implements InjectionAwareInterface
         $result = $this->_getApi()->partner_order_create();
         
         $model->oid = $result;
-        $model->updated_at   = date('c');
+        $model->updated_at   = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
         
         return true;
@@ -130,7 +130,7 @@ class Service implements InjectionAwareInterface
      * Suspend VPS
      * 
      * @param $order
-     * @return void
+     * @return boolean
      */
     public function suspend($order, $model)
     {
@@ -139,14 +139,14 @@ class Service implements InjectionAwareInterface
         }
 
         $this->_getApi()->partner_order_suspend($model->vserverid);
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
         return true;
     }
 
     /**
      * @param $order
-     * @return void
+     * @return boolean
      */
     public function unsuspend($order, $model)
     {
@@ -155,14 +155,14 @@ class Service implements InjectionAwareInterface
         }
         
         $this->_getApi()->partner_order_unsuspend($model->vserverid);
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
         return true;
     }
 
     /**
      * @param $order
-     * @return void
+     * @return boolean
      */
     public function delete($order, $model)
     {

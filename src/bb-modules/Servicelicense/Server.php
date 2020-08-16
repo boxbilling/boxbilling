@@ -63,6 +63,9 @@ class Server implements \Box\InjectionAwareInterface
         return $this->_result;
     }
 
+    /**
+     * @param string $key
+     */
     private function getServer($key = null, $default = null)
     {
         if (null === $key) {
@@ -74,14 +77,19 @@ class Server implements \Box\InjectionAwareInterface
 
     private function getIp($checkProxy = true)
     {
-        $ip = NULL;
+        $ip = null;
         if ($checkProxy && $this->getServer('HTTP_CLIENT_IP') != null) {
             $ip = $this->getServer('HTTP_CLIENT_IP');
-        } else if ($checkProxy && $this->getServer('HTTP_X_FORWARDED_FOR') != null) {
-            $ip = $this->getServer('HTTP_X_FORWARDED_FOR');
         } else {
-            $ip = $this->getServer('REMOTE_ADDR');
+            if ($checkProxy && $this->getServer('HTTP_X_FORWARDED_FOR') != null) {
+                $ip = $this->getServer('HTTP_X_FORWARDED_FOR');
+            } else {
+                $ip = $this->getServer('REMOTE_ADDR');
+            }
         }
+
+        $ips_arr = explode(',', $ip);
+        $ip      = trim($ips_arr[0]);
 
         return $ip;
     }
@@ -107,7 +115,7 @@ class Server implements \Box\InjectionAwareInterface
             throw new \LogicException('Your license key is not valid.', 1005);
         }
 
-        $model->pinged_at = date('c');
+        $model->pinged_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
 
         if (!isset($data['host']) || empty($data['host'])) {

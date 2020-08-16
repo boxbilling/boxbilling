@@ -88,9 +88,11 @@ class Guest extends \Api_Abstract
      */
     public function param($data)
     {
-        if(!isset ($data['key'])) {
-            throw new \Box_Exception('Parameter key is missing');
-        }
+        $required = array(
+            'key'    => 'Parameter key is missing',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
+
         return $this->getService()->getPublicParamValue($data['key']);
     }
 
@@ -107,13 +109,13 @@ class Guest extends \Api_Abstract
     /**
      * Gets period title by identifier
      * 
-     * @param string $code - Perdio code name, ie: 1M => Monthly
+     * @param string $code - Period code name, ie: 1M => Monthly
      * 
      * @return string 
      */
     public function period_title($data)
     {
-        $code = isset($data['code']) ? $data['code'] : NULL;
+        $code = $this->di['array_get']($data, 'code', NULL);
         if($code == NULL) {
             return '-';
         }
@@ -137,7 +139,7 @@ class Guest extends \Api_Abstract
     }
 
     /**
-     * If called from template file this function returnes current url
+     * If called from template file this function returns current url
      * @return string
      */
     public function current_url()
@@ -176,5 +178,12 @@ class Guest extends \Api_Abstract
             }
         }
         return $locale;
+    }
+
+    public function get_pending_messages()
+    {
+        $messages = $this->getService()->getPendingMessages();
+        $this->getService()->clearPendingMessages();
+        return $messages;
     }
 }

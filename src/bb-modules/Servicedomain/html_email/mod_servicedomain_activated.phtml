@@ -1,6 +1,6 @@
 {% block subject %}[{{ guest.system_company.name }}] {{ order.title }}{% endblock %}
 {% block content %}
-{% filter markdown %}
+{% apply markdown %}
 
 Hello {{ c.first_name }} {{ c.last_name }},
 
@@ -15,9 +15,9 @@ Your website and  email will not function until the domain has propagated.
 
 
 Domain: {{ service.domain }}     
-Registration date: {{order.created_at|date}}    
+Registration date: {{order.created_at|bb_date}}
 Registration period: {{service.period}} Year(s)   
-{% if order.expires_at %}Expires on: {{ order.expires_at|date }} {% endif %}     
+{% if order.expires_at %}Expires on: {{ order.expires_at|bb_date }} {% endif %}
 {% if order.period %}
 Billing period:
 
@@ -39,5 +39,5 @@ Manage order: {{ 'order/service/manage'|link }}/{{ order.id }}
 
 {{ guest.system_company.signature }}
 
-{% endfilter %}
+{% endapply %}
 {% endblock %}

@@ -256,7 +256,7 @@ CREATE TABLE `client_balance` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `client_id` bigint(20) DEFAULT NULL,
   `type` varchar(100) DEFAULT NULL,
-  `rel_id` int(11) DEFAULT NULL,
+  `rel_id` varchar(20) DEFAULT NULL,
   `amount` decimal(18,2) DEFAULT '0.00',
   `description` text,
   `created_at` datetime DEFAULT NULL,
@@ -729,8 +729,8 @@ CREATE TABLE `metered_usage` (
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `mod_email_queue` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `to` varchar(255) NOT NULL,
-  `from` varchar(255) NOT NULL,
+  `recipient` varchar(255) NOT NULL,
+  `sender` varchar(255) NOT NULL,
   `subject` varchar(255) NOT NULL,
   `content` text NOT NULL,
   `to_name` varchar(255) DEFAULT NULL,
@@ -952,7 +952,7 @@ CREATE TABLE `promo` (
 CREATE TABLE `queue` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) DEFAULT NULL,
-  `mod` varchar(255) DEFAULT NULL,
+  `module` varchar(255) DEFAULT NULL,
   `timeout` bigint(20) DEFAULT NULL,
   `iteration` int(10) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,

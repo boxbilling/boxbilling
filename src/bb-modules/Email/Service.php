@@ -30,19 +30,20 @@ class Service implements \Box\InjectionAwareInterface
     {
         $query = 'SELECT * FROM activity_client_email';
 
-        $search = isset($data['search']) ? $data['search'] : NULL;
-        $client_id = isset($data['client_id']) ? $data['client_id'] : NULL;
+        $search = $this->di['array_get']($data, 'search', NULL);
+        $client_id = $this->di['array_get']($data, 'client_id', NULL);
 
         $where = array();
         $bindings = array();
 
         if($search) {
             $search = "%$search%";
-            $where[] = '(m.sender LIKE :sender OR m.recipients LIKE :recipient OR m.subject LIKE :subject OR m.content_text LIKE :context_text)';
+            $where[] = '(sender LIKE :sender OR recipients LIKE :recipient OR subject LIKE :subject OR content_text LIKE :content_text OR content_html LIKE :content_html)';
             $bindings[':sender'] = $search;
             $bindings[':recipient'] = $search;
             $bindings[':subject'] = $search;
             $bindings[':content_text'] = $search;
+            $bindings[':content_html'] = $search;
         }
 
         if(NULL !== $client_id) {
@@ -110,6 +111,9 @@ class Service implements \Box\InjectionAwareInterface
         return true;
     }
 
+    /**
+     * @param \Model_EmailTemplate $t
+     */
     public function getVars($t)
     {
         $json = $this->di['crypt']->decrypt($t->vars, 'v8JoWZph12DYSY4aq8zpvWdzC');
@@ -119,9 +123,10 @@ class Service implements \Box\InjectionAwareInterface
 
     public function sendTemplate($data)
     {
-        if (!isset($data['code'])) {
-            throw new \Box_Exception('Template code not passed');
-        }
+        $required = array(
+            'code' => 'Template code not passed',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
         if (!isset($data['to']) && !isset($data['to_staff']) && !isset($data['to_client'])) {
             throw new \Box_Exception('Receiver is not defined. Define to or to_client or to_staff parameter');
@@ -148,8 +153,7 @@ class Service implements \Box\InjectionAwareInterface
         $db = $this->di['db'];
 
         $t  = $db->findOne('EmailTemplate', 'action_code = :action', array(':action' => $data['code']));
-        if (!is_object($t)) {
-            //if(BB_DEBUG) error_log('Email template '.$data['code'] . ' not found. Creating new template');
+        if (!$t instanceof \Model_EmailTemplate) {
 
             list($s, $c, $desc, $enabled, $mod) = $this->_getDefaults($data);
             $t              = $db->dispense('EmailTemplate');
@@ -172,8 +176,8 @@ class Service implements \Box\InjectionAwareInterface
         $systemService =  $this->di['mod_service']('system');
 
         list($subject, $content) = $this->_parse($t, $vars);
-        $from      = isset($data['from']) ? $data['from'] : $systemService->getParamValue('company_email');
-        $from_name = isset($data['from_name']) ? $data['from_name'] : $systemService->getParamValue('company_name');
+        $from      = $this->di['array_get']($data, 'from', $systemService->getParamValue('company_email'));
+        $from_name = $this->di['array_get']($data, 'from_name', $systemService->getParamValue('company_name'));
         $sent      = false;
 
         if (!$from){
@@ -192,7 +196,7 @@ class Service implements \Box\InjectionAwareInterface
             $sent    = $this->sendMail($to, $from, $subject, $content, $to_name, $from_name, $customer['id']);
         } else {
             $to      = $data['to'];
-            $to_name = isset($data['to_name']) ? $data['to_name'] : null;
+            $to_name = $this->di['array_get']($data, 'to_name', null);
             $sent    = $this->sendMail($to, $from, $subject, $content, $to_name, $from_name);
         }
 
@@ -201,17 +205,19 @@ class Service implements \Box\InjectionAwareInterface
 
     public function sendMail($to, $from, $subject, $content, $to_name = null, $from_name = null, $client_id = null, $admin_id = null)
     {
-        return $this->_queue($to, $from, $subject, $content, $to_name, $from_name, $client_id, $admin_id);
+        $email = $this->_queue($to, $from, $subject, $content, $to_name, $from_name, $client_id, $admin_id);
+        $this->_sendFromQueue($email);
+        return true;
     }
 
     private function _getDefaults($data)
     {
         $code = $data['code'];
 
-        $enabled     = false;
-        $subject     = isset($data['default_subject']) ? $data['default_subject'] : ucwords(str_replace('_', ' ', $code));
-        $content     = isset($data['default_template']) ? $data['default_template'] : $this->_getVarsString();
-        $description = isset($data['default_description']) ? $data['default_description'] : null;
+        $enabled     = 0;
+        $subject     = $this->di['array_get']($data, 'default_subject', ucwords(str_replace('_', ' ', $code)));
+        $content     = $this->di['array_get']($data, 'default_template', $this->_getVarsString());
+        $description = $this->di['array_get']($data, 'default_description', null);
 
         $matches = array();
         preg_match("/mod_([a-zA-Z0-9]+)_([a-zA-Z0-9]+)/i", $code, $matches);
@@ -225,17 +231,13 @@ class Service implements \Box\InjectionAwareInterface
             preg_match('#{%.?block subject.?%}((.*?)+){%.?endblock.?%}#', $tpl, $ms);
             if (isset($ms[1])) {
                 $subject = $ms[1];
-            } else {
-                //if(BB_DEBUG) error_log(sprintf('Default email template %s does not have subject block', $code));
             }
 
             $mc = array();
             preg_match('/{%.?block content.?%}((.*?\n)+){%.?endblock.?%}/m', $tpl, $mc);
             if (isset($mc[1])) {
                 $content = $mc[1];
-                $enabled = true;
-            } else {
-                //if(BB_DEBUG) error_log(sprintf('Default email template %s does not have content block', $code));
+                $enabled = 1;
             }
         }
 
@@ -247,8 +249,8 @@ class Service implements \Box\InjectionAwareInterface
         $db                = $this->di['db'];
 
         $queue             = $db->dispense('ModEmailQueue');
-        $queue->to         = $to;
-        $queue->from       = $from;
+        $queue->recipient  = $to;
+        $queue->sender     = $from;
         $queue->subject    = $subject;
         $queue->content    = $content;
         $queue->to_name    = $to_name;
@@ -256,8 +258,8 @@ class Service implements \Box\InjectionAwareInterface
         $queue->client_id  = $client_id;
         $queue->admin_id   = $admin_id;
         $queue->status     = 'unsent';
-        $queue->created_at = date('c');
-        $queue->updated_at = date('c');
+        $queue->created_at = date('Y-m-d H:i:s');
+        $queue->updated_at = date('Y-m-d H:i:s');
         $queue->priority   = 1;
         $queue->tries      = 0;
         try {
@@ -266,12 +268,12 @@ class Service implements \Box\InjectionAwareInterface
             error_log($e->getMessage());
         }
 
-        return true;
+        return $queue;
     }
 
     private function _getVarsString()
     {
-        $str = '{% filter markdown %}' . PHP_EOL . PHP_EOL;
+        $str = '{% apply markdown %}' . PHP_EOL . PHP_EOL;
         $str .= 'This email template was automatically generated by BoxBilling extension.   ' . PHP_EOL;
         $str .= 'Template is ready to be modified.   ' . PHP_EOL;
         $str .= 'Email template is just like BoxBilling theme file.   ' . PHP_EOL;
@@ -279,18 +281,15 @@ class Service implements \Box\InjectionAwareInterface
         $str .= 'Example API usage in email template:' . PHP_EOL . PHP_EOL;
         $str .= '{{ guest.system_version }}' . PHP_EOL . PHP_EOL;
         $str .= "{{ now|date('Y-m-d') }}" . PHP_EOL . PHP_EOL;
-        $str .= '{% endfilter %}';
+        $str .= '{% endapply %}';
         return $str;
     }
 
-    private function _parse($t, $vars)
+    private function _parse(\Model_EmailTemplate $t, $vars)
     {
-        $dd = $vars;
-        $pc = $this->di['twig']->render($t->content);
-
-        $dd = $vars;
-        $ps = $this->di['twig']->render($t->subject);
-
+        $systemService = $this->di['mod_service']('System');
+        $pc = $systemService->renderString($t->content, false, $vars);
+        $ps = $systemService->renderString($t->subject, false, $vars);
         return array($ps, $pc);
     }
 
@@ -305,14 +304,10 @@ class Service implements \Box\InjectionAwareInterface
         $mail->setSubject($email->subject);
         $mail->addTo($email->recipients);
 
-        $this->_logEmailToDb($email); //Logging to DB
-
-        $systemService = $this->di['mod_service']('system');
-        $settings        = $systemService->getEmailSettings();
-        $transport       = isset($settings['mailer']) ? $settings['mailer'] : 'sendmail';
+        $settings      = $this->di['mod_config']('email');
+        $transport       = $this->di['array_get']($settings, 'mailer', 'sendmail');
 
         if (APPLICATION_ENV == 'testing') {
-            //print $mail->getSubject() . PHP_EOL . $mail->getBody();
             if (BB_DEBUG) error_log('Skipping email sending in test environment');
             return true;
         }
@@ -328,37 +323,15 @@ class Service implements \Box\InjectionAwareInterface
         return true;
     }
 
-    private function _logEmailToDb(\Model_ActivityClientEmail $email)
-    {
-        $query = "INSERT INTO activity_client_email
-                    SET client_id = :client_id,
-                        sender = :sender,
-                        recipients = :recipients,
-                        subject = :subject,
-                        content_html = :content_html,
-                        content_text = :content_text
-                    ";
 
-        $bindings = array(
-            ':client_id'    => $email->client_id,
-            ':sender'       => $email->sender,
-            ':recipients'   => $email->recipients,
-            ':subject'      => $email->subject,
-            ':content_html' => $email->content_html,
-            ':content_text' => $email->content_text
-        );
 
-        $di = $this->getDi();
-        $db = $di['db'];
-        $db->exec($query, $bindings);
-    }
 
     public function templateGetSearchQuery($data)
     {
         $query = "SELECT * FROM email_template";
 
-        $code   = isset($data['code']) ? $data['code'] : NULL;
-        $search = isset($data['search']) ? $data['search'] : NULL;
+        $code   = $this->di['array_get']($data, 'code', NULL);
+        $search = $this->di['array_get']($data, 'search', NULL);
 
         $where    = array();
         $bindings = array();
@@ -416,23 +389,22 @@ class Service implements \Box\InjectionAwareInterface
             $model->category = $category;
         }
 
+        $systemService = $this->di['mod_service']('System');
         $vars = $this->getVars($model);
 
         if (isset($subject)) {
             // check subject syntax before saving
             // should throw exception if render fails
-            //$this->template_render(array('id' => $model->id, '_tpl' => $subject));
             $vars['_tpl'] = $subject;
-            $this->di['twig']->render($subject, $vars);
+            $systemService->renderString($subject, false, $vars);
             $model->subject = $subject;
         }
 
         if (isset($content)) {
             // check content syntax before saving
             // should throw exception if render fails
-            //$this->template_render(array('id' => $model->id, '_tpl' => $content));
             $vars['_tpl'] = $content;
-            $this->di['twig']->render($content, $vars);
+            $systemService->renderString($content, false, $vars);
 
             $model->content = $content;
         }
@@ -453,11 +425,6 @@ class Service implements \Box\InjectionAwareInterface
 
         $d = array('code' => $code);
         list($s, $c) = $this->_getDefaults($d);
-       /* $new = array(
-            'id'      => $t->id,
-            'subject' => $s,
-            'content' => $c,
-        );*/
         $this->updateTemplate($t, null, null, $s, $c);
         $this->di['logger']->info('Reset email template: %s', $t->action_code);
 
@@ -488,7 +455,7 @@ class Service implements \Box\InjectionAwareInterface
 
         $this->di['logger']->info('Added new  email template #%s', $modelId);
 
-        return $modelId;
+        return $model;
     }
 
     public function templateBatchGenerate()
@@ -515,15 +482,12 @@ class Service implements \Box\InjectionAwareInterface
                 continue;
             }
 
-            list($s, $c, $desc, $enabled, $mod) = $this->_getDefaults(array('code' => $code));
-            $t              = $this->di['db']->dispense('EmailTemplate');
-            $t->enabled     = $enabled;
-            $t->action_code = $code;
-            $t->category    = $mod;
-            $t->subject     = $s;
-            $t->content     = $c;
-            $t->description = $desc;
-            $this->di['db']->store($t);
+            list($subject, $content, $desc, $enabled, $mod) = $this->_getDefaults(array('code' => $code));
+            $t = $this->templateCreate($code, $subject, $content, $enabled, $mod);
+            if ($desc) {
+                $t->description = $desc;
+                $this->di['db']->store($t);
+            }
         }
 
         $this->di['logger']->info('Generated email templates for installed extensions');
@@ -553,23 +517,20 @@ class Service implements \Box\InjectionAwareInterface
         $mod        = $this->di['mod']('email');
         $settings   = $mod->getConfig();
         $tries      = 0;
-        $time_limit = (isset($settings['time_limit']) ? $settings['time_limit'] : 5) * 60;
+        $time_limit = ($this->di['array_get']($settings, 'time_limit', 5)) * 60;
         $start      = time();
-        while ($this->_sendFromQueue()) {
+        while ($email = $this->di['db']->findOne('ModEmailQueue', ' status = \'unsent\' ORDER BY updated_at ')) {
+            $this->_sendFromQueue($email);
             $tries++;
             if (isset($settings['queue_once']) && $settings['queue_once'] && $settings['queue_once'] <= $tries) break;
             if ($time_limit && time() - $start > $time_limit) break;
         }
     }
 
-    private function _sendFromQueue()
+    private function _sendFromQueue(\Model_ModEmailQueue $queue)
     {
-        $queue = $this->di['db']->findOne('ModEmailQueue', ' status = \'unsent\' ORDER BY updated_at ');
-        if (!$queue) return false;
-
         $queue->status = 'sending';
         $this->di['db']->store($queue);
-
         //@demoVersionLimit
         if (!$this->di['license']->isPro()) {
             $queue->content .= PHP_EOL;
@@ -582,20 +543,20 @@ class Service implements \Box\InjectionAwareInterface
 
         if (isset($settings['log_enabled']) && $settings['log_enabled']) {
             $activityService =  $this->di['mod_service']('activity');
-            $activityService->logEmail($queue->subject, $queue->client_id, $queue->from, $queue->to, $queue->content);
+            $activityService->logEmail($queue->subject, $queue->client_id, $queue->sender, $queue->recipient, $queue->content);
         }
 
-        $transport = isset($settings['mailer']) ? $settings['mailer'] : 'sendmail';
+        $transport = $this->di['array_get']($settings, 'mailer', 'sendmail');
 
         try {
             $mail = $this->di['mail'];
             $mail->setSubject($queue->subject);
             $mail->setBodyHtml($queue->content);
-            $mail->setFrom($queue->from, $queue->from_name);
-            $mail->addTo($queue->to, $queue->to_name);
+            $mail->setFrom($queue->sender, $queue->from_name);
+            $mail->addTo($queue->recipient, $queue->to_name);
 
             if (APPLICATION_ENV != 'production') {
-                //if(BB_DEBUG) error_log('Skip email sending');
+                error_log('Skip email sending. Application ENV: '.APPLICATION_ENV);
                 return true;
             }
 
@@ -610,7 +571,7 @@ class Service implements \Box\InjectionAwareInterface
             if ($queue->priority) $queue->priority--;
             $queue->status = 'unsent';
             $queue->tries++;
-            $queue->updated_at = date('c');
+            $queue->updated_at = date('Y-m-d H:i:s');
             $this->di['db']->store($queue);
             if ($settings['cancel_after'] && $queue->tries > $settings['cancel_after']) $this->di['db']->trash($queue);
         }

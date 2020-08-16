@@ -15,8 +15,6 @@ class Box_AppAdmin extends Box_App
 {
     public function init()
     {
-        $this->options->redirect_on_auth_exception = '/staff/login';
-
         $m = $this->di['mod']($this->mod);
         $controller = $m->getAdminController();
         $controller->register($this);
@@ -24,7 +22,7 @@ class Box_AppAdmin extends Box_App
 
     public function render($fileName, $variableArray = array())
     {
-        $template = $this->getTwig()->loadTemplate($fileName.'.phtml');
+        $template = $this->getTwig()->load($fileName.'.phtml');
         return $template->render($variableArray);
     }
 

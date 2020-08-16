@@ -1,7 +1,7 @@
 <?php
 namespace Box\Tests\Mod\Support\Api;
 
-class Api_AdminTest extends \PHPUnit_Framework_TestCase
+class Api_AdminTest extends \BBTestCase
 {
     /**
      * @var \Box\Mod\Support\Api\Admin
@@ -43,6 +43,9 @@ class Api_AdminTest extends \PHPUnit_Framework_TestCase
         $di          = new \Box_Di();
         $di['pager'] = $paginatorMock;
         $di['db']    = $dbMock;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $this->adminApi->setDi($di);
 
         $this->adminApi->setService($serviceMock);
@@ -334,10 +337,24 @@ class Api_AdminTest extends \PHPUnit_Framework_TestCase
         $serviceMock = $this->getMockBuilder('\Box\Mod\Support\Service')
             ->setMethods(array('getExpired', 'autoClose'))->getMock();
         $serviceMock->expects($this->atLeastOnce())->method('getExpired')
-            ->will($this->returnValue(array(new \Model_SupportTicket(), new \Model_SupportTicket())));
+            ->will($this->returnValue(array(array('id' => 1), array('id' => 2))));
         $serviceMock->expects($this->atLeastOnce())->method('autoClose')
             ->will($this->returnValue(true));
 
+        $ticket = new \Model_SupportTicket();
+        $ticket->loadBean(new \RedBeanPHP\OODBBean());
+        $ticket->id = rand(1, 100);
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('getExistingModelById')
+            ->will($this->returnValue($ticket));
+
+        $this->adminApi->setService($serviceMock);
+        $di           = new \Box_Di();
+        $di['db']     = $dbMock;
+        $di['logger'] = $this->getMockBuilder('Box_Log')->getMock();
+        $this->adminApi->setDi($di);
         $this->adminApi->setService($serviceMock);
 
         $result = $this->adminApi->batch_ticket_auto_close(array());
@@ -354,13 +371,20 @@ class Api_AdminTest extends \PHPUnit_Framework_TestCase
         $serviceMock = $this->getMockBuilder('\Box\Mod\Support\Service')
             ->setMethods(array('getExpired', 'autoClose'))->getMock();
         $serviceMock->expects($this->atLeastOnce())->method('getExpired')
-            ->will($this->returnValue(array($ticket, $ticket)));
+            ->will($this->returnValue(array(array('id' => 1), array('id' => 2))));
         $serviceMock->expects($this->atLeastOnce())->method('autoClose')
             ->will($this->returnValue(null));
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('getExistingModelById')
+            ->will($this->returnValue($ticket));
+
 
         $this->adminApi->setService($serviceMock);
         $di           = new \Box_Di();
         $di['logger'] = $this->getMockBuilder('Box_Log')->getMock();
+        $di['db']     = $dbMock;
         $this->adminApi->setDi($di);
         $result = $this->adminApi->batch_ticket_auto_close(array());
 
@@ -479,6 +503,9 @@ class Api_AdminTest extends \PHPUnit_Framework_TestCase
         $di          = new \Box_Di();
         $di['pager'] = $paginatorMock;
         $di['db']    = $dbMock;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $this->adminApi->setDi($di);
 
         $this->adminApi->setService($serviceMock);
@@ -745,6 +772,9 @@ class Api_AdminTest extends \PHPUnit_Framework_TestCase
 
         $di          = new \Box_Di();
         $di['pager'] = $paginatorMock;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $this->adminApi->setDi($di);
 
         $this->adminApi->setService($serviceMock);
@@ -925,6 +955,9 @@ class Api_AdminTest extends \PHPUnit_Framework_TestCase
         $di          = new \Box_Di();
         $di['pager'] = $paginatorMock;
         $di['db']    = $dbMock;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $this->adminApi->setDi($di);
 
         $this->adminApi->setService($serviceMock);
@@ -1032,6 +1065,9 @@ class Api_AdminTest extends \PHPUnit_Framework_TestCase
 
         $di              = new \Box_Di();
         $di['validator'] = $validatorMock;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $this->adminApi->setDi($di);
 
         $this->adminApi->setService($serviceMock);
@@ -1158,6 +1194,9 @@ class Api_AdminTest extends \PHPUnit_Framework_TestCase
         $di              = new \Box_Di();
         $di['validator'] = $validatorMock;
         $di['db']     = $dbMock;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $this->adminApi->setDi($di);
 
         $this->adminApi->setService($serviceMock);

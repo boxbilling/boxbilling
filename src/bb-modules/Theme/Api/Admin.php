@@ -34,9 +34,10 @@ class Admin extends \Api_Abstract
      */
     public function get($data)
     {
-        if(!isset($data['code'])) {
-            throw new \Box_Exception('Theme code is missing');
-        }
+        $required = array(
+            'code'    => 'Theme code is missing',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
         return $this->getService()->loadTheme($data['code']);
     }
@@ -49,16 +50,18 @@ class Admin extends \Api_Abstract
      */
     public function select($data)
     {
-        if(!isset($data['code'])) {
-            throw new \Box_Exception('Theme code is missing');
-        }
+        $required = array(
+            'code'    => 'Theme code is missing',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
+
         $theme = $this->getService()->getTheme($data['code']);
 
         $systemService = $this->di['mod_service']('system');
         if($theme->isAdminAreaTheme()) {
-            $systemService->updateParam('admin_theme', $data['code']);
+            $systemService->setParamValue('admin_theme', $data['code']);
         } else {
-            $systemService->updateParam('theme', $data['code']);
+            $systemService->setParamValue('theme', $data['code']);
         }
 
         $this->di['logger']->info('Changed default theme');
@@ -75,12 +78,11 @@ class Admin extends \Api_Abstract
      */
     public function preset_delete($data)
     {
-        if(!isset($data['code'])) {
-            throw new \Box_Exception('Theme code is missing');
-        }
-        if(!isset($data['preset'])) {
-            throw new \Box_Exception('Theme preset name is missing');
-        }
+        $required = array(
+            'code'    => 'Theme code is missing',
+            'preset'    => 'Theme preset name is missing',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
         $service = $this->getService();
 
@@ -100,12 +102,11 @@ class Admin extends \Api_Abstract
      */
     public function preset_select($data)
     {
-        if(!isset($data['code'])) {
-            throw new \Box_Exception('Theme code is missing');
-        }
-        if(!isset($data['preset'])) {
-            throw new \Box_Exception('Theme preset name is missing');
-        }
+        $required = array(
+            'code'    => 'Theme code is missing',
+            'preset'    => 'Theme preset name is missing',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
         $service = $this->getService();
         $theme = $service->getTheme($data['code']);

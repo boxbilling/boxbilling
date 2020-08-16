@@ -30,7 +30,8 @@ function handler_error($number, $message, $file, $line)
     return false;
 }
 
-function handler_exception(Exception $e)
+// Removed Exception type. Some errors are thrown as exceptions causing fatal errors.
+function handler_exception($e)
 {
     if(APPLICATION_ENV == 'testing') {
         print $e->getMessage() . PHP_EOL;
@@ -60,7 +61,7 @@ function handler_exception(Exception $e)
         print sprintf('<p>Code: <em>%s</em></p>', $e->getCode());
     }
     print sprintf('<p>%s</p>', $e->getMessage());
-    print sprintf('<p><a href="http://www.boxbilling.com/docs/search.html?q=%s" target="_blank">Look for detailed error explanation</a></p>', urlencode($e->getMessage()));
+    print sprintf('<p><a href="http://docs.boxbilling.com/en/latest/search.html?q=%s&check_keywords=yes&area=default" target="_blank">Look for detailed error explanation</a></p>', urlencode($e->getMessage()));
 
     if(defined('BB_DEBUG') && BB_DEBUG) {
         print sprintf('<em>%s</em>', 'Set BB_DEBUG to FALSE, to hide the message below');
@@ -100,7 +101,7 @@ if(!file_exists($configPath) || 0 == filesize( $configPath )) {
     $base_url .= preg_replace('@/+$@','',dirname($_SERVER['SCRIPT_NAME'])).'/';
     $url = $base_url . 'install/index.php';
     $configFile = pathinfo($configPath, PATHINFO_BASENAME);
-    $msg = sprintf("There doesn't seem to be a <em>$configFile</em> file or bb-config.php file does not contain required configuration parameters. I need this before we can get started. Need more help? <a target='_blank' href='http://www.boxbilling.com/docs/search.html?q=install'>We got it</a>. You can create a <em>$configFile</em> file through a web interface, but this doesn't work for all server setups. The safest way is to manually create the file.</p><p><a href='%s' class='button'>Continue with BoxBilling installation</a>", $url);
+    $msg = sprintf("There doesn't seem to be a <em>$configFile</em> file or bb-config.php file does not contain required configuration parameters. I need this before we can get started. Need more help? <a target='_blank' href='http://docs.boxbilling.com/en/latest/reference/installation.html'>We got it</a>. You can create a <em>$configFile</em> file through a web interface, but this doesn't work for all server setups. The safest way is to manually create the file.</p><p><a href='%s' class='button'>Continue with BoxBilling installation</a>", $url);
     throw new Exception($msg, 101);
 }
 
@@ -119,7 +120,7 @@ define('BB_SSL',            (substr($config['url'], 0, 5) === 'https'));
 if($config['sef_urls']) {
     define('BB_URL_API',    $config['url'] . 'api/');
 } else {
-    define('BB_URL_API',    $config['url'] . 'index.php/api/');
+    define('BB_URL_API',    $config['url'] . 'index.php?_url=/api/');
 }
 
 if($config['debug']) {
@@ -136,40 +137,12 @@ ini_set('log_errors', '1');
 ini_set('html_errors', FALSE);
 ini_set('error_log', BB_PATH_LOG . '/php_error.log');
 
-$lang = (isset($_COOKIE) && isset($_COOKIE['BBLANG']) && !empty($_COOKIE['BBLANG'])) ? $_COOKIE['BBLANG'] : $config['locale'];
-$domain = 'messages';
-$codeset = "UTF-8";
-if(!function_exists('gettext')) {
-    require_once BB_PATH_LIBRARY . '/php-gettext/gettext.inc';
-    T_setlocale(LC_MESSAGES, $lang.'.'.$codeset);
-    T_setlocale(LC_TIME, $lang.'.'.$codeset);
-    T_bindtextdomain($domain, BB_PATH_LANGS);
-    T_bind_textdomain_codeset($domain, $codeset);
-    T_textdomain($domain);
-} else {
-    @putenv('LANG='.$lang.'.'.$codeset);
-    @putenv('LANGUAGE='.$lang.'.'.$codeset);
-    // set locale
-    if (!defined('LC_MESSAGES')) define('LC_MESSAGES', 5);
-    if (!defined('LC_TIME')) define('LC_TIME', 2);
-    setlocale(LC_MESSAGES, $lang.'.'.$codeset);
-    setlocale(LC_TIME, $lang.'.'.$codeset);
-    bindtextdomain($domain, BB_PATH_LANGS);
-    if(function_exists('bind_textdomain_codeset')) bind_textdomain_codeset($domain, $codeset);
-    textdomain($domain);
-    
-    function __($msgid, array $values = NULL)
-    {
-        if(empty($msgid)) return null;
-        $string = gettext($msgid);
-        return empty($values) ? $string : strtr($string, $values);
-    }
-}
-
 // Strip magic quotes from request data.
 if (function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()) {
     // Create lamba style unescaping function (for portability)
     $quotes_sybase = strtolower(ini_get('magic_quotes_sybase'));
+
+    /* create_function deprecated in PHP 7.2
     $unescape_function = (empty($quotes_sybase) || $quotes_sybase === 'off') ? 'stripslashes($value)' : 'str_replace("\'\'","\'",$value)';
     $stripslashes_deep = create_function('&$value, $fn', '
         if (is_string($value)) {
@@ -177,7 +150,16 @@ if (function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()) {
         } else if (is_array($value)) {
             foreach ($value as &$v) $fn($v, $fn);
         }
-    ');
+    ');  */
+
+    $stripslashes_deep = function(&$value, $fn){
+        if (is_string($value)) {
+            $value = (empty($quotes_sybase) || $quotes_sybase === 'off') ? stripslashes($value) : str_replace("\'\'","\'",$value);
+        } else if (is_array($value)) {
+            foreach ($value as &$v) $fn($v, $fn);
+        }
+    };
+
 
     // Unescape data
     $stripslashes_deep($_POST, $stripslashes_deep);

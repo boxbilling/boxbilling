@@ -169,10 +169,6 @@ class Service implements InjectionAwareInterface
         $stmt->execute();
         $stats['last_month'] = $stmt->fetchColumn();
 
-//        $stmt = $pdo->prepare(sprintf($total_query, $table));
-//        $stmt->execute();
-//        $stats['this_year'] = $stmt->fetchColumn();
-
         return $stats;
     }
 
@@ -313,7 +309,7 @@ class Service implements InjectionAwareInterface
 
     public function getClientCountries($data)
     {
-        $limit = isset($data['limit']) ? (int)$data['limit']: 10;
+        $limit = (int) $this->di['array_get']($data, 'limit', 10);
         $q="
             SELECT country, COUNT(id) as clients
             FROM `client`
@@ -329,7 +325,7 @@ class Service implements InjectionAwareInterface
 
     public function getSalesByCountry($data)
     {
-        $limit = isset($data['limit']) ? (int)$data['limit']: 10;
+        $limit = (int) $this->di['array_get']($data, 'limit', 10);
         $q="
             SELECT buyer_country, COUNT(id) as sales
             FROM `invoice`
@@ -392,6 +388,10 @@ class Service implements InjectionAwareInterface
         return $this->_genFlotArray($results, $time_from, $time_to);
     }
 
+    /**
+     * @param integer $time_from
+     * @param integer $time_to
+     */
     private function _genFlotArray($results, $time_from, $time_to)
     {
         $data = array();
@@ -399,7 +399,7 @@ class Service implements InjectionAwareInterface
         do {
             $time_from = strtotime('+1 day',$time_from);
             $dom = date('Y-m-d', $time_from);
-            $c = (isset($results[$dom])) ? $results[$dom] : 0;
+            $c = $this->di['array_get']($results, $dom, 0);
             $data[] = array($time_from * 1000, (int)$c);
         } while ($time_to > $time_from);
         array_pop($data);

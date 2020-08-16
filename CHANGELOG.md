@@ -1,4 +1,148 @@
-Release 4.11.3(2014-11-03)
+Release 4.19
+------------------------------------------------------------------------------
+* Cron job memory optimizations
+* Remove convertToModels() function as it uses too much RAM
+* Fixed issue with custom fields of client
+* Forum search fix
+* Product and admin area icons will be using absolute path in order to avoid issues when BoxBilling installed in subfolder
+* Domain privacy button issue fixed
+* Various bug fixes and improvements
+
+Release 4.18
+------------------------------------------------------------------------------
+* Select TLDs for free domain registration on shared hosting product
+* Add grunt task runner for developers (creates minified js and css files in admin_default theme)
+* Updated Stripe payment gateway;
+* Updated Serviceboxbillinglicense module;
+* Improved batch paid invoice activation process;
+* Updated 2checkout payment adapter;
+* Domain transfer option added to `huraga` theme #327
+* Updated Paypal payment gateway to avoid 403 forbidden error on IPN request
+* Added phone code filter;
+* Various bug fixes and improvements
+
+Release 4.17
+------------------------------------------------------------------------------
+* Added Stripe payment adapter
+* Send email notification to helpdesk email address (created new mod_support_helpdesk_ticket_open email template)
+* Added `Cookieconsent` extension for displaying notification about cookies which is required by EU cookie law 
+* Updated Plesk server manager to Plesk 12
+* Updated mod_email_queue and queue tables columns. Removed MySql reserved words.
+* Updated domain product type startingFromPrice value calculation.
+* Updated SolusVM module
+* Updated Ispconfig3 server manager
+* Implemented license collision protection
+* Updated ResellerClub and all of it's derived registrars to cope with changed authentication logic (from now on only API key is supported)
+* Various bug fixes and improvements
+
+Release 4.16
+------------------------------------------------------------------------------
+* Compatibility with MySQL 5.6 Datetime values updated to meet MySQL STRICT_TRANS_TABLES mode rules.
+* Fixed add funds issue when admin marked invoice as paid.
+* Invoices can be downloaded as PDF in boxbilling theme
+* Added language picker for client in huraga theme
+* Updated translations:
+  * merged admin.po into messages.po 
+  * added language selector in admin area
+* Bluepay payment adapter no longer supported. Adapter file moved to boxbilling/extensions repository
+* Added direct link to "support ticket message"
+* Added new gateway - Pay with Client Balance.
+* Implemented Google Recaptcha v2 - Tough on bots Easy on humans
+* BoxBilling API improvements
+* Updated orderbutton popup style in mobile view
+* Seo module updates
+* Users must verify theirs emails after email confirmations setting is enabled
+* Compatibility with PHP7
+* Generate VAT rules for each EU country according to it's standart rate
+* Various bug fixes and improvements
+
+Release 4.15 (2015-02-19)
+------------------------------------------------------------------------------
+* New module:
+    * paidsupport
+* Module orderbutton javascript code improvements
+* ResellerClub adapter supports API-KEY as authorization option.
+* Fix admin area prefix issue.
+* Added getEuVat() method which returns standard tax rate for each EU country
+* Tax rules edit option added
+* Notification message shown when email confirmed.
+* Tax rules can be generated automatically for all EU countries
+* Fix UTF-8 currency symbols issue in PDF and print invoice view.
+* Fixed onAfterGuestPublicTicketReply and onAfterGuestPublicTicketOpen hooks. Incorrect public ticket subject was sent to staff members.
+* Added option to approve client email for admin
+* DotTk registrar adapter is not supported.
+* Initiate translation DI object after bb-di is included
+* Spamchecker module updated
+* When removing product from cart it's addons will remove automatically
+* Missing email queue table after upgrade fixed
+* admin/currency/get API call returns array
+* Admin can generate invoice PDF from admin area
+* Scheduled tasks fix
+* Spyc package moved to composer
+* Countries list updated
+* Missing `mod_cron_check` file fixed for custom templates
+* Various bug fixes and improvements
+
+Release 4.14 (2015-02-03)
+------------------------------------------------------------------------------
+
+* New event hook:  
+    * onBeforeThemeSettingsSave
+* New API(client) calls:
+    * invoice_get_tax_rate
+    * client_is_taxable
+    * client_balance_get_total
+* Taxes are shown in the cart checkout summary
+* Email templates are generated after install
+* Footer links fix for Huraga theme
+* Only one coupon code name can be created and used;
+* Fixed CKEditor issue with canned responses
+* Custom payment gateway render error fixed
+* Fixed Centova Cast module
+* Password hash in email resolved
+* Orderbutton module popup improved
+* Client email confirmation logic updated
+* Variables in email templates list fixed
+* Generating email templates just after installing of BoxBilling
+* Allow only text in Notification module messages
+* Fixed constantly regenerating invoices issue
+* Add funds logic updated
+* Settings of footer links updated
+* Security and performance fixes and updates
+
+Release 4.13 (2015-01-15)
+------------------------------------------------------------------------------
+
+* Vagrant configuration added
+* Interkassa payment adapter updated to v2
+* Interlaced images support added to invoice pdf
+* Fixed email template rendering 
+* Web cron removed
+* Fixed file manager module.
+* Fixed date format in emails
+* Added button to remove item from cart popup
+* <!--more--> tag added for news/blog posts
+* WebMoney payment adapter updated
+* Ability to set how many hours user needs to wait until consequent support ticket submission
+* Added search in canned responses
+* Code improvements and optimisations
+* YouHosting module rewritten to work with open source version
+* Translation implementation reworked.
+* Bug fixes
+
+
+Release 4.12 (2014-12-02)
+------------------------------------------------------------------------------
+
+* Client password hashing updated (php password_* functions are being used)
+* Added mass delete functionality in admin area
+* Ability to set promotional code for client groups
+* Ability for administrator to edit order config
+* ResellerClub adapter updated
+* Pagination fixed
+* Bug fixes
+
+Release 4.11.3 (2014-11-03)
 ------------------------------------------------------------------------------
 
 * BoxBilling going open source

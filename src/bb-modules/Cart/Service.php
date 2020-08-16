@@ -39,6 +39,9 @@ class Service implements InjectionAwareInterface
         return array($sql, array());
     }
 
+    /**
+     * @return \Model_Cart
+     */
     public function getSessionCart()
     {
         $sqlBindings = array(':session_id' => $this->di['session']->getId());
@@ -60,8 +63,8 @@ class Service implements InjectionAwareInterface
         $cart              = $this->di['db']->dispense('Cart');
         $cart->session_id  = $this->di['session']->getId();
         $cart->currency_id = $currency->id;
-        $cart->created_at  = date('c');
-        $cart->updated_at  = date('c');
+        $cart->created_at  = date('Y-m-d H:i:s');
+        $cart->updated_at  = date('Y-m-d H:i:s');
         $this->di['db']->store($cart);
 
         return $cart;
@@ -75,22 +78,23 @@ class Service implements InjectionAwareInterface
         $productService = $product->getService();
 
         if ($this->isRecurrentPricing($product)) {
-            if (!isset($data['period'])) {
-                throw new \Box_Exception('Period parameter not passed');
-            }
+            $required = array(
+                'period' => 'Period parameter not passed',
+            );
+            $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
             if (!$this->isPeriodEnabledForProduct($product, $data['period'])) {
                 throw new \Box_Exception('Selected billing period is not valid');
             }
         }
 
-        $qty = isset($data['quantity']) ? $data['quantity'] : 1;
+        $qty =  $this->di['array_get']($data, 'quantity', 1);
         // check stock
         if (!$this->isStockAvailable($product, $qty)) {
             throw new \Box_Exception("I'm afraid we are out of stock.");
         }
 
-        $addons = isset($data['addons']) ? $data['addons'] : array();
+        $addons =  $this->di['array_get']($data, 'addons', array());
         unset($data['id']);
         unset($data['addons']);
 
@@ -114,14 +118,17 @@ class Service implements InjectionAwareInterface
                 $addon = $productService->getAddonById($id);
                 if ($addon instanceof \Model_Product) {
                     if ($this->isRecurrentPricing($addon)) {
-                        if (!isset($ac['period'])) {
-                            throw new \Box_Exception('Addon period parameter not passed');
-                        }
+
+                        $required = array(
+                            'period' => 'Addon period parameter not passed',
+                        );
+                        $this->di['validator']->checkRequiredParamsForArray($required, $ac);
 
                         if (!$this->isPeriodEnabledForProduct($addon, $ac['period'])) {
                             throw new \Box_Exception('Selected billing period is not valid for addon');
                         }
                     }
+                    $ac['parent_id'] = $product->id;
 
                     $list[] = array(
                         'product' => $addon,
@@ -202,17 +209,29 @@ class Service implements InjectionAwareInterface
         return true;
     }
 
-    public function removeProduct(\Model_Cart $cart, $id)
+    public function removeProduct(\Model_Cart $cart, $id, $removeAddons = true)
     {
-        $bindings    = array(
-            ':cart_id'    => $cart->id,
-            ':id' => $id
+        $bindings = array(
+            ':cart_id' => $cart->id,
+            ':id'      => $id
         );
 
         $cartProduct = $this->di['db']->findOne('CartProduct', 'id = :id AND cart_id = :cart_id', $bindings);
         if (!$cartProduct instanceof \Model_CartProduct) {
             throw new \Box_Exception('Product not found');
         }
+
+        if ($removeAddons) {
+            $allCartProducts = $this->di['db']->find('CartProduct', 'cart_id = :cart_id', array(':cart_id' => $cart->id));
+            foreach ((array)$allCartProducts as $cProduct) {
+                $config = json_decode($cProduct->config, true);
+                if (isset($config['parent_id']) && $config['parent_id'] == $cartProduct->product_id) {
+                    $this->di['db']->trash($cProduct);
+                    $this->di['logger']->info('Removed product addon from shopping cart');
+                }
+            }
+        }
+
         $this->di['db']->trash($cartProduct);
 
         $this->di['logger']->info('Removed product from shopping cart');
@@ -237,7 +256,7 @@ class Service implements InjectionAwareInterface
             $this->di['db']->trash($cartProduct);
         }
         $cart->promo_id   = NULL;
-        $cart->updated_at = date('c');
+        $cart->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($cart);
 
         return true;
@@ -246,7 +265,7 @@ class Service implements InjectionAwareInterface
     public function removePromo(\Model_Cart $cart)
     {
         $cart->promo_id   = NULL;
-        $cart->updated_at = date('c');
+        $cart->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($cart);
 
         $this->di['logger']->info('Removed promo code from shopping cart #%s', $cart->id);
@@ -305,7 +324,7 @@ class Service implements InjectionAwareInterface
         foreach ($products as $product) {
             $p = $this->cartProductToApiArray($product);
             $total += $p['total'];
-            $items_discount += $p['discount'];
+            $items_discount += $p['discount_price'];
             $items[] = $p;
         }
 
@@ -320,7 +339,8 @@ class Service implements InjectionAwareInterface
         $result          = array(
             'promocode' => $promocode,
             'discount'  => $items_discount,
-            'total'     => $total,
+            'subtotal'  => $total,
+            'total'     => $total - $items_discount,
             'items'     => $items,
             'currency'  => $currencyService->toApiArray($currency),
         );
@@ -403,10 +423,7 @@ class Service implements InjectionAwareInterface
     public function checkoutCart(\Model_Cart $cart, \Model_Client $client, $gateway_id = null)
     {
         if ($cart->promo_id) {
-            $promo = $this->di['db']->load('Promo', $cart->promo_id);
-            if(!$promo instanceof \Model_Promo){
-                throw new \Box_Exception('Promo not found');
-            }
+            $promo = $this->di['db']->getExistingModelById('Promo', $cart->promo_id, 'Promo not found');
             if (!$this->isClientAbleToUsePromo($client, $promo)) {
                 throw new \Box_Exception('You have already used this promo code. Please remove promo code and checkout again.', null, 9874);
             }
@@ -422,7 +439,7 @@ class Service implements InjectionAwareInterface
             )
         );
 
-        list($order, $invoice_id, $orders) = $this->createFromCart($client, $gateway_id);
+        list($order, $invoice, $orders) = $this->createFromCart($client, $gateway_id);
 
         $this->rm($cart);
 
@@ -447,9 +464,8 @@ class Service implements InjectionAwareInterface
         );
 
         // invoice may not be created if total is 0
-        if ($invoice_id) {
-            $idata                  = $this->di['db']->getExistingModelById('Invoice', $invoice_id, 'Invoice not found');
-            $result['invoice_hash'] = $idata->hash;
+        if ($invoice instanceof \Model_Invoice && $invoice->status == \Model_Invoice::STATUS_UNPAID) {
+            $result['invoice_hash'] = $invoice->hash;
         }
 
         return $result;
@@ -457,18 +473,12 @@ class Service implements InjectionAwareInterface
 
     public function createFromCart(\Model_Client $client, $gateway_id = null)
     {
-        $cart         = $this->getSessionCart();
-        $cartProducts = $this->di['db']->find('CartProduct', 'cart_id = :cart_id', array(':cart_id' => $cart->id));
-        if (count($cartProducts) == 0) {
+        $cart = $this->getSessionCart();
+        $ca = $this->toApiArray($cart);
+        if (count($ca['items']) == 0) {
             throw new \Box_Exception('Can not checkout empty cart.');
         }
 
-        $ca = $this->toApiArray($cart);
-
-        $create_invoice = true;
-        if ($ca['total'] == 0) {
-            $create_invoice = false;
-        }
 
         $currency = $this->di['db']->getExistingModelById('Currency', $cart->currency_id, 'Currency not found.');
 
@@ -506,19 +516,19 @@ class Service implements InjectionAwareInterface
             $order->title          = $item['title'];
             $order->currency       = $currency->code;
             $order->service_type   = $item['type'];
-            $order->unit           = isset($item['unit']) ? $item['unit'] : NULL;
-            $order->period         = isset($item['period']) ? $item['period'] : NULL;
-            $order->quantity       = isset($item['quantity']) ? $item['quantity'] : NULL;
+            $order->unit           = $this->di['array_get']($item, 'unit', NULL);
+            $order->period         = $this->di['array_get']($item, 'period', NULL);
+            $order->quantity       = $this->di['array_get']($item, 'quantity', NULL);
             $order->price          = $item['price'] * $currency->conversion_rate;
             $order->discount       = $item['discount_price'] * $currency->conversion_rate;
             $order->status         = \Model_ClientOrder::STATUS_PENDING_SETUP;
-            $order->notes          = isset($item['notes']) ? $item['notes'] : NULL;
+            $order->notes          = $this->di['array_get']($item, 'notes', NULL);
             $order->config         = json_encode($item);
-            $order->created_at     = date('c');
-            $order->updated_at     = date('c');
+            $order->created_at     = date('Y-m-d H:i:s');
+            $order->updated_at     = date('Y-m-d H:i:s');
             $this->di['db']->store($order);
 
-            $orders[] = $order->id;
+            $orders[] = $order;
 
             // mark promo as used
             if ($cart->promo_id) {
@@ -536,7 +546,7 @@ class Service implements InjectionAwareInterface
 
             $invoice_items[] = array(
                 'title'    => $order->title,
-                'price'    => $order->price - ($order->discount),
+                'price'    => $order->price * $order->quantity,
                 'quantity' => $order->quantity,
                 'unit'     => $order->unit,
                 'period'   => $order->period,
@@ -545,6 +555,16 @@ class Service implements InjectionAwareInterface
                 'rel_id'   => $order->id,
                 'task'     => \Model_InvoiceItem::TASK_ACTIVATE,
             );
+
+            if($order->discount > 0){ 
+                $invoice_items[] = array(
+                    'title'    => __('Discount: :product', array(':product' => $order->title)),
+                    'price'    => $order->discount * -1,
+                    'quantity' => 1,
+                    'unit'     => 'discount',
+                    'rel_id'    => $order->id,
+                );
+            }
 
             if ($item['setup_price'] > 0) {
                 $setup_price     = ($item['setup_price'] * $currency->conversion_rate) - ($item['discount_setup'] * $currency->conversion_rate);
@@ -565,50 +585,64 @@ class Service implements InjectionAwareInterface
             $i++;
         }
 
-        if ($create_invoice) {
+        if ($ca['total'] > 0) { //crete invoice if order total > 0
 
             $invoiceService =  $this->di['mod_service']('Invoice');
-            $invoice_id = $invoiceService->prepareInvoice($client, array('client_id' => $client->id, 'items' => $invoice_items, 'gateway_id' => $gateway_id));
-            $invoiceModel = $this->di['db']->load('Invoice', $invoice_id);
-            $invoiceService->approveInvoice($invoiceModel, array('id' => $invoice_id, 'use_credits' => true));
+            $invoiceModel   = $invoiceService->prepareInvoice($client, array('client_id' => $client->id, 'items' => $invoice_items, 'gateway_id' => $gateway_id));
 
-            foreach ($orders as $oid) {
-                $o                    = $this->di['db']->load('ClientOrder', $oid);
-                $o->unpaid_invoice_id = $invoice_id;
-                $this->di['db']->store($o);
-            }
+            $clientBalanceService = $this->di['mod_service']('Client', 'Balance');
+            $balanceAmount = $clientBalanceService->getClientBalance($client);
+            $useCredits = $balanceAmount >= $ca['total'];
 
-            $result = array($master_order, $invoice_id, $orders);
-        } else {
-            $result = array($master_order, null, $orders);
-        }
+            $invoiceService->approveInvoice($invoiceModel, array('id' => $invoiceModel->id, 'use_credits' => $useCredits));
 
-        //activate orders if product is setup to be activated after order place or order total is $0
-        $orderService = $this->di['mod_service']('Order');
-        foreach ($orders as $oid) {
-
-            $order   = $this->di['db']->load('ClientOrder', $oid);
-            $oa      = $orderService->toApiArray($order, false, $client);
-            $product = $this->di['db']->getExistingModelById('Product', $oa['product_id']);
-            if ($product->setup == \Model_ProductTable::SETUP_AFTER_ORDER || ($product->setup == \Model_ProductTable::SETUP_AFTER_PAYMENT && $oa['total'] - $oa['discount'] <= 0)) {
-                try {
-                    $orderService->activateOrder($order);
-                } catch (\Exception $e) {
-                    error_log($e->getMessage());
-                    $status = 'error';
-                    $notes = 'Order could not be activated after checkout due to error: ' . $e->getMessage();
-                    $orderService->orderStatusAdd($order, $status, $notes);
+            if ($invoiceModel->status == \Model_Invoice::STATUS_UNPAID) {
+                foreach ($orders as $order) {
+                    $order->unpaid_invoice_id = $invoiceModel->id;
+                    $this->di['db']->store($order);
                 }
             }
         }
 
-        return $result;
+        //activate orders if product is setup to be activated after order place or order total is $0
+        $orderService = $this->di['mod_service']('Order');
+        $ids = array();
+        foreach ($orders as $order) {
+            $ids[] = $order->id;
+            $oa      = $orderService->toApiArray($order, false, $client);
+            $product = $this->di['db']->getExistingModelById('Product', $oa['product_id']);
+            try {
+                if ($product->setup == \Model_ProductTable::SETUP_AFTER_ORDER){
+                    $orderService->activateOrder($order);
+                }
+
+                if ($ca['total'] <= 0 && $product->setup == \Model_ProductTable::SETUP_AFTER_PAYMENT && $oa['total'] - $oa['discount'] <= 0){
+                    $orderService->activateOrder($order);
+                }
+
+                if ($ca['total'] > 0 && $product->setup == \Model_ProductTable::SETUP_AFTER_PAYMENT && $invoiceModel->status == \Model_Invoice::STATUS_PAID ){
+                    $orderService->activateOrder($order);
+                }
+            }
+            catch (\Exception $e) {
+                error_log($e->getMessage());
+                $status = 'error';
+                $notes  = 'Order could not be activated after checkout due to error: ' . $e->getMessage();
+                $orderService->orderStatusAdd($order, $status, $notes);
+            }
+        }
+
+        return array(
+            $master_order,
+            isset($invoiceModel) ? $invoiceModel : null,
+            $ids,
+        );
     }
 
     public function usePromo(\Model_Promo $promo)
     {
         $promo->used++;
-        $promo->updated_at = date('c');
+        $promo->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($promo);
     }
 
@@ -637,9 +671,9 @@ class Service implements InjectionAwareInterface
      * Function checks if product is related to other products in cart
      * If relation exists then count discount for this
      *
-     * @param Model_Cart $cart
-     * @param Model_CartProduct $model
-     * @return type
+     * @param \Model_Cart $cart
+     * @param \Model_CartProduct $model
+     * @return number
      */
     protected function getRelatedItemsDiscount(\Model_Cart $cart, \Model_CartProduct $model)
     {
@@ -693,17 +727,9 @@ class Service implements InjectionAwareInterface
         $config = $this->getItemConfig($model);
         $setup = $repo->getProductSetupPrice($product, $config);
         $price = $repo->getProductPrice($product, $config);
-        $qty = isset($config['quantity']) ? $config['quantity'] : 1 ;
+        $qty =  $this->di['array_get']($config, 'quantity', 1) ;
 
         list ($discount_price, $discount_setup) = $this->getProductDiscount($model, $setup);
-
-        $discount_total = $discount_price + $discount_setup;
-
-        $subtotal = ($price * $qty) + $setup;
-        if(abs($discount_total) > $subtotal ) {
-            $discount_total = $subtotal;
-            $discount_price = $subtotal;
-        }
 
         $data = array_merge($config, array(
             'id'            => $model->id,
@@ -715,25 +741,22 @@ class Service implements InjectionAwareInterface
             'unit'          => $repo->getUnit($product),
             'price'         => $price,
             'setup_price'   => $setup,
-            'discount'      => $discount_total,
             'discount_price'=> $discount_price,
             'discount_setup'=> $discount_setup,
-            'total'         => $subtotal - $discount_total,
+            'total'         => ($price * $qty) ,
         ));
         return $data;
     }
 
     public function getProductDiscount(\Model_CartProduct $cartProduct, $setup)
     {
-        $config = $this->getItemConfig($cartProduct);
-        $qty = isset($config['quantity']) ? $config['quantity'] : 1 ;
-
         $cart = $this->di['db']->load('Cart', $cartProduct->cart_id);
         $discount_price = $this->getRelatedItemsDiscount($cart, $cartProduct);
         $discount_setup = 0; // discount for setup price
         if($cart->promo_id) {
             $promo = $this->di['db']->getExistingModelById('Promo', $cart->promo_id, 'Promo not found');
-            $discount_price += $this->getItemPromoDiscount($cartProduct, $promo);
+            //Promo discount should override related item discount
+            $discount_price = $this->getItemPromoDiscount($cartProduct, $promo);
 
             if($promo->freesetup) {
                 $discount_setup = $setup;

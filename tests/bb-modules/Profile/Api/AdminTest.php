@@ -2,7 +2,7 @@
 
 namespace Box\Tests\Mod\Profile\Api;
 
-class AdminTest extends \PHPUnit_Framework_TestCase
+class AdminTest extends \BBTestCase
 {
     public function testGet()
     {
@@ -32,6 +32,7 @@ class AdminTest extends \PHPUnit_Framework_TestCase
             'name'    =>  $model->name,
             'signature'    =>  $model->signature,
             'status'    =>  $model->status,
+            'api_token' => null,
             'created_at'    =>  $model->created_at,
             'updated_at'    =>  $model->updated_at,
         );

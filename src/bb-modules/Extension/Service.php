@@ -55,14 +55,15 @@ class Service implements InjectionAwareInterface
 
     public static function onBeforeAdminCronRun(\Box_Event $event)
     {
-        $api = $event->getApiAdmin();
-        
+        $di               = $event->getDi();
+        $extensionService = $di['mod_service']('extension');
+
         try {
-            $api->extension_get_list();
-        } catch(Exception $e) {
+            $extensionService->getExtensionsList(array());
+        } catch (\Exception $e) {
             error_log($e);
         }
-        
+
         return true;
     }
 
@@ -84,8 +85,8 @@ class Service implements InjectionAwareInterface
 
     public function getSearchQuery($filter)
     {
-        $search = isset($filter['search']) ? $filter['search'] : NULL;
-        $type = isset($filter['type']) ? $filter['type'] : NULL;
+        $search = $this->di['array_get']($filter, 'search', NULL);
+        $type = $this->di['array_get']($filter, 'type', NULL);
 
         $params = array();
         $sql="SELECT * FROM extension
@@ -112,33 +113,34 @@ class Service implements InjectionAwareInterface
         list($sql, $params) = $this->getSearchQuery($filter);
         $installed = $this->di['db']->getAll($sql, $params);
 
-        $has_settings = isset($filter['has_settings']) ? (bool)$filter['has_settings'] : NULL;
-        $only_installed = isset($filter['installed']) ? (bool)$filter['installed'] : NULL;
-        $installed_and_core = isset($filter['active']) ? (bool)$filter['active'] : NULL;
-        $result = array();
+        $has_settings       = $this->di['array_get']($filter, 'has_settings');
+        $only_installed     = $this->di['array_get']($filter, 'installed');
+        $installed_and_core = $this->di['array_get']($filter, 'active');
+        $search             = isset($filter['search']) ? strtolower($filter['search']) : NULL;
+        $result             = array();
 
-        if($installed_and_core) {
+        if ($installed_and_core) {
             $core = $this->di['mod']('extension')->getCoreModules();
-            foreach($core as $core_mod) {
-                $m = $this->di['mod']($core_mod);
-                $manifest = $m->getManifest();
-                $manifest['status'] = 'core';
+            foreach ($core as $core_mod) {
+                $m                        = $this->di['mod']($core_mod);
+                $manifest                 = $m->getManifest();
+                $manifest['status']       = 'core';
                 $manifest['has_settings'] = $m->hasSettingsPage();
-                $result[] = $manifest;
+                $result[]                 = $manifest;
             }
         }
 
-        foreach($installed as $im) {
+        foreach ($installed as $im) {
             $manifest = json_decode($im['manifest'], 1);
-            if(!is_array($manifest)) {
-                error_log('Error decoding module json file. '.$im['name']);
+            if (!is_array($manifest)) {
+                error_log('Error decoding module json file. ' . $im['name']);
                 continue;
             }
-            $m = $this->di['mod']($im['name']);
+            $m                   = $this->di['mod']($im['name']);
             $manifest['version'] = $im['version'];
 
             $manifest['status'] = $im['status'];
-            if($im['type'] == 'mod' && $im['status'] == 'installed' && $m->hasSettingsPage()) {
+            if ($im['type'] == 'mod' && $im['status'] == 'installed' && $m->hasSettingsPage()) {
                 $manifest['has_settings'] = true;
             } else {
                 $manifest['has_settings'] = false;
@@ -147,36 +149,56 @@ class Service implements InjectionAwareInterface
             $result[] = $manifest;
         }
 
-        if(!$only_installed && !$installed_and_core) {
+        if (!$only_installed && !$installed_and_core) {
             //add inactive modules
             $a = $this->_getAvailable();
 
             //unset installed modules
-            foreach($installed as $ins) {
-                if(in_array($ins['name'], $a)) {
+            foreach ($installed as $ins) {
+                if (in_array($ins['name'], $a)) {
                     $key = array_search($ins['name'], $a);
                     unset($a[$key]);
                 }
             }
 
-            foreach($a as $mod) {
-                $m = $this->di['mod']($mod);
-                $manifest = $m->getManifest();
-                $manifest['status'] = null;
+            foreach ($a as $mod) {
+                $m                        = $this->di['mod']($mod);
+                $manifest                 = $m->getManifest();
+                $manifest['status']       = null;
                 $manifest['has_settings'] = false;
 
                 $result[] = $manifest;
             }
         }
 
-        if($has_settings) {
-            foreach ($result as $idx=>$mod) {
-                if(!$mod['has_settings']) {
+        if ($has_settings) {
+            foreach ($result as $idx => $mod) {
+                if (!$mod['has_settings']) {
                     unset($result[$idx]);
                 }
             }
             $result = array_values($result);
         }
+
+        if (!empty($search)) {
+            foreach ($result as $idx => $mod) {
+                if (strpos(strtolower($mod['name']), $search) === false) {
+                    unset($result[$idx]);
+                }
+
+            }
+            $result = array_values($result);
+        }
+
+        foreach ($result as $key => $value){
+            $iconPath = 'images/icons/middlenav/cog.png';
+            $icon_url = $this->di['array_get']($value, 'icon_url');
+            if ($icon_url){
+                $iconPath = $this->di['config']['url'].$icon_url;
+            }
+            $result[$key]['icon_url'] = $iconPath;
+        }
+
         return $result;
     }
 
@@ -209,11 +231,6 @@ class Service implements InjectionAwareInterface
         $staff_service = $this->di['mod_service']('staff');
         $current_mod = null;
         $current_url = null;
-        if($url) {
-            $p = parse_url($url);
-            $path = $p['path'];
-            //@todo
-        }
         $nav = array();
         $subpages = array();
 
@@ -278,6 +295,9 @@ class Service implements InjectionAwareInterface
         return $nav;
     }
 
+    /**
+     * @return \Model_Extension
+     */
     public function findExtension($type, $id)
     {
         $extension = $this->di['db']->findOne('Extension', 'type = ? and name = ? ', array($type, $id));
@@ -307,12 +327,6 @@ class Service implements InjectionAwareInterface
 
             throw new \Box_Exception('Visit extension site for update information.', null, 252);
 
-            /*
-            //@todo perform module update here
-            if(empty($extension->download_url)) {
-                throw new \Box_Exception('Extension :mod does not have download url', array(':mod'=>$data['mod']), 786);
-            }
-            */
             $result = array(
                 'version_old' => $model->version,
                 'version_new' => $latest,
@@ -462,8 +476,7 @@ class Service implements InjectionAwareInterface
                 break;
 
             default:
-                throw new \Box_Exception('Extension does not support auto-install deature. Extension must be installed manually');
-                break;
+                throw new \Box_Exception('Extension does not support auto-install feature. Extension must be installed manually');
         }
 
         if (file_exists($zip)){
@@ -552,8 +565,8 @@ class Service implements InjectionAwareInterface
             $c->extension = $ext;
             $c->meta_key = 'config';
             $c->meta_value = null;
-            $c->created_at = date('c');
-            $c->updated_at = date('c');
+            $c->created_at = date('Y-m-d H:i:s');
+            $c->updated_at = date('Y-m-d H:i:s');
             $this->di['db']->store($c);
             $config = array();
         } else {
@@ -574,7 +587,7 @@ class Service implements InjectionAwareInterface
             WHERE extension = :ext
             AND meta_key = 'config'
             LIMIT 1;
-        ";;
+        ";
 
         $config = json_encode($data);
         $config = $this->di['crypt']->encrypt($config, $this->_getSalt());

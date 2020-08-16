@@ -47,7 +47,9 @@ class Admin implements \Box\InjectionAwareInterface
      */
     public function save_theme_settings(\Box_App $app, $theme)
     {
-        $api = $app->getApiAdmin();
+        $this->di['events_manager']->fire(array('event' => 'onBeforeThemeSettingsSave', 'params' => $_POST));
+
+        $api = $this->di['api_admin'];
 
         $mod = $this->di['mod']('theme');
         $service = $mod->getService();
@@ -95,7 +97,7 @@ class Admin implements \Box\InjectionAwareInterface
 
     public function get_theme(\Box_App $app, $theme)
     {
-        $api = $app->getApiAdmin();
+        $this->di['is_admin_logged'];
 
         $mod = $this->di['mod']('theme');
         $service = $mod->getService();
@@ -115,7 +117,7 @@ class Admin implements \Box\InjectionAwareInterface
 
         $data = array(
             'info'          => $info,
-            'error'         => isset($_GET['error']) ? $_GET['error'] : null,
+            'error'         => $this->di['array_get']($_GET, 'error', null),
             'theme_code'    => $t->getName(),
             'settings_html' => $html,
             'uploaded'      => $t->getUploadedAssets($theme),

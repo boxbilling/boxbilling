@@ -19,7 +19,7 @@ namespace Box\Mod\Product\Api;
 class Guest extends \Api_Abstract
 {
     /**
-     * Get pagineted list of products
+     * Get paginated list of products
      * 
      * @optional bool $show_hidden - also get hidden products. Default false
      * @return type 
@@ -32,7 +32,7 @@ class Guest extends \Api_Abstract
         }
 
         list($sql, $params) = $this->getService()->getProductSearchQuery($data);
-        $per_page = isset($data['per_page']) ? $data['per_page'] : $this->di['pager']->getPer_page();
+        $per_page = $this->di['array_get']($data, 'per_page', $this->di['pager']->getPer_page());
         $pager = $this->di['pager']->getSimpleResultSet($sql, $params, $per_page);
         foreach ($pager['list'] as $key => $item) {
             $model               = $this->di['db']->getExistingModelById('Product', $item['id'], 'Post not found');
@@ -70,8 +70,8 @@ class Guest extends \Api_Abstract
             throw new \Box_Exception('Product ID or slug is missing');
         }
 
-        $id = isset($data['id']) ? $data['id'] : NULL;
-        $slug = isset($data['slug']) ? $data['slug'] : NULL;
+        $id = $this->di['array_get']($data, 'id', NULL);
+        $slug = $this->di['array_get']($data, 'slug', NULL);
 
         $service = $this->getService();
         if($id) {
@@ -96,7 +96,7 @@ class Guest extends \Api_Abstract
         $data['status'] = 'enabled';
         $service = $this->getService();
         list($sql, $params) = $service->getProductCategorySearchQuery($data);
-        $per_page = isset($data['per_page']) ? $data['per_page'] : $this->di['pager']->getPer_page();
+        $per_page = $this->di['array_get']($data, 'per_page', $this->di['pager']->getPer_page());
         $pager = $this->di['pager']->getAdvancedResultSet($sql, $params, $per_page);
         foreach($pager['list'] as $key => $item){
             $category = $this->di['db']->getExistingModelById('ProductCategory', $item['id'], 'Product category not found');
@@ -120,13 +120,13 @@ class Guest extends \Api_Abstract
      * Product configuration must have slider_%s keys
      * 
      * @optional string $type - product type for slider - default = hosting
-     * @optional string $format - return format. Default is array . You can chosse json format, to directly inject to javascript
+     * @optional string $format - return format. Default is array . You can choose json format, to directly inject to javascript
      * @return mixed
      */
     public function get_slider($data)
     {
-        $format = isset($data['format']) ? $data['format'] : null;
-        $type = isset($data['type']) ? $data['type'] : 'hosting';
+        $format = $this->di['array_get']($data, 'format', null);
+        $type = $this->di['array_get']($data, 'type', 'hosting');
         
         $products = $this->di['db']->find('Product', 'type = :type', array(':type' => $type));
         if(count($products) <= 0) {

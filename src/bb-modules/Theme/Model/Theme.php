@@ -86,6 +86,9 @@ class Theme
         return $files;
     }
 
+    /**
+     * @return string
+     */
     public function getSettingsPageHtml()
     {
         $spp = $this->getPathConfig() .DIRECTORY_SEPARATOR. 'settings.html';
@@ -131,7 +134,7 @@ class Theme
     public function getCurrentPreset()
     {
         $array = $this->getSettingsData();
-        return isset($array['current']) ? $array['current'] : 'Default';
+        return isset($array['current'])? $array['current'] :  'Default';
     }
 
     public function getPresetFromSettingsDataFile($preset)
@@ -170,21 +173,24 @@ class Theme
         return $this->getPathConfig() . DIRECTORY_SEPARATOR .'settings_data.json';
     }
 
+    /**
+     * @param string $text
+     */
     private function strip_tags_content($text, $tags = '', $invert = TRUE)
     {
 
         preg_match_all('/<(.+?)[\s]*\/?[\s]*>/si', trim($tags), $tags);
         $tags = array_unique($tags[1]);
 
-        if(is_array($tags) AND count($tags) > 0) {
-            if($invert == FALSE) {
+        if(is_array($tags) && count($tags) > 0) {
+            if($invert === FALSE) {
                 return preg_replace('@<(?!(?:'. implode('|', $tags) .')\b)(\w+)\b.*?>.*?</\1>@si', '', $text);
             }
             else {
                 return preg_replace('@<('. implode('|', $tags) .')\b.*?>.*?</\1>@si', '', $text);
             }
         }
-        elseif($invert == FALSE) {
+        elseif($invert === FALSE) {
             return preg_replace('@<(\w+)\b.*?>.*?</\1>@si', '', $text);
         }
         return $text;

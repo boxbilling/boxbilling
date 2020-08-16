@@ -24,7 +24,7 @@ class Box_Response implements \Box\InjectionAwareInterface
     protected $cookies;
     protected $di;
 
-    function __construct ($content = null, $code = null, $status = null)
+    public function __construct ($content = null, $code = null, $status = null)
     {
 
     }
@@ -54,7 +54,7 @@ class Box_Response implements \Box\InjectionAwareInterface
     }
 
     /**
-     * @param mixed $content_type
+     * @param mixed $contentType
      */
     public function setContentType($contentType, $charset = null)
     {
@@ -75,7 +75,7 @@ class Box_Response implements \Box\InjectionAwareInterface
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getContent()
     {

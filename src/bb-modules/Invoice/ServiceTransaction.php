@@ -40,7 +40,8 @@ class ServiceTransaction implements InjectionAwareInterface
         $this->di['logger']->info('Executed action to process received transactions');
         $received = $this->getReceived();
         foreach($received as $transaction) {
-            $this->preProcessTransaction($transaction);
+            $model = $this->di['db']->getExistingModelById('Transaction', $transaction['id']);
+            $this->preProcessTransaction($model);
         }
         return true;
     }
@@ -49,47 +50,19 @@ class ServiceTransaction implements InjectionAwareInterface
     {
         $this->di['events_manager']->fire(array('event'=>'onBeforeAdminTransactionUpdate', 'params'=>array('id'=>$model->id)));
 
-        if(isset($data['invoice_id'])) {
-            $model->invoice_id = $data['invoice_id'];
-        }
-
-        if(isset($data['txn_id'])) {
-            $model->txn_id = $data['txn_id'];
-        }
-
-        if(isset($data['txn_status'])) {
-            $model->txn_status = $data['txn_status'];
-        }
-
-        if(isset($data['gateway_id'])) {
-            $model->gateway_id = $data['gateway_id'];
-        }
-
-        if(isset($data['amount'])) {
-            $model->amount = $data['amount'];
-        }
-
-        if(isset($data['currency'])) {
-            $model->currency = $data['currency'];
-        }
-
-        if(isset($data['type'])) {
-            $model->type = $data['type'];
-        }
-
-        if(isset($data['note'])) {
-            $model->note = $data['note'];
-        }
-
-        if(isset($data['status'])) {
-            $model->status = $data['status'];
-        }
-
-        if(isset($data['validate_ipn'])) {
-            $model->validate_ipn = $data['validate_ipn'];
-        }
-
-        $model->updated_at = date('c');
+        $model->invoice_id = $this->di['array_get']($data, 'invoice_id', $model->invoice_id);
+        $model->txn_id = $this->di['array_get']($data, 'txn_id', $model->txn_id);
+        $model->txn_status = $this->di['array_get']($data, 'txn_status', $model->txn_status);
+        $model->gateway_id = $this->di['array_get']($data, 'gateway_id', $model->gateway_id);
+        $model->amount = $this->di['array_get']($data, 'amount', $model->amount);
+        $model->currency = $this->di['array_get']($data, 'currency', $model->currency);
+        $model->type = $this->di['array_get']($data, 'type', $model->type);
+        $model->note = $this->di['array_get']($data, 'note', $model->note);
+        $model->status = $this->di['array_get']($data, 'status', $model->status);
+        $model->error = $this->di['array_get']($data, 'error', $model->error);
+        $model->error_code = $this->di['array_get']($data, 'error_code', $model->error_code);
+        $model->validate_ipn = $this->di['array_get']($data, 'validate_ipn', $model->validate_ipn);
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
         $this->di['events_manager']->fire(array('event'=>'onAfterAdminTransactionUpdate', 'params'=>array('id'=>$model->id)));
 
@@ -100,7 +73,8 @@ class ServiceTransaction implements InjectionAwareInterface
     public function createAndProcess($ipn)
     {
         $id = $this->create($ipn);
-        return $this->processTransaction($id);
+        $this->processTransaction($id);
+        return $id;
     }
 
     public function create(array $data)
@@ -116,34 +90,27 @@ class ServiceTransaction implements InjectionAwareInterface
             if(!isset($data['bb_gateway_id'])) {
                 throw new \Box_Exception('Payment gateway id is missing');
             }
-            $invoice = $this->di['db']->load('Invoice', $data['bb_invoice_id']);
-            if(!$invoice instanceof \Model_Invoice) {
-                throw new \Box_Exception('Invoice was not found');
-            }
-
-            $gateway = $this->di['db']->load('PayGateway', $data['bb_gateway_id']);
-            if(!$gateway instanceof \Model_PayGateway) {
-                throw new \Box_Exception('Gateway was not found');
-            }
+            $this->di['db']->getExistingModelById('Invoice', $data['bb_invoice_id'], 'Invoice was not found');
+            $this->di['db']->getExistingModelById('PayGateway', $data['bb_gateway_id'], 'Gateway was not found');
         }
 
         $ipn = array(
             'get'                   =>  (isset($data['get']) && is_array($data['get'])) ? $data['get'] : NULL,
             'post'                  =>  (isset($data['post']) && is_array($data['post'])) ? $data['post'] : NULL,
-            'http_raw_post_data'    =>  isset($data['http_raw_post_data']) ? $data['http_raw_post_data'] : NULL,
-            'server'                =>  isset($data['server']) ? $data['server'] : NULL,
+            'http_raw_post_data'    =>  $this->di['array_get']($data, 'http_raw_post_data', NULL),
+            'server'                =>  $this->di['array_get']($data, 'server', NULL),
         );
 
         $transaction = $this->di['db']->dispense('Transaction');
-        $transaction->gateway_id    = isset($data['bb_gateway_id']) ? $data['bb_gateway_id'] : NULL;
-        $transaction->invoice_id    = isset($data['bb_invoice_id']) ? $data['bb_invoice_id'] : NULL;
-        $transaction->txn_id        = isset($data['txn_id']) ? $data['txn_id'] : NULL;
+        $transaction->gateway_id    = $this->di['array_get']($data, 'bb_gateway_id', NULL);
+        $transaction->invoice_id    = $this->di['array_get']($data, 'bb_invoice_id', NULL);
+        $transaction->txn_id        = $this->di['array_get']($data, 'txn_id', NULL);
         $transaction->status        = 'received';
         $transaction->ip            = $this->di['request']->getClientAddress();
         $transaction->ipn           = json_encode($ipn);
         $transaction->note          = (isset($data['note'])) ? $data['note'] : NULL;
-        $transaction->created_at    = date('c');
-        $transaction->updated_at    = date('c');
+        $transaction->created_at    = date('Y-m-d H:i:s');
+        $transaction->updated_at    = date('Y-m-d H:i:s');
         $newId = $this->di['db']->store($transaction);
 
         $this->di['logger']->info('Received transaction %s from payment gateway %s', $newId, $transaction->gateway_id);
@@ -203,19 +170,19 @@ class ServiceTransaction implements InjectionAwareInterface
                 LEFT JOIN invoice as i on m.invoice_id = i.id
                 WHERE 1 ';
 
-        $id           = isset($data['id']) ? $data['id'] : NULL;
-        $search       = isset($data['search']) ? $data['search'] : NULL;
-        $invoice_hash = isset($data['invoice_hash']) ? $data['invoice_hash'] : NULL;
-        $invoice_id   = isset($data['invoice_id']) ? $data['invoice_id'] : NULL;
-        $gateway_id   = isset($data['gateway_id']) ? $data['gateway_id'] : NULL;
-        $client_id    = isset($data['client_id']) ? $data['client_id'] : NULL;
-        $status       = isset($data['status']) ? $data['status'] : NULL;
-        $currency     = isset($data['currency']) ? $data['currency'] : NULL;
-        $type         = isset($data['type']) ? $data['type'] : NULL;
-        $txn_id       = isset($data['txn_id']) ? $data['txn_id'] : NULL;
+        $id           = $this->di['array_get']($data, 'id', NULL);
+        $search       = $this->di['array_get']($data, 'search', NULL);
+        $invoice_hash = $this->di['array_get']($data, 'invoice_hash', NULL);
+        $invoice_id   = $this->di['array_get']($data, 'invoice_id', NULL);
+        $gateway_id   = $this->di['array_get']($data, 'gateway_id', NULL);
+        $client_id    = $this->di['array_get']($data, 'client_id', NULL);
+        $status       = $this->di['array_get']($data, 'status', NULL);
+        $currency     = $this->di['array_get']($data, 'currency', NULL);
+        $type         = $this->di['array_get']($data, 'type', NULL);
+        $txn_id       = $this->di['array_get']($data, 'txn_id', NULL);
 
-        $date_from = isset($data['date_from']) ? $data['date_from'] : NULL;
-        $date_to   = isset($data['date_to']) ? $data['date_to'] : NULL;
+        $date_from = $this->di['array_get']($data, 'date_from', NULL);
+        $date_to   = $this->di['array_get']($data, 'date_to', NULL);
 
         $params = array();
         if ($id) {
@@ -347,6 +314,9 @@ class ServiceTransaction implements InjectionAwareInterface
         );
     }
 
+    /**
+     * @param \Model_Transaction $model
+     */
     public function oldProcessLogic($model)
     {
         $tx = $this->process($model);
@@ -365,7 +335,7 @@ class ServiceTransaction implements InjectionAwareInterface
                 $model->status = \Model_Transaction::STATUS_ERROR;
                 $model->error = $e->getMessage();
                 $model->error_code = $e->getCode();
-                $model->updated_at = date('c');
+                $model->updated_at = date('Y-m-d H:i:s');
                 $this->di['db']->store($model);
                 throw $e;
             }
@@ -408,7 +378,7 @@ class ServiceTransaction implements InjectionAwareInterface
         }
 
         $ipn = json_decode($tx->ipn, 1);
-        return $adapter->processTransaction($this->di['api_admin'], $id, $ipn, $tx->gateway_id);
+        return $adapter->processTransaction($this->di['api_system'], $id, $ipn, $tx->gateway_id);
     }
 
     public function getReceived()
@@ -417,8 +387,8 @@ class ServiceTransaction implements InjectionAwareInterface
             'status'    =>  'received'
         );
         list($sql, $params) = $this->getSearchQuery($filter);
-        $assocArray = $this->di['db']->getAll($sql, $params);
-        return $this->di['db']->convertToModels('transaction', $assocArray);
+
+        return $this->di['db']->getAll($sql, $params);
     }
 
     public function process($tx)
@@ -451,13 +421,12 @@ class ServiceTransaction implements InjectionAwareInterface
 
                 default:
                     throw new \Box_Exception('Unknown transaction #:id type: :type', array(':id'=>$transaction->id, ':type'=>$transaction->type), 632);
-                    break;
             }
         } catch(\Exception $e) {
             $transaction->status = \Model_Transaction::STATUS_ERROR;
             $transaction->error = $e->getMessage();
             $transaction->error_code = $e->getCode();
-            $transaction->updated_at = date('c');
+            $transaction->updated_at = date('Y-m-d H:i:s');
             $this->di['db']->store($transaction);
 
             if(BB_DEBUG) error_log($e->getMessage());
@@ -472,7 +441,7 @@ class ServiceTransaction implements InjectionAwareInterface
         if($tx->status == \Model_Transaction::STATUS_PROCESSED) {
             $tx->error = NULL;
             $tx->error_code = NULL;
-            $tx->updated_at = date('c');
+            $tx->updated_at = date('Y-m-d H:i:s');
             $this->di['db']->store($tx);
             return true;
         }
@@ -480,7 +449,7 @@ class ServiceTransaction implements InjectionAwareInterface
         if($this->hasProcessedTransaction($tx)) {
 
             $tx->note       .= 'Transaction was marked as processed. Transaction with same ID is already processed';
-            $tx->updated_at = date('c');
+            $tx->updated_at = date('Y-m-d H:i:s');
             $this->di['db']->store($tx);
 
             $this->_markAsProcessed($tx);
@@ -505,7 +474,7 @@ class ServiceTransaction implements InjectionAwareInterface
         $tx->error = NULL;
         $tx->error_code = NULL;
         $tx->status = \Model_Transaction::STATUS_PROCESSED;
-        $tx->updated_at = date('c');
+        $tx->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($tx);
     }
 
@@ -517,7 +486,7 @@ class ServiceTransaction implements InjectionAwareInterface
 
         $invoiceService = $this->di['mod_service']('Invoice');
         $payGatewayService = $this->di['mod_service']('Invoice', 'PayGateway');
-        $ipn = json_decode($tx->ipn);
+        $ipn = $this->di['tools']->decodeJ($tx->ipn);
 
         if(empty($tx->gateway_id)) {
             throw new \Box_Exception('Could not determine transaction origin. Transaction payment gateway is unknown.', null, 701);
@@ -588,7 +557,7 @@ class ServiceTransaction implements InjectionAwareInterface
         }
 
         $tx->status     = \Model_Transaction::STATUS_APPROVED;
-        $tx->updated_at = date('c');
+        $tx->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($tx);
 
         return $tx;
@@ -663,8 +632,8 @@ class ServiceTransaction implements InjectionAwareInterface
         $s->amount = $tx->amount;
         $s->currency = $invoice->currency;
         $s->status = 'active';
-        $s->created_at = date('c');
-        $s->updated_at = date('c');
+        $s->created_at = date('Y-m-d H:i:s');
+        $s->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($s);
 
         $this->_markAsProcessed($tx);
@@ -681,7 +650,7 @@ class ServiceTransaction implements InjectionAwareInterface
         $serviceSubscription = $this->di['mod_service']("Subscription");
         $model = $this->di['db']->load('Subscription', $tx->s_id);
         if(!$model instanceof \Model_Subscription) {
-            throw new \Box_Exception('Subscription #:id was not found. Could not unsusbscribe', array(':id'=>$tx->s_id));
+            throw new \Box_Exception('Subscription #:id was not found. Could not unsubscribe', array(':id'=>$tx->s_id));
         }
 
         $serviceSubscription->unsubscribe($model);
@@ -733,8 +702,8 @@ class ServiceTransaction implements InjectionAwareInterface
         $credit->rel_id = $tx->id;
         $credit->description = "Invoice #".$proforma->id . ' payment received from transaction #'.$tx->id;
         $credit->amount = $tx->amount;
-        $credit->created_at = date('c');
-        $credit->updated_at = date('c');
+        $credit->created_at = date('Y-m-d H:i:s');
+        $credit->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($credit);
     }
 

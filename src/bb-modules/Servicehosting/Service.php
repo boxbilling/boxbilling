@@ -107,15 +107,9 @@ class Service implements InjectionAwareInterface, MeteredInterface
         $c = $orderService->getConfig($order);
         $this->validateOrderData($c);
 
-        $server = $this->di['db']->load('ServiceHostingServer', $c['server_id']);
-        if(!$server instanceof \Model_ServiceHostingServer) {
-            throw new \Box_Exception('Server from order configuration was not found');
-        }
+        $server = $this->di['db']->getExistingModelById('ServiceHostingServer', $c['server_id'], 'Server from order configuration was not found');
 
-        $hp = $this->di['db']->load('ServiceHostingHp', $c['hosting_plan_id']);
-        if(!$hp instanceof \Model_ServiceHostingHp) {
-            throw new \Box_Exception('Hosting plan from order configuration was not found');
-        }
+        $hp = $this->di['db']->getExistingModelById('ServiceHostingHp', $c['hosting_plan_id'], 'Hosting plan from order configuration was not found');
 
         $model = $this->di['db']->dispense('ServiceHosting');
         $model->client_id = $order->client_id;
@@ -124,9 +118,9 @@ class Service implements InjectionAwareInterface, MeteredInterface
         $model->sld = $c['sld'];
         $model->tld = $c['tld'];
         $model->ip = $server->ip;
-        $model->reseller = isset($c['reseller']) ? $c['reseller'] : FALSE;
-        $model->created_at = date('c');
-        $model->updated_at = date('c');
+        $model->reseller = $this->di['array_get']($c, 'reseller', false);
+        $model->created_at = date('Y-m-d H:i:s');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
 
         return $model;
@@ -149,8 +143,8 @@ class Service implements InjectionAwareInterface, MeteredInterface
         if(isset($c['username']) && !empty($c['username'])) {
             $username = $c['username'];
         } else {
-            $username = $this->_generateUsername();
-        }
+            $username = $this->_generateUsername($model->sld.$model->tld);
+        }        
         
         $model->username = $username;
         $model->pass = $pass;
@@ -171,7 +165,7 @@ class Service implements InjectionAwareInterface, MeteredInterface
      *
      * @todo
      * @param \Model_ClientOrder $order
-     * @return void
+     * @return boolean
      */
     public function action_renew(\Model_ClientOrder $order)
     {
@@ -183,14 +177,14 @@ class Service implements InjectionAwareInterface, MeteredInterface
         }
         //@todo ?
 
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
         return true;
     }
 
     /**
      * @param \Model_ClientOrder $order
-     * @return void
+     * @return boolean
      */
     public function action_suspend(\Model_ClientOrder $order)
     {
@@ -202,14 +196,14 @@ class Service implements InjectionAwareInterface, MeteredInterface
         list($adapter, $account) = $this->_getAM($model);
         $adapter->suspendAccount($account);
 
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
         return true;
     }
 
     /**
      * @param \Model_ClientOrder $order
-     * @return void
+     * @return boolean
      */
     public function action_unsuspend(\Model_ClientOrder $order)
     {
@@ -221,14 +215,14 @@ class Service implements InjectionAwareInterface, MeteredInterface
         list($adapter, $account) = $this->_getAM($model);
         $adapter->unsuspendAccount($account);
 
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
         return true;
     }
 
     /**
      * @param \Model_ClientOrder $order
-     * @return void
+     * @return boolean
      */
     public function action_cancel(\Model_ClientOrder $order)
     {
@@ -240,18 +234,22 @@ class Service implements InjectionAwareInterface, MeteredInterface
         list($adapter, $account) = $this->_getAM($model);
         $adapter->cancelAccount($account);
 
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
         return true;
     }
 
     /**
      * @param \Model_ClientOrder $order
-     * @return void
+     * @return boolean
      */
     public function action_uncancel(\Model_ClientOrder $order)
     {
         $this->action_create($order);
+        $orderService = $this->di['mod_service']('order');
+        $model = $orderService->getOrderService($order);
+        list($adapter, $account) = $this->_getAM($model);
+        $adapter->createAccount($account);
         return true;
     }
 
@@ -274,14 +272,14 @@ class Service implements InjectionAwareInterface, MeteredInterface
 
     public function changeAccountPlan(\Model_ClientOrder $order, \Model_ServiceHosting $model, \Model_ServiceHostingHp $hp)
     {
+        $model->service_hosting_hp_id = $hp->id;
         if($this->_performOnService($order)){
             $package = $this->getServerPackage($hp);
             list($adapter, $account) = $this->_getAM($model);
             $adapter->changeAccountPackage($account, $package);
         }
 
-        $model->service_hosting_hp_id = $hp->id;
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
         $this->di['logger']->info('Changed hosting plan of account #%s', $model->id);
         return TRUE;
@@ -293,7 +291,7 @@ class Service implements InjectionAwareInterface, MeteredInterface
             throw new \Box_Exception('Account password is missing or is not valid');
         }
 
-        $u = $data['username'];
+        $u = strtolower($data['username']);
 
         if($this->_performOnService($order)){
             list($adapter, $account) = $this->_getAM($model);
@@ -301,7 +299,7 @@ class Service implements InjectionAwareInterface, MeteredInterface
         }
         
         $model->username = $u;
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
 
         $this->di['logger']->info('Changed hosting account %s username', $model->id);
@@ -322,7 +320,7 @@ class Service implements InjectionAwareInterface, MeteredInterface
         }
         
         $model->ip = $ip;
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
         $this->di['logger']->info('Changed hosting account %s ip', $model->id);
         return TRUE;
@@ -345,7 +343,7 @@ class Service implements InjectionAwareInterface, MeteredInterface
         
         $model->sld = $sld;
         $model->tld = $tld;
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
         $this->di['logger']->info('Changed hosting account %s domain', $model->id);
         return TRUE;
@@ -366,7 +364,7 @@ class Service implements InjectionAwareInterface, MeteredInterface
         }
 
         $model->pass = $p;
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
         $this->di['logger']->info('Changed hosting account %s password', $model->id);
         return TRUE;
@@ -385,7 +383,7 @@ class Service implements InjectionAwareInterface, MeteredInterface
             $model->ip = $updated->getIp();
         }
         
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
         $this->di['logger']->info('Synchronizing hosting account %s with server', $model->id);
         return TRUE;
@@ -415,16 +413,13 @@ class Service implements InjectionAwareInterface, MeteredInterface
     /**
      * Generate username by domain
      *
-     * @param string $domain
      */
-    private function _generateUsername()
+    private function _generateUsername($domain_name)
     {
-        $num1 = rand(10000, 99999);
-        $num2 = rand(10000, 99999);
-        $username = $num1 . $num2;
-        $username = substr($username, 0, 8); // max length 8
-        $username[0] = "u";
-
+		$username =  preg_replace('/[^A-Za-z0-9]/', '', $domain_name);
+		$username = substr($username,0,7);
+		$randnum = rand(0, 9);
+        $username = $username . $randnum;
         return $username;
     }
 
@@ -461,7 +456,7 @@ class Service implements InjectionAwareInterface, MeteredInterface
             ->setUsername($model->username)
             ->setReseller($model->reseller)
             ->setDomain($model->sld . $model->tld)
-            ->setPassword($model->getTmpPass())
+            ->setPassword($model->pass)
             ->setNs1($server->ns1)
             ->setNs2($server->ns2)
             ->setNs3($server->ns3)
@@ -534,13 +529,15 @@ class Service implements InjectionAwareInterface, MeteredInterface
 
     private function _getDomainTuple($data)
     {
-        if(!isset($data['domain'])) {
-            throw new \Box_Exception('Hosting product must have domain configuration');
-        }
+        $required = array(
+            'domain' => 'Hosting product must have domain configuration',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
-        if(!isset($data['domain']['action'])) {
-            throw new \Box_Exception('Domain action is missing');
-        }
+        $required = array(
+            'action' => 'Domain action is missing',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data['domain']);
 
         if($data['domain']['action'] == 'owndomain') {
             $sld = $data['domain']['owndomain_sld'];
@@ -548,23 +545,25 @@ class Service implements InjectionAwareInterface, MeteredInterface
         }
 
         if($data['domain']['action'] == 'register') {
-            if(!isset($data['domain']['register_sld'])) {
-                throw new \Box_Exception('Hosting product must have defined register_sld parameter');
-            }
-            if(!isset($data['domain']['register_tld'])) {
-                throw new \Box_Exception('Hosting product must have defined register_tld parameter');
-            }
+
+            $required = array(
+                'register_sld' => 'Hosting product must have defined register_sld parameter',
+                'register_tld' => 'Hosting product must have defined register_tld parameter',
+            );
+            $this->di['validator']->checkRequiredParamsForArray($required, $data['domain']);
+
             $sld = $data['domain']['register_sld'];
             $tld = $data['domain']['register_tld'];
         }
 
         if($data['domain']['action'] == 'transfer') {
-            if(!isset($data['domain']['transfer_sld'])) {
-                throw new \Box_Exception('Hosting product must have defined transfer_sld parameter');
-            }
-            if(!isset($data['domain']['transfer_tld'])) {
-                throw new \Box_Exception('Hosting product must have defined transfer_tld parameter');
-            }
+
+            $required = array(
+                'transfer_sld' => 'Hosting product must have defined transfer_sld parameter',
+                'transfer_tld' => 'Hosting product must have defined transfer_tld parameter',
+            );
+            $this->di['validator']->checkRequiredParamsForArray($required, $data['domain']);
+
             $sld = $data['domain']['transfer_sld'];
             $tld = $data['domain']['transfer_tld'];
         }
@@ -582,7 +581,7 @@ class Service implements InjectionAwareInterface, MeteredInterface
             $model->ip = $data['ip'];
         }
 
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
 
         $this->di['logger']->info('Updated hosting account %s without sending actions to server', $model->id);
@@ -651,34 +650,33 @@ class Service implements InjectionAwareInterface, MeteredInterface
         return array($sql, array());
     }
 
-    public function createServer($name, $ip, $manager, $extras)
+    public function createServer($name, $ip, $manager, $data)
     {
         $model = $this->di['db']->dispense('ServiceHostingServer');
         $model->name = $name;
         $model->ip = $ip;
 
-        $model->hostname = isset($extras['hostname']) ? $extras['hostname'] : NULL;
-        $model->assigned_ips = isset($extras['assigned_ips']) ? $extras['assigned_ips'] : NULL;
-        $model->active = isset($extras['active']) ? $extras['active'] : 1;
+        $model->hostname     = $this->di['array_get']($data, 'hostname');
+        $model->assigned_ips = $this->di['array_get']($data, 'assigned_ips');
+        $model->active       = $this->di['array_get']($data, 'active', 1);
+        $model->status_url   = $this->di['array_get']($data, 'status_url');
+        $model->max_accounts = $this->di['array_get']($data, 'max_accounts');
 
-        $model->status_url = isset($extras['status_url']) ? $extras['status_url'] : NULL;
-        $model->max_accounts = isset($extras['max_accounts']) ? $extras['max_accounts'] : NULL;
+        $model->ns1 = $this->di['array_get']($data, 'ns1');
+        $model->ns2 = $this->di['array_get']($data, 'ns2');
+        $model->ns3 = $this->di['array_get']($data, 'ns3');
+        $model->ns4 = $this->di['array_get']($data, 'ns4');
 
-        $model->ns1 = isset($extras['ns1']) ? $extras['ns1'] : NULL;
-        $model->ns2 = isset($extras['ns2']) ? $extras['ns2'] : NULL;
-        $model->ns3 = isset($extras['ns3']) ? $extras['ns3'] : NULL;
-        $model->ns4 = isset($extras['ns4']) ? $extras['ns4'] : NULL;
+        $model->manager    = $manager;
+        $model->username   = $this->di['array_get']($data, 'username');
+        $model->password   = $this->di['array_get']($data, 'password');
+        $model->accesshash = $this->di['array_get']($data, 'accesshash');
+        $model->port       = $this->di['array_get']($data, 'port');
+        $model->secure     = $this->di['array_get']($data, 'secure', 0);
 
-        $model->manager = $manager;
-        $model->username = isset($extras['username']) ? $extras['username'] : NULL;
-        $model->password = isset($extras['password']) ? $extras['password'] : NULL;
-        $model->accesshash = isset($extras['accesshash']) ? $extras['accesshash'] : NULL;
-        $model->port = isset($extras['port']) ? $extras['port'] : NULL;
-        $model->secure = isset($extras['secure']) ? $extras['secure'] : 0;
-
-        $model->created_at = date('c');
-        $model->updated_at = date('c');
-        $newId = $this->di['db']->store($model);
+        $model->created_at = date('Y-m-d H:i:s');
+        $model->updated_at = date('Y-m-d H:i:s');
+        $newId             = $this->di['db']->store($model);
 
         $this->di['logger']->info('Added new hosting server %s', $newId);
 
@@ -693,78 +691,36 @@ class Service implements InjectionAwareInterface, MeteredInterface
         return true;
     }
 
-    public function updateServer(\Model_ServiceHostingServer $model, array $data){
+    public function updateServer(\Model_ServiceHostingServer $model, array $data)
+    {
+        $model->name     = $this->di['array_get']($data, 'name', $model->name);
+        $model->ip       = $this->di['array_get']($data, 'ip', $model->ip);
+        $model->hostname = $this->di['array_get']($data, 'hostname', $model->hostname);
 
-        if(isset($data['name'])) {
-            $model->name = $data['name'];
-        }
-
-        if(isset($data['ip'])) {
-            $model->ip = $data['ip'];
-        }
-
-        if(isset($data['hostname'])) {
-            $model->hostname = $data['hostname'];
-        }
-
-        if(isset($data['assigned_ips'])) {
-            $fn = create_function('&$val', '$val = trim($val);');
-            $array = explode(PHP_EOL, $data['assigned_ips']);
-            array_walk($array, $fn);
-            $array = array_diff($array, array(''));
+        $assigned_ips = $this->di['array_get']($data, 'assigned_ips', '');
+        if (!empty($assigned_ips)) {
+            $array               = explode(PHP_EOL, $data['assigned_ips']);
+            $array               = array_map('trim', $array);
+            $array               = array_diff($array, array(''));
             $model->assigned_ips = json_encode($array);
         }
 
-        if(isset($data['active'])) {
-            $model->active = $data['active'];
-        }
+        $model->active       = $this->di['array_get']($data, 'active', $model->active);
+        $model->status_url   = $this->di['array_get']($data, 'status_url', $model->status_url);
+        $model->max_accounts = $this->di['array_get']($data, 'max_accounts', $model->max_accounts);
+        $model->ns1          = $this->di['array_get']($data, 'ns1', $model->ns1);
+        $model->ns2          = $this->di['array_get']($data, 'ns2', $model->ns2);
+        $model->ns3          = $this->di['array_get']($data, 'ns3', $model->ns3);
+        $model->ns4          = $this->di['array_get']($data, 'ns4', $model->ns4);
+        $model->manager      = $this->di['array_get']($data, 'manager', $model->manager);
+        $model->accesshash   = $this->di['array_get']($data, 'accesshash', $model->accesshash);
+        $model->port         = $this->di['array_get']($data, 'port', $model->port);
+        $model->secure       = $this->di['array_get']($data, 'secure', $model->secure);
+        $model->username     = $this->di['array_get']($data, 'username', $model->username);
+        $model->password     = $this->di['array_get']($data, 'password', $model->password);
+        $model->accesshash     = $this->di['array_get']($data, 'accesshash', $model->accesshash);
 
-        if(isset($data['status_url'])) {
-            $model->status_url = $data['status_url'];
-        }
-
-        if(isset($data['max_accounts'])) {
-            $model->max_accounts = $data['max_accounts'];
-        }
-
-        if(isset($data['ns1'])) {
-            $model->ns1 = $data['ns1'];
-        }
-        if(isset($data['ns2'])) {
-            $model->ns2 = $data['ns2'];
-        }
-        if(isset($data['ns3'])) {
-            $model->ns3 = $data['ns3'];
-        }
-        if(isset($data['ns4'])) {
-            $model->ns4 = $data['ns4'];
-        }
-
-        if(isset($data['manager'])) {
-            $model->manager = $data['manager'];
-        }
-
-        if(isset($data['username'])) {
-            $model->username = $data['username'];
-        }
-
-        if(isset($data['password'])) {
-            $model->password = $data['password'];
-        }
-
-        if(isset($data['accesshash'])) {
-            $model->accesshash = $data['accesshash'];
-        }
-
-        if(isset($data['port'])) {
-            $model->port = $data['port'];
-        }
-
-        if(isset($data['secure'])) {
-            $model->secure = $data['secure'];
-        }
-
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
 
         $this->di['logger']->info('Update hosting server %s', $model->id);
@@ -857,41 +813,26 @@ class Service implements InjectionAwareInterface, MeteredInterface
         return $result;
     }
 
-    public function updateHp(\Model_ServiceHostingHp $model, $data)
+    public function updateHp(\Model_ServiceHostingHp $model, array $data)
     {
-        if(isset($data['name'])) {
-            $model->name = $data['name'];
-        }
-        if(isset($data['bandwidth'])) {
-            $model->bandwidth = $data['bandwidth'];
-        }
-        if(isset($data['quota'])) {
-            $model->quota = $data['quota'];
-        }
-        if(isset($data['max_addon'])) {
-            $model->max_addon = $data['max_addon'];
-        }
-        if(isset($data['max_ftp'])) {
-            $model->max_ftp = $data['max_ftp'];
-        }
-        if(isset($data['max_sql'])) {
-            $model->max_sql = $data['max_sql'];
-        }
-        if(isset($data['max_pop'])) {
-            $model->max_pop = $data['max_pop'];
-        }
-        if(isset($data['max_sub'])) {
-            $model->max_sub = $data['max_sub'];
-        }
-        if(isset($data['max_park'])) {
-            $model->max_park = $data['max_park'];
-        }
+        $model->name      = $this->di['array_get']($data, 'name', $model->name);
+        $model->bandwidth = $this->di['array_get']($data, 'bandwidth', $model->bandwidth);
+        $model->quota     = $this->di['array_get']($data, 'quota', $model->quota);
+        $model->max_addon = $this->di['array_get']($data, 'max_addon', $model->max_addon);
+        $model->max_ftp   = $this->di['array_get']($data, 'max_ftp', $model->max_ftp);
+        $model->max_sql   = $this->di['array_get']($data, 'max_sql', $model->max_sql);
+        $model->max_pop   = $this->di['array_get']($data, 'max_pop', $model->max_pop);
+        $model->max_sub   = $this->di['array_get']($data, 'max_sub', $model->max_sub);
+        $model->max_park  = $this->di['array_get']($data, 'max_park', $model->max_park);
+
 
         /* add new config value to hosting plan */
         $config = json_decode($model->config, 1);
 
-        if(isset($data['config']) && is_array($data['config'])) {
-            foreach($data['config'] as $key=>$val) {
+        $inConfig = $this->di['array_get']($data, 'config');
+
+        if(is_array($inConfig)) {
+            foreach($inConfig as $key=>$val) {
                 if(isset($config[$key])) {
                     $config[$key] = $val;
                 }
@@ -901,16 +842,14 @@ class Service implements InjectionAwareInterface, MeteredInterface
             }
         }
 
-        if(isset($data['new_config_name']) &&
-            isset($data['new_config_value']) &&
-            !empty($data['new_config_name']) &&
-            !empty($data['new_config_value'])) {
-
-            $config[$data['new_config_name']] = $data['new_config_value'];
+        $newConfigName = $this->di['array_get']($data, 'new_config_name');
+        $newConfigValue = $this->di['array_get']($data, 'new_config_value');
+        if(!empty($newConfigName) && !empty($newConfigValue)) {
+            $config[$newConfigName] = $newConfigValue;
         }
 
         $model->config = json_encode($config);
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
 
         $this->di['logger']->info('Updated hosting plan %s', $model->id);
@@ -922,18 +861,18 @@ class Service implements InjectionAwareInterface, MeteredInterface
         $model = $this->di['db']->dispense('ServiceHostingHp');
         $model->name = $name;
 
-        $model->bandwidth = isset($data['bandwidth']) ? $data['bandwidth'] : 1024 * 1024;
-        $model->quota = isset($data['quota']) ? $data['quota'] : 1024 * 1024;
+        $model->bandwidth = $this->di['array_get']($data, 'bandwidth', 1024 * 1024);
+        $model->quota     = $this->di['array_get']($data, 'quota', 1024 * 1024);
 
-        $model->max_addon = isset($data['max_addon']) ? $data['max_addon'] : 1;
-        $model->max_park = isset($data['max_park']) ? $data['max_park'] : 1;
-        $model->max_sub = isset($data['max_sub']) ? $data['max_sub'] : 1;
-        $model->max_pop = isset($data['max_pop']) ? $data['max_pop'] : 1;
-        $model->max_sql = isset($data['max_sql']) ? $data['max_sql'] : 1;
-        $model->max_ftp = isset($data['max_ftp']) ? $data['max_ftp'] : 1;
+        $model->max_addon = $this->di['array_get']($data, 'max_addon', 1);
+        $model->max_park  = $this->di['array_get']($data, 'max_park', 1);
+        $model->max_sub   = $this->di['array_get']($data, 'max_sub', 1);
+        $model->max_pop   = $this->di['array_get']($data, 'max_pop', 1);
+        $model->max_sql   = $this->di['array_get']($data, 'max_sql', 1);
+        $model->max_ftp   = $this->di['array_get']($data, 'max_ftp', 1);
 
-        $model->created_at = date('c');
-        $model->updated_at = date('c');
+        $model->created_at = date('Y-m-d H:i:s');
+        $model->updated_at = date('Y-m-d H:i:s');
         $newId = $this->di['db']->store($model);
 
         $this->di['logger']->info('Added new hosting plan %s', $newId);
@@ -970,8 +909,6 @@ class Service implements InjectionAwareInterface, MeteredInterface
         $order_service = $this->di['mod_service']('order');
         $log = $order_service->getLogger($order);
         $manager->setLog($log);
-//        $manager->setDi($this->di);
-
         return $manager;
     }
 
@@ -1024,5 +961,29 @@ class Service implements InjectionAwareInterface, MeteredInterface
             throw new \Box_Exception('Could not find main domain product');
         }
         return array('product'=>$d, 'config'=> $dc);
+    }
+
+    /**
+     * @param \Model_Product $product
+     * @return array
+     */
+    public function getFreeTlds(\Model_Product $product)
+    {
+        $config = $this->di['tools']->decodeJ($product->config);
+        $freeTlds = $this->di['array_get']($config, 'free_tlds', array());
+        $result = array();
+        foreach ($freeTlds as $tld){
+            $result[] = array('tld' => $tld);
+        }
+
+        if (empty ($result)) {
+            $query = 'active = 1 and allow_register = 1';
+            $tlds   = $this->di['db']->find('Tld', $query, array());
+            $serviceDomainService = $this->di['mod_service']('Servicedomain');
+            foreach ($tlds as $model) {
+                $result[] = $serviceDomainService->tldToApiArray($model);
+            }
+        }
+        return $result;
     }
 }

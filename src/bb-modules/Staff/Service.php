@@ -133,7 +133,7 @@ class Service implements InjectionAwareInterface
         try {
             $orderModel = $di['db']->load('ClientOrder', $params['id']);
             $orderTicketService = $di['mod_service']('order');
-            $order = $orderTicketService->toApiArray($orderModel, true, $di['loggedin_admin']);
+            $order = $orderTicketService->toApiArray($orderModel, true);
 
             $email = array();
             $email['to_staff']  = true;
@@ -157,12 +157,23 @@ class Service implements InjectionAwareInterface
         try {
             $supportTicketService = $di['mod_service']('support');
             $ticketModel = $supportTicketService->getTicketById($params['id']);
-            $ticket = $supportTicketService->toApiArray($ticketModel, true, $di['loggedin_admin']);
+            $ticket = $supportTicketService->toApiArray($ticketModel, true);
+
+            $helpdeskModel = $di['db']->load('SupportHelpdesk', $ticketModel->support_helpdesk_id);
+            $emailService = $di['mod_service']('email');
+            if (!empty($helpdeskModel->email)) {
+                $email           = array();
+                $email['to']     = $helpdeskModel->email;
+                $email['code']   = 'mod_support_helpdesk_ticket_open';
+                $email['ticket'] = $ticket;
+                $emailService->sendTemplate($email);
+                return true;
+            }
+
             $email = array();
             $email['to_staff']  = true;
             $email['code']      = 'mod_staff_ticket_open';
             $email['ticket']    = $ticket;
-            $emailService = $di['mod_service']('email');
             $emailService->sendTemplate($email);
         } catch(\Exception $exc) {
             error_log($exc->getMessage());
@@ -219,8 +230,8 @@ class Service implements InjectionAwareInterface
         
         try {
             $supportTicketService = $di['mod_service']('support');
-            $ticketModel = $supportTicketService->getTicketById($params['id']);
-            $ticket = $supportTicketService->toApiArray($ticketModel, true);
+            $ticketModel = $supportTicketService->getPublicTicketById($params['id']);
+            $ticket = $supportTicketService->publicToApiArray($ticketModel, true);
             $email = array();
             $email['to_staff']  = true;
             $email['code']      = 'mod_staff_pticket_open';
@@ -260,8 +271,8 @@ class Service implements InjectionAwareInterface
         
         try {
             $supportTicketService = $di['mod_service']('support');
-            $ticketModel = $supportTicketService->getTicketById($params['id']);
-            $ticket = $supportTicketService->toApiArray($ticketModel, true);
+            $ticketModel = $supportTicketService->getPublicTicketById($params['id']);
+            $ticket = $supportTicketService->publicToApiArray($ticketModel, true);
             $email = array();
             $email['to_staff']  = true;
             $email['code']      = 'mod_staff_pticket_reply';
@@ -302,7 +313,7 @@ class Service implements InjectionAwareInterface
 
         $di = $this->getDi();
         $pager = $di['pager'];
-        $per_page = isset($data['per_page']) ? $data['per_page'] : $this->di['pager']->getPer_page();
+        $per_page = $this->di['array_get']($data, 'per_page', $this->di['pager']->getPer_page());
         return $pager->getSimpleResultSet($query, $params, $per_page);
     }
 
@@ -310,9 +321,9 @@ class Service implements InjectionAwareInterface
     {
         $query = "SELECT * FROM admin";
 
-        $search = isset($data['search']) ? $data['search'] : NULL;
-        $status = isset($data['status']) ? $data['status'] : NULL;
-        $no_cron = isset($data['no_cron']) ? (bool)$data['no_cron'] : false;
+        $search = $this->di['array_get']($data, 'search', NULL);
+        $status = $this->di['array_get']($data, 'status', NULL);
+        $no_cron = (bool) $this->di['array_get']($data, 'no_cron', false);
 
         $where = array();
         $bindings = array();
@@ -357,13 +368,13 @@ class Service implements InjectionAwareInterface
         $cron->role = \Model_Admin::ROLE_CRON;
         $cron->admin_group_id = 1;
         $cron->email = $this->di['tools']->generatePassword().'@'.$this->di['tools']->generatePassword().'.com';
-        $cron->pass = uniqid() . microtime();
+        $cron->pass = $this->di['password']->hashIt(uniqid() . microtime());
         $cron->name = "System Cron Job";
         $cron->signature = "";
         $cron->protected = 1;
         $cron->status = 'active';
-        $cron->created_at = date('c');
-        $cron->updated_at = date('c');
+        $cron->created_at = date('Y-m-d H:i:s');
+        $cron->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($cron);
         return $cron;
     }
@@ -395,27 +406,12 @@ class Service implements InjectionAwareInterface
     {
         $this->di['events_manager']->fire(array('event'=>'onBeforeAdminStaffUpdate', 'params'=>array('id'=>$model->id)));
 
-        if(isset($data['email'])) {
-            $model->email = $data['email'];
-        }
-
-        if(isset($data['admin_group_id'])) {
-            $model->admin_group_id = $data['admin_group_id'];
-        }
-
-        if(isset($data['name'])) {
-            $model->name = $data['name'];
-        }
-
-        if(isset($data['status'])) {
-            $model->status = $data['status'];
-        }
-
-        if(isset($data['signature'])) {
-            $model->signature = $data['signature'];
-        }
-
-        $model->updated_at = date('c');
+        $model->email = $this->di['array_get']($data, 'email', $model->email);
+        $model->admin_group_id = $this->di['array_get']($data, 'admin_group_id', $model->admin_group_id);
+        $model->name = $this->di['array_get']($data, 'name', $model->name);
+        $model->status = $this->di['array_get']($data, 'status', $model->status);
+        $model->signature = $this->di['array_get']($data, 'signature', $model->signature);
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
 
         $this->di['events_manager']->fire(array('event'=>'onAfterAdminStaffUpdate', 'params'=>array('id'=>$model->id)));
@@ -442,11 +438,10 @@ class Service implements InjectionAwareInterface
 
     public function changePassword(\Model_Admin $model, $password)
     {
-
         $this->di['events_manager']->fire(array('event'=>'onBeforeAdminStaffPasswordChange', 'params'=>array('id'=>$model->id)));
 
         $model->pass = $this->di['password']->hashIt($password);
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
 
         $this->di['events_manager']->fire(array('event'=>'onAfterAdminStaffPasswordChange', 'params'=>array('id'=>$model->id)));
@@ -460,7 +455,7 @@ class Service implements InjectionAwareInterface
         $systemService = $this->di['mod_service']('system');
         $systemService->checkLimits('Model_Admin', 3);
 
-        $signature = isset($data['signature']) ? $data['signature'] : NULL;
+        $signature = $this->di['array_get']($data, 'signature', NULL);
 
         $this->di['events_manager']->fire(array('event'=>'onBeforeAdminStaffCreate', 'params'=>$data));
 
@@ -472,8 +467,8 @@ class Service implements InjectionAwareInterface
         $model->name                = $data['name'];
         $model->status              = $model->getStatus($data['status']);
         $model->signature           = $signature;
-        $model->created_at          = date('c');
-        $model->updated_at          = date('c');
+        $model->created_at          = date('Y-m-d H:i:s');
+        $model->updated_at          = date('Y-m-d H:i:s');
 
         try {
             $newId = $this->di['db']->store($model);
@@ -498,8 +493,8 @@ class Service implements InjectionAwareInterface
         $admin->pass = $this->di['password']->hashIt($data['password']);
         $admin->protected = 1;
         $admin->status = 'active';
-        $admin->created_at = date('c');
-        $admin->updated_at = date('c');
+        $admin->created_at = date('Y-m-d H:i:s');
+        $admin->updated_at = date('Y-m-d H:i:s');
 
         $newId = $this->di['db']->store($admin);
 
@@ -540,8 +535,8 @@ class Service implements InjectionAwareInterface
         $model = $this->di['db']->dispense('AdminGroup');
         $model->name = $name;
 
-        $model->created_at = date('c');
-        $model->updated_at = date('c');
+        $model->created_at = date('Y-m-d H:i:s');
+        $model->updated_at = date('Y-m-d H:i:s');
         $groupId = $this->di['db']->store($model);
 
         $this->di['logger']->info('Created new staff group %s', $groupId);
@@ -585,7 +580,7 @@ class Service implements InjectionAwareInterface
         if (isset($data['name'])){
             $model->name = $data['name'];
         }
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
 
         $this->di['logger']->info('Updated staff group %s', $model->id);
@@ -599,8 +594,8 @@ class Service implements InjectionAwareInterface
                 LEFT JOIN admin as a on m.admin_id = a.id
                 ';
 
-        $search = isset($data['search']) ? $data['search'] : NULL;
-        $admin_id = isset($data['admin_id']) ? $data['admin_id'] : NULL;
+        $search = $this->di['array_get']($data, 'search', NULL);
+        $admin_id = $this->di['array_get']($data, 'admin_id', NULL);
 
         $where = array();
         $params = array();
@@ -664,7 +659,7 @@ class Service implements InjectionAwareInterface
         $content .= "Email: ".$admin_email.PHP_EOL;
         $content .= "Password: ".$admin_pass.PHP_EOL.PHP_EOL;
 
-        $content .= "Read BoxBilling documentation to get started http://www.boxbilling.com/docs/".PHP_EOL;
+        $content .= "Read BoxBilling documentation to get started http://docs.boxbilling.com/".PHP_EOL;
         $content .= "Thank You for using BoxBilling.".PHP_EOL;
 
         $subject = sprintf('BoxBilling is ready at "%s"', BB_URL);

@@ -31,12 +31,12 @@
             </fieldset>
         </form>
         {% else %}
-        <div class="head"><h5 class="iUser">{% trans 'Login' %}</h5></div>
+        <div class="head"><h5 class="iUser"><i class="dark-sprite-icon sprite-user" style="margin-left: -25px; margin-right: 11px;"></i>{% trans 'Login' %}</h5></div>
         <form class="mainForm api-form" action="{{ 'api/guest/staff/login'|link }}" method="post" data-api-redirect="{{ 'index'|alink }}">
             <fieldset>
                 <div class="loginRow noborder">
                     <label for="req1">{% trans 'Email' %}:</label>
-                    <div class="loginInput"><input id="req1" type="email" name="email" value="{{ request.email }}" placeholder="{% trans 'Enter your email address' %}"/></div>
+                    <div class="loginInput"><input id="req1" type="email" name="email" value="{{ request.email }}" placeholder="{% trans 'Enter your email address' %}" autofocus/></div>
                     <div class="fix"></div>
                 </div>
                 

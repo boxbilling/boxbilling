@@ -25,7 +25,7 @@ class Admin extends \Api_Abstract
     public function get_list($data)
     {
         list($sql, $params) = $this->getService()->getSearchQuery($data);
-        $per_page = isset($data['per_page']) ? $data['per_page'] : $this->di['pager']->getPer_page();
+        $per_page = $this->di['array_get']($data, 'per_page', $this->di['pager']->getPer_page());
         $pager =  $this->di['pager']->getSimpleResultSet($sql, $params, $per_page);
 
         foreach ($pager['list'] as $key => $cartArr){
@@ -38,7 +38,7 @@ class Admin extends \Api_Abstract
 
     /**
      * Get shopping cart contents by id
-     * @param int $id - shoppoing cart id
+     * @param int $id - shopping cart id
      * @return array - shopping cart contents
      */
     public function get($data)

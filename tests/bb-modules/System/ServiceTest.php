@@ -1,7 +1,7 @@
 <?php
 namespace Box\Mod\System;
 
-class ServiceTest extends \PHPUnit_Framework_TestCase {
+class ServiceTest extends \BBTestCase {
     /**
      * @var \Box\Mod\System\Service
      */
@@ -60,7 +60,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $di = new \Box_Di();
         $di['db'] = $dbMock;
         $di['config'] = $config;
-
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $this->service->setDi($di);
 
         $result = $this->service->getCompany();
@@ -73,7 +75,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $expected = array(
             array(
                 'locale' => 'en_US',
-                'title' => 'English',
+                'title' => 'English (United States)',
             ),
         );
 
@@ -157,9 +159,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
         $logMock = $this->getMockBuilder('\Box_Log')->getMock();
 
-        $systemServiceMock = $this->getMockBuilder('\Box\Mod\System\Service')->setMethods(array('updateParam'))->getMock();
+        $systemServiceMock = $this->getMockBuilder('\Box\Mod\System\Service')->setMethods(array('setParamValue'))->getMock();
         $systemServiceMock->expects($this->atLeastOnce())
-            ->method('updateParam')
+            ->method('setParamValue')
             ->will($this->returnValue(true));
 
         $di = new \Box_Di();
@@ -199,6 +201,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $di['updater'] = $updaterMock;
         $di['mod_service'] = $di->protect(function () use($systemServiceMock) {return $systemServiceMock;});
         $di['tools'] = $toolsMock;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
 
         $systemServiceMock->setDi($di);
 
@@ -280,6 +285,34 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
         $this->setExpectedException('\Twig_Error_Syntax');
         $this->service->renderString('test', false, $vars);
+    }
+
+    public function testrenderStringTemplate()
+    {
+        $vars = array(
+            '_client_id' => 1
+        );
+
+        $twigMock = $this->getMockBuilder('\Twig_Environment')->disableOriginalConstructor()->getMock();
+        $twigMock->expects($this->atLeastOnce())
+            ->method('addGlobal');
+        $twigMock->expects($this->atLeastOnce())
+            ->method('loadTemplate')
+            ->willThrowException(new \Twig_Error_Syntax('Exception created with PHPUNIT'));
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('load')
+            ->will($this->returnValue(new \Model_Client()));
+
+        $di = new \Box_Di();
+        $di['db'] = $dbMock;
+        $di['twig'] = $twigMock;
+        $di['api_client'] = new \Model_Client();
+        $this->service->setDi($di);
+
+        $string = $this->service->renderString('test', true, $vars);
+        $this->assertEquals($string, 'test');
     }
 
     public function testclearCache()
@@ -393,5 +426,204 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $this->assertInternalType('string', $result);
         $this->assertEquals(\Box_Version::VERSION, $result);
     }
+
+    public function testcheckLimits_UserIsPro()
+    {
+        $licenseMock = $this->getMockBuilder('\Box_License')->getMock();
+        $licenseMock->expects($this->atLeastOnce())
+            ->method('isPro')
+            ->willReturn(true);
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->never())
+            ->method('find');
+
+
+        $di = new \Box_Di();
+        $di['license'] = $licenseMock;
+        $di['db'] = $dbMock;
+
+        $this->service->setDi($di);
+
+        $result = $this->service->checkLimits('Model_Product');
+    }
+
+    public function testcheckLimits_LimitIsNotReached()
+    {
+        $modelName = 'Model_Product';
+        $model = new \Model_Product();
+        $model->loadBean(new \RedBeanPHP\OODBBean());
+
+        $findResult = array(
+            array($model),
+            array($model),
+        );
+        $limit = 5;
+
+        $licenseMock = $this->getMockBuilder('\Box_License')->getMock();
+        $licenseMock->expects($this->atLeastOnce())
+            ->method('isPro')
+            ->willReturn(false);
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->once())
+            ->method('find')
+            ->willReturn($findResult);
+
+
+        $di = new \Box_Di();
+        $di['license'] = $licenseMock;
+        $di['db'] = $dbMock;
+
+        $this->service->setDi($di);
+
+        $result = $this->service->checkLimits($modelName, $limit);
+    }
+
+    public function testcheckLimits_OverTheLimit()
+    {
+        $modelName = 'Model_Product';
+        $model = new \Model_Product();
+        $model->loadBean(new \RedBeanPHP\OODBBean());
+
+        $findResult = array(
+            array($model),
+            array($model),
+            array($model),
+            array($model),
+            array($model),
+            array($model),
+        );
+        $limit = 5;
+
+        $licenseMock = $this->getMockBuilder('\Box_License')->getMock();
+        $licenseMock->expects($this->atLeastOnce())
+            ->method('isPro')
+            ->willReturn(false);
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->once())
+            ->method('find')
+            ->willReturn($findResult);
+
+
+        $di = new \Box_Di();
+        $di['license'] = $licenseMock;
+        $di['db'] = $dbMock;
+
+        $this->service->setDi($di);
+
+        $this->setExpectedException('\Box_Exception', 'You have reached free version limit. Upgrade to PRO version of BoxBilling if you want this limit removed.', 875);
+        $this->service->checkLimits($modelName, $limit);
+    }
+
+    public function testcheckLimits_LimitAndResultRowsEqual()
+    {
+        $modelName = 'Model_Product';
+        $model = new \Model_Product();
+        $model->loadBean(new \RedBeanPHP\OODBBean());
+
+        $findResult = array(
+            array($model),
+            array($model),
+            array($model),
+            array($model),
+            array($model),
+            array($model),
+        );
+        $limit = count($findResult);
+
+        $licenseMock = $this->getMockBuilder('\Box_License')->getMock();
+        $licenseMock->expects($this->atLeastOnce())
+            ->method('isPro')
+            ->willReturn(false);
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->once())
+            ->method('find')
+            ->willReturn($findResult);
+
+
+        $di = new \Box_Di();
+        $di['license'] = $licenseMock;
+        $di['db'] = $dbMock;
+
+        $this->service->setDi($di);
+
+        $this->setExpectedException('\Box_Exception', 'You have reached free version limit. Upgrade to PRO version of BoxBilling if you want this limit removed.', 875);
+        $this->service->checkLimits($modelName, $limit);
+    }
+
+    public function testgetPendingMessages()
+    {
+        $di = new \Box_Di();
+
+        $sessionMock = $this->getMockBuilder('\Box_Session')->disableOriginalConstructor()->getMock();
+        $sessionMock->expects($this->atLeastOnce())
+            ->method('get')
+            ->with('pending_messages')
+            ->willReturn(array());
+
+        $di['session'] = $sessionMock;
+
+        $this->service->setDi($di);
+        $result = $this->service->getPendingMessages();
+        $this->assertInternalType('array', $result);
+    }
+
+    public function testgetPendingMessages_GetReturnsNotArray()
+    {
+        $di = new \Box_Di();
+
+        $sessionMock = $this->getMockBuilder('\Box_Session')->disableOriginalConstructor()->getMock();
+        $sessionMock->expects($this->atLeastOnce())
+            ->method('get')
+            ->with('pending_messages')
+            ->willReturn(null);
+
+        $di['session'] = $sessionMock;
+
+        $this->service->setDi($di);
+        $result = $this->service->getPendingMessages();
+        $this->assertInternalType('array', $result);
+    }
+
+    public function testsetPendingMessage()
+    {
+        $serviceMock = $this->getMockBuilder('\Box\Mod\System\Service')
+            ->setMethods(array('getPendingMessages'))
+            ->getMock();
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('getPendingMessages')
+            ->willReturn(array());
+
+        $di = new \Box_Di();
+
+        $sessionMock = $this->getMockBuilder('\Box_Session')->disableOriginalConstructor()->getMock();
+        $sessionMock->expects($this->atLeastOnce())
+            ->method('set')
+            ->with('pending_messages');
+
+        $di['session'] = $sessionMock;
+
+        $serviceMock->setDi($di);
+
+        $message = 'Important Message';
+        $result = $serviceMock->setPendingMessage($message);
+        $this->assertTrue($result);
+    }
+
+    public function testclearPendingMessages()
+    {
+        $di = new \Box_Di();
+
+        $sessionMock = $this->getMockBuilder('\Box_Session')->disableOriginalConstructor()->getMock();
+        $sessionMock->expects($this->atLeastOnce())
+            ->method('delete')
+            ->with('pending_messages');
+        $di['session'] = $sessionMock;
+        $this->service->setDi($di);
+        $result = $this->service->clearPendingMessages();
+        $this->assertTrue($result);
+    }
 }
- 

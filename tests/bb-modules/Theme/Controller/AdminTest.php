@@ -4,7 +4,7 @@
 namespace Box\Mod\Theme\Controller;
 
 
-class AdminTest extends \PHPUnit_Framework_TestCase {
+class AdminTest extends \BBTestCase {
 
     public function testDi()
     {
@@ -32,8 +32,6 @@ class AdminTest extends \PHPUnit_Framework_TestCase {
     public function testget_theme()
     {
         $boxAppMock = $this->getMockBuilder('\Box_App')->disableOriginalConstructor()->getMock();
-        $boxAppMock->expects($this->exactly(1))
-            ->method('getApiAdmin');
         $boxAppMock->expects($this->atLeastOnce())
             ->method('render')
             ->with('mod_theme_preset')
@@ -79,6 +77,10 @@ class AdminTest extends \PHPUnit_Framework_TestCase {
                 return $modMock;
             }
         });
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+        $di['is_admin_logged']  = true;
 
         $controller = new \Box\Mod\Theme\Controller\Admin();
         $controller->setDi($di);
@@ -88,8 +90,6 @@ class AdminTest extends \PHPUnit_Framework_TestCase {
     public function testsave_theme_settings()
     {
         $boxAppMock = $this->getMockBuilder('\Box_App')->disableOriginalConstructor()->getMock();
-        $boxAppMock->expects($this->exactly(1))
-            ->method('getApiAdmin');
         $boxAppMock->expects($this->atLeastOnce())
             ->method('redirect');
 
@@ -122,6 +122,9 @@ class AdminTest extends \PHPUnit_Framework_TestCase {
             ->method('getService')
             ->willReturn($themeServiceMock);
 
+	    $eventMock = $this->getMockBuilder('\Box_EventManager')->getMock();
+	    $eventMock->expects($this->atLeastOnce())->method('fire');
+
         $di = new \Box_Di();
         $di['mod'] = $di->protect(function ($name) use($modMock){
             if ($name == 'theme')
@@ -129,6 +132,10 @@ class AdminTest extends \PHPUnit_Framework_TestCase {
                 return $modMock;
             }
         });
+	    $di['events_manager'] = $eventMock;
+        $adminModel = new \Model_Client();
+        $adminModel->loadBean(new \RedBeanPHP\OODBBean());
+        $di['api_admin'] = new \Api_Handler($adminModel);
 
         $controller = new \Box\Mod\Theme\Controller\Admin();
         $controller->setDi($di);
@@ -142,8 +149,6 @@ class AdminTest extends \PHPUnit_Framework_TestCase {
     public function testsave_theme_settings_PathIsNotWritable()
     {
         $boxAppMock = $this->getMockBuilder('\Box_App')->disableOriginalConstructor()->getMock();
-        $boxAppMock->expects($this->exactly(1))
-            ->method('getApiAdmin');
         $boxAppMock->expects($this->atLeastOnce())
             ->method('redirect');
 
@@ -174,6 +179,9 @@ class AdminTest extends \PHPUnit_Framework_TestCase {
             ->method('getService')
             ->willReturn($themeServiceMock);
 
+	    $eventMock = $this->getMockBuilder('\Box_EventManager')->getMock();
+	    $eventMock->expects($this->atLeastOnce())->method('fire');
+
         $di = new \Box_Di();
         $di['mod'] = $di->protect(function ($name) use($modMock){
             if ($name == 'theme')
@@ -181,6 +189,10 @@ class AdminTest extends \PHPUnit_Framework_TestCase {
                 return $modMock;
             }
         });
+	    $di['events_manager'] = $eventMock;
+        $adminModel = new \Model_Client();
+        $adminModel->loadBean(new \RedBeanPHP\OODBBean());
+        $di['api_admin'] = new \Api_Handler($adminModel);
 
         $controller = new \Box\Mod\Theme\Controller\Admin();
         $controller->setDi($di);

@@ -25,7 +25,17 @@ class Registrar_Adapter_Resellerclub extends Registrar_AdapterAbstract
     public $config = array(
         'userid'   => null,
         'password' => null,
+        'api-key' => null,
     );
+
+    public function isKeyValueNotEmpty($array, $key)
+    {
+        $value = isset ($array[$key]) ? $array[$key] : '';
+        if (strlen(trim($value)) == 0){
+            return false;
+        }
+        return true;
+    }
 
     public function __construct($options)
     {
@@ -37,30 +47,31 @@ class Registrar_Adapter_Resellerclub extends Registrar_AdapterAbstract
             $this->config['userid'] = $options['userid'];
             unset($options['userid']);
         } else {
-            throw new Registrar_Exception('Domain registrar "Resellerclub" is not configured properly. Please update configuration parameter "Resellerclub Username" at "Configuration -> Domain registration".');
+            throw new Registrar_Exception('Domain registrar "ResellerClub" is not configured properly. Please update configuration parameter "ResellerClub Reseller ID" at "Configuration -> Domain registration".');
         }
 
-        if(isset($options['password']) && !empty($options['password'])) {
-            $this->config['password'] = $options['password'];
-            unset($options['password']);
+        if(isset($options['api-key']) && !empty($options['api-key'])) {
+            $this->config['api-key'] = $options['api-key'];
+            unset($options['api-key']);
         } else {
-            throw new Registrar_Exception('Domain registrar "Resellerclub" is not configured properly. Please update configuration parameter "Resellerclub Pasword" at "Configuration -> Domain registration".');
+            throw new Registrar_Exception('Domain registrar "ResellerClub" is not configured properly. Please update configuration parameter "ResellerClub API Key" at "Configuration -> Domain registration".');
         }
     }
     
     public static function getConfig()
     {
         return array(
-            'label'     =>  'Manages domains on Resellerclub via API. ResellerClub requires your server IP in order to work. Login to the ResellerClub control panel (the url will be in the email you received when you signed up with them) and then go to Settings > API and enter the IP address of the server where BoxBilling is installed to authorize it for API access.',
+            'label'     =>  'Manages domains on ResellerClub via API. ResellerClub requires your server IP in order to work. Login to the ResellerClub control panel (the url will be in the email you received when you signed up with them) and then go to Settings > API and enter the IP address of the server where BoxBilling is installed to authorize it for API access.',
             'form'  => array(
                 'userid' => array('text', array(
-                            'label' => 'Reseller ID. You can get this at ResellerClub control panel Settings > Personal information > Primary profile > Reseller ID', 
-                            'description'=>'Resellerclub Username'
+                            'label' => 'Reseller ID. You can get this at ResellerClub control panel Settings > Personal information > Primary profile > Reseller ID',
+                            'description'=> 'ResellerClub Reseller ID'
                         ),
                      ),
-                'password' => array('password', array(
-                            'label' => 'Resellerclub Pasword', 
-                            'description'=>'Resellerclub Password',
+                'api-key' => array('password', array(
+                            'label' => 'ResellerClub API Key',
+                            'description'=> 'You can get this at ResellerClub control panel, go to Settings -> API',
+                            'required' => false,
                         ),
                      ),
             ),
@@ -69,7 +80,7 @@ class Registrar_Adapter_Resellerclub extends Registrar_AdapterAbstract
     
     /**
      * Tells what TLDs can be registered via this adapter
-     * @return array
+     * @return string[]
      */
     public function getTlds()
     {
@@ -167,8 +178,6 @@ class Registrar_Adapter_Resellerclub extends Registrar_AdapterAbstract
             'address-line-2'    =>  $c->getAddress2(),
             'address-line-3'    =>  $c->getAddress3(),
             'state'             =>  $c->getState(),
-//            'fax-cc'            =>  $c->getFax(),
-//            'fax'               =>  $c->getFaxCc(),
         );
 
         $params = array_merge($optional_params, $required_params);
@@ -317,7 +326,7 @@ class Registrar_Adapter_Resellerclub extends Registrar_AdapterAbstract
             'tech-contact-id'   =>  $tech_contact_id,
             'billing-contact-id'=>  $billing_contact_id,
             'invoice-option'    =>  'NoInvoice',
-            'protect-privacy'   =>  false, //$domain->getPrivacyEnabled(),
+            'protect-privacy'   =>  false,
         );
 
         if($tld == '.asia') {
@@ -476,7 +485,6 @@ class Registrar_Adapter_Resellerclub extends Registrar_AdapterAbstract
             'mobile'                         =>  '',
         );
 
-//        $params = $this->_checkRequiredParams($optional_params, $params);
         $params = array_merge($optional_params, $params);
         $customer_id = $this->_makeRequest('customers/signup', $params, 'POST');
         return $customer_id;
@@ -650,19 +658,28 @@ class Registrar_Adapter_Resellerclub extends Registrar_AdapterAbstract
     }
 
     /**
+     * @param array $params
+     * @return array
+     */
+    public function includeAuthorizationParams(array $params)
+    {
+        return array_merge($params, array(
+            'auth-userid' => $this->config['userid'],
+            'api-key' => $this->config['api-key'],
+        ));
+    }
+
+    /**
      * Perform call to Api
      * @param string $url
      * @param array $params
      * @param string $method
-     * @return mixed
+     * @return string
      * @throws Registrar_Exception
      */
     protected function _makeRequest($url ,$params = array(), $method = 'GET', $type = 'json')
     {
-        $params = array_merge(array(
-            'auth-userid'   =>  $this->config['userid'],
-            'auth-password' =>  $this->config['password'],
-        ), $params);
+        $params = $this->includeAuthorizationParams($params);
 
         $opts = array(
             CURLOPT_CONNECTTIMEOUT  => 30,
@@ -747,10 +764,6 @@ class Registrar_Adapter_Resellerclub extends Registrar_AdapterAbstract
         foreach($required_params as $param => $value) {
             if(!isset($params[$param])) {
                 $params[$param] = $value;
-            }
-
-            if(!is_bool($params[$param]) && empty($params[$param])) {
-//                throw new Registrar_Exception(sprintf('Required param "%s" can not be blank', $param));
             }
         }
 
@@ -875,11 +888,11 @@ class Registrar_Adapter_Resellerclub extends Registrar_AdapterAbstract
         }
 
         if($tld == '.ru' || $tld == '.com.ru' || $tld == '.org.ru' || $tld == '.net.ru') {
-            if(strlen(trim($client->getBirthday())) == 0 || strtotime($client->getBirthday()) == false) {
+            if(strlen(trim($client->getBirthday())) === 0 || strtotime($client->getBirthday()) === false) {
                 throw new Registrar_Exception('Valid contact Birth Date is required while registering RU domain name');
             }
 
-            if(strlen(trim($client->getDocumentNr())) == 0 ) {
+            if(strlen(trim($client->getDocumentNr())) === 0 ) {
                 throw new Registrar_Exception('Valid contact Passport information is required while registering RU domain name');
             }
 
@@ -965,7 +978,7 @@ class Registrar_Adapter_Resellerclub extends Registrar_AdapterAbstract
                 'status'        => 'Active',
                 'type'          => $type,
             );
-            $result = $this->_makeRequest('contacts/search', $params, 'GET', 'json', true);
+            $result = $this->_makeRequest('contacts/search', $params, 'GET', 'json');
             if($result['recsonpage'] < 1) {
                 throw new Registrar_Exception('Contact not found');
             }
@@ -980,7 +993,7 @@ class Registrar_Adapter_Resellerclub extends Registrar_AdapterAbstract
 
     private function getCARegistrantAgreementVersion()
     {
-        $agreement = $this->_makeRequest('contacts/dotca/registrantagreement', array(), 'GET', 'json', true);
+        $agreement = $this->_makeRequest('contacts/dotca/registrantagreement', array(), 'GET', 'json');
         return $agreement['version'];
     }
 }

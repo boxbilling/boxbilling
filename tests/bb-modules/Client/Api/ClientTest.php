@@ -4,7 +4,7 @@
 namespace Box\Mod\Client\Api;
 
 
-class ClientTest extends \PHPUnit_Framework_TestCase {
+class ClientTest extends \BBTestCase {
 
     public function testgetDi()
     {
@@ -49,6 +49,9 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
         $di['mod_service'] = $di->protect(function ($name) use($serviceMock) {return $serviceMock;});
         $di['pager'] = $pagerMock;
         $di['db'] = $dbMock;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
 
         $client = new \Box\Mod\Client\Api\Client();
         $client->setDi($di);
@@ -60,28 +63,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
         $this->assertInternalType('array', $result);
     }
 
-    public function testchange_password_PasswordRequired()
-    {
-        $client = new \Box\Mod\Client\Api\Client();
-
-        $data = array();
-
-        $this->setExpectedException('\Box_Exception', 'Password required');
-        $client->change_password($data);
-    }
-
-    public function testchange_password_PasswordConfirmationRequired()
-    {
-        $client = new \Box\Mod\Client\Api\Client();
-
-        $data = array(
-            'password' => '1234'
-        );
-
-        $this->setExpectedException('\Box_Exception', 'Password confirmation required');
-        $client->change_password($data);
-    }
-
     public function testchange_password_PasswordDoNotMatch()
     {
         $client = new \Box\Mod\Client\Api\Client();
@@ -90,6 +71,12 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
             'password' => '1234',
             'password_confirm' => '1234567'
         );
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->disableOriginalConstructor()->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')
+            ->will($this->returnValue(null));
+        $di['validator'] = $validatorMock;
+        $client->setDi($di);
 
         $this->setExpectedException('\Box_Exception', 'Passwords do not match.');
         $client->change_password($data);
@@ -156,17 +143,23 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
         $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
         $validatorMock->expects($this->atLeastOnce())->method('isEmailValid');
 
-        $boxModMock = $this->getMockBuilder('\Box_Mod')->disableOriginalConstructor()->getMock();
-        $boxModMock->expects($this->atLeastOnce())
-            ->method('getConfig')
-            ->willReturn(array());
-
         $di = new \Box_Di();
         $di['db'] = $dbMock;
-        $di['mod'] = $di->protect(function ($name) use($boxModMock) {return $boxModMock;});
         $di['events_manager'] = $eventMock;
         $di['validator'] = $validatorMock;
         $di['logger'] = new \Box_Log();
+
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+
+        $config = array(
+            'allow_change_email' => true,
+        );
+
+        $di['mod_config'] = $di->protect(function ($modName) use($config){
+            return $config;
+        });
 
         $api = new \Box\Mod\Client\Api\Client();
         $api->setDi($di);
@@ -174,6 +167,53 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
         $api->setService($serviceMock);
         $result = $api->update($data);
         $this->assertTrue($result);
+    }
+
+    public function testbalance_get_total()
+    {
+        $balanceAmount = 0.00;
+        $model = new \Model_Client();
+        $model->loadBean(new \RedBeanPHP\OODBBean());
+
+        $serviceMock = $this->getMockBuilder('\Box\Mod\Client\ServiceBalance')->getMock();
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('getClientBalance')
+            ->will($this->returnValue($balanceAmount));
+
+        $di = new \Box_Di();
+        $di['mod_service'] = $di->protect(function ($name, $sub) use($serviceMock) {return $serviceMock;});
+
+        $api = new \Box\Mod\Client\Api\Client();
+        $api->setDi($di);
+        $api->setIdentity($model);
+
+        $result = $api->balance_get_total();
+
+        $this->assertInternalType('float', $result);
+        $this->assertEquals($balanceAmount, $result);
+
+    }
+
+    public function testis_taxable()
+    {
+        $clientIsTaxable = true;
+
+        $serviceMock = $this->getMockBuilder('\Box\Mod\Client\Service')->getMock();
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('isClientTaxable')
+            ->willReturn($clientIsTaxable);
+
+        $client = new \Model_Client();
+        $client->loadBean(new \RedBeanPHP\OODBBean());
+
+        $api = new \Box\Mod\Client\Api\Client();
+        $api->setService($serviceMock);
+        $api->setIdentity($client);
+
+        $result = $api->is_taxable();
+        $this->assertInternalType('bool', $result);
+        $this->assertEquals($clientIsTaxable, $result);
+
     }
 }
  

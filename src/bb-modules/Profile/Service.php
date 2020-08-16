@@ -31,12 +31,13 @@ class Service implements InjectionAwareInterface
 
     public function changeAdminPassword(\Model_Admin $admin, $new_password)
     {
+        $event_params = array();
         $event_params['password'] = $new_password;
         $event_params['id']       = $admin->id;
         $this->di['events_manager']->fire(array('event' => 'onBeforeAdminStaffProfilePasswordChange', 'params' => $event_params));
 
         $admin->pass       = $this->di['password']->hashIt($new_password);
-        $admin->updated_at = date('c');
+        $admin->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($admin);
 
         $event_params       = array();
@@ -55,7 +56,7 @@ class Service implements InjectionAwareInterface
         $this->di['events_manager']->fire(array('event' => 'onBeforeAdminStaffApiKeyChange', 'params' => $event_params));
 
         $admin->api_token  = $this->di['tools']->generatePassword(32);
-        $admin->updated_at = date('c');
+        $admin->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($admin);
 
         $this->di['events_manager']->fire(array('event' => 'onAfterAdminStaffApiKeyChange', 'params' => $event_params));
@@ -71,19 +72,10 @@ class Service implements InjectionAwareInterface
         $event_params['id'] = $admin->id;
         $this->di['events_manager']->fire(array('event' => 'onBeforeAdminStaffProfileUpdate', 'params' => $event_params));
 
-        if (isset($data['email'])) {
-            $admin->email = $data['email'];
-        }
-
-        if (isset($data['name'])) {
-            $admin->name = $data['name'];
-        }
-
-        if (isset($data['signature'])) {
-            $admin->signature = $data['signature'];
-        }
-
-        $admin->updated_at = date('c');
+        $admin->email = $this->di['array_get']($data, 'email', $admin->email);
+        $admin->name = $this->di['array_get']($data, 'name', $admin->name);
+        $admin->signature = $this->di['array_get']($data, 'signature', $admin->signature);
+        $admin->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($admin);
 
         $event_params       = array();
@@ -105,12 +97,13 @@ class Service implements InjectionAwareInterface
             'name'           => $identity->name,
             'signature'      => $identity->signature,
             'status'         => $identity->status,
+            'api_token'      => $identity->api_token,
             'created_at'     => $identity->created_at,
             'updated_at'     => $identity->updated_at,
         );
     }
 
-    public function updateClient(\Model_Client $client, array $data)
+    public function updateClient(\Model_Client $client, array $data = array())
     {
         $event_params       = $data;
         $event_params['id'] = $client->id;
@@ -118,144 +111,68 @@ class Service implements InjectionAwareInterface
 
         $mod    = $this->di['mod']('client');
         $config = $mod->getConfig();
-        if (isset($data['email'])
-            && $client->email != $data['email']
+        $email = $this->di['array_get']($data, 'email', '');
+        if ($client->email != $email
             && isset($config['allow_change_email'])
             && !$config['allow_change_email']
         ) {
             throw new \Box_Exception('Email can not be changed');
         }
 
-        if (isset($data['email'])) {
+        if (!empty($email)) {
             $validator = $this->di['validator'];
-            $validator->isEmailValid($data['email']);
+            $validator->isEmailValid($email);
 
             $clientService = $this->di['mod_service']('client');
-            if ($clientService->emailAreadyRegistered($data['email'], $client)) {
+            if ($clientService->emailAreadyRegistered($email, $client)) {
                 throw new \Box_Exception('Can not change email. It is already registered.');
             }
 
-            $client->email = $data['email'];
+            $client->email = $email;
         }
 
-        if (isset($data['first_name'])) {
-            $client->first_name = $data['first_name'];
-        }
+        $client->first_name = $this->di['array_get']($data, 'first_name', $client->first_name);
+        $client->last_name  = $this->di['array_get']($data, 'last_name', $client->last_name);
+        $client->gender     = $this->di['array_get']($data, 'gender', $client->gender);
 
-        if (isset($data['last_name'])) {
-            $client->last_name = $data['last_name'];
+        $birthday = $this->di['array_get']($data, 'birthday');
+        if (strlen(trim($birthday)) > 0 && strtotime($birthday) === false) {
+            throw new \Box_Exception('Invalid birth date value');
         }
+        $client->birthday = $birthday;
 
-        if (isset($data['gender'])) {
-            $client->gender = $data['gender'];
-        }
+        $client->company        = $this->di['array_get']($data, 'company', $client->company);
+        $client->company_vat    = $this->di['array_get']($data, 'company_vat', $client->company_vat);
+        $client->company_number = $this->di['array_get']($data, 'company_number', $client->company_number);
+        $client->type           = $this->di['array_get']($data, 'type', $client->type);
+        $client->address_1      = $this->di['array_get']($data, 'address_1', $client->address_1);
+        $client->address_2      = $this->di['array_get']($data, 'address_2', $client->address_2);
+        $client->phone_cc       = $this->di['array_get']($data, 'phone_cc', $client->phone_cc);
+        $client->phone          = $this->di['array_get']($data, 'phone', $client->phone);
+        $client->country        = $this->di['array_get']($data, 'country', $client->country);
+        $client->postcode       = $this->di['array_get']($data, 'postcode', $client->postcode);
+        $client->city           = $this->di['array_get']($data, 'city', $client->city);
+        $client->state          = $this->di['array_get']($data, 'state', $client->state);
+        $client->document_type  = $this->di['array_get']($data, 'document_type', $client->document_type);
+        $client->document_nr    = $this->di['array_get']($data, 'document_nr', $client->document_nr);
 
-        if (isset($data['birthday'])) {
-            if (strlen(trim($data['birthday'])) > 0 && strtotime($data['birthday']) == false) {
-                throw new \Box_Exception('Invalid birth date value');
-            }
-            $client->birthday = $data['birthday'];
+        if (isset($client->document_nr)) {
+            $client->document_type = $this->di['array_get']($data, 'document_type ', 'passport');
         }
+        $client->lang      = $this->di['array_get']($data, 'lang', $client->lang);
+        $client->notes     = $this->di['array_get']($data, 'notes', $client->notes);
+        $client->custom_1  = $this->di['array_get']($data, 'custom_1', $client->custom_1);
+        $client->custom_2  = $this->di['array_get']($data, 'custom_2', $client->custom_2);
+        $client->custom_3  = $this->di['array_get']($data, 'custom_3', $client->custom_3);
+        $client->custom_4  = $this->di['array_get']($data, 'custom_4', $client->custom_4);
+        $client->custom_5  = $this->di['array_get']($data, 'custom_5', $client->custom_5);
+        $client->custom_6  = $this->di['array_get']($data, 'custom_6', $client->custom_6);
+        $client->custom_7  = $this->di['array_get']($data, 'custom_7', $client->custom_7);
+        $client->custom_8  = $this->di['array_get']($data, 'custom_8', $client->custom_8);
+        $client->custom_9  = $this->di['array_get']($data, 'custom_9', $client->custom_9);
+        $client->custom_10 = $this->di['array_get']($data, 'custom_10', $client->custom_10);
 
-        if (isset($data['company'])) {
-            $client->company = $data['company'];
-        }
-
-        if (isset($data['company_vat'])) {
-            $client->company_vat = $data['company_vat'];
-        }
-
-        if (isset($data['company_number'])) {
-            $client->company_number = $data['company_number'];
-        }
-
-        if (isset($data['type'])) {
-            $client->type = $data['type'];
-        }
-
-        if (isset($data['address_1'])) {
-            $client->address_1 = $data['address_1'];
-        }
-
-        if (isset($data['address_2'])) {
-            $client->address_2 = $data['address_2'];
-        }
-
-        if (isset($data['phone_cc'])) {
-            $client->phone_cc = $data['phone_cc'];
-        }
-
-        if (isset($data['phone'])) {
-            $client->phone = $data['phone'];
-        }
-
-        if (isset($data['country'])) {
-            $client->country = $data['country'];
-        }
-
-        if (isset($data['postcode'])) {
-            $client->postcode = $data['postcode'];
-        }
-
-        if (isset($data['city'])) {
-            $client->city = $data['city'];
-        }
-
-        if (isset($data['state'])) {
-            $client->state = $data['state'];
-        }
-
-        if (isset($data['document_type'])) {
-            $client->document_type = $data['document_type'];
-        }
-
-        if (isset($data['document_nr'])) {
-            $client->document_nr = $data['document_nr'];
-            if (!isset($data['document_type'])){
-                $client->document_type = 'passport';
-            }
-        }
-
-        if (isset($data['lang'])) {
-            $client->lang = $data['lang'];
-        }
-
-        if (isset($data['notes'])) {
-            $client->notes = $data['notes'];
-        }
-
-        if (isset($data['custom_1'])) {
-            $client->custom_1 = $data['custom_1'];
-        }
-        if (isset($data['custom_2'])) {
-            $client->custom_2 = $data['custom_2'];
-        }
-        if (isset($data['custom_3'])) {
-            $client->custom_3 = $data['custom_3'];
-        }
-        if (isset($data['custom_4'])) {
-            $client->custom_4 = $data['custom_4'];
-        }
-        if (isset($data['custom_5'])) {
-            $client->custom_5 = $data['custom_5'];
-        }
-        if (isset($data['custom_6'])) {
-            $client->custom_6 = $data['custom_6'];
-        }
-        if (isset($data['custom_7'])) {
-            $client->custom_7 = $data['custom_7'];
-        }
-        if (isset($data['custom_8'])) {
-            $client->custom_8 = $data['custom_8'];
-        }
-        if (isset($data['custom_9'])) {
-            $client->custom_9 = $data['custom_9'];
-        }
-        if (isset($data['custom_10'])) {
-            $client->custom_10 = $data['custom_10'];
-        }
-
-        $client->updated_at = date('c');
+        $client->updated_at = date('Y-m-d H:i:s');
 
         $this->di['db']->store($client);
 
@@ -269,7 +186,7 @@ class Service implements InjectionAwareInterface
     public function resetApiKey(\Model_Client $client)
     {
         $client->api_token  = $this->di['tools']->generatePassword(32);
-        $client->updated_at = date('c');
+        $client->updated_at = date('Y-m-d H:i:s');
 
         $this->di['db']->store($client);
 
@@ -287,7 +204,7 @@ class Service implements InjectionAwareInterface
 
         $this->di['validator']->isPasswordStrong($password);
 
-        $client->pass = $password;
+        $client->pass = $this->di['password']->hashIt($password);
         $this->di['db']->store($client);
 
         $this->di['events_manager']->fire(array('event' => 'onAfterClientProfilePasswordChange', 'params' => array('id' => $client->id)));

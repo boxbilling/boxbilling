@@ -65,35 +65,36 @@ class Client implements \Box\InjectionAwareInterface
 
     public function get_client_index(\Box_App $app)
     {
-        $api = $app->getApiClient();
+        $this->di['is_client_logged'];
         return $app->render('mod_client_index');
     }
 
     public function get_client_confirmation(\Box_App $app, $hash)
     {
-        $mod = new Box_Mod('client');
-        $service = $mod->getService();
+        $service = $this->di['mod_service']('client');
         $service->approveClientEmailByHash($hash);
+        $systemService = $this->di['mod_service']('System');
+        $systemService->setPendingMessage(__('Email address was confirmed'));
         $app->redirect('/');
     }
 
     public function get_client_logout(\Box_App $app)
     {
-        $api = $app->getApiClient();
+        $api = $this->di['api_client'];
         $api->profile_logout();
         $app->redirect('/');
     }
 
     public function get_client_page(\Box_App $app, $page)
     {
-        $api = $app->getApiClient();
+        $this->di['is_client_logged'];
         $template = 'mod_client_'.$page;
         return $app->render($template);
     }
 
     public function get_reset_password_confirm(\Box_App $app, $hash)
     {
-        $api = $app->getApiGuest();
+        $api = $this->di['api_guest'];
         $data = array(
             'hash' =>  $hash,
         );

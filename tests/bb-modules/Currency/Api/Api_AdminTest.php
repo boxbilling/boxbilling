@@ -2,7 +2,7 @@
 
 namespace Box\Tests\Mod\Currency\Api;
 
-class AdminTest extends \PHPUnit_Framework_TestCase
+class AdminTest extends \BBTestCase
 {
     public $availableCurrencies = array(
         'AED' => 'AED - United Arab Emirates dirham',
@@ -88,7 +88,6 @@ class AdminTest extends \PHPUnit_Framework_TestCase
         'LKR' => 'LKR - Sri Lanka rupee',
         'LRD' => 'LRD - Liberian dollar',
         'LSL' => 'LSL - Lesotho loti',
-        'LTL' => 'LTL - Lithuanian litas',
         'LYD' => 'LYD - Libyan dinar',
         'MAD' => 'MAD - Moroccan dirham',
         'MDL' => 'MDL - Moldovan leu',
@@ -167,7 +166,7 @@ class AdminTest extends \PHPUnit_Framework_TestCase
         $adminApi = new \Box\Mod\Currency\Api\Admin();
 
         $willReturn = array(
-            "list"     => array('id' => 1),
+            "list" => array('id' => 1),
         );
 
         $model = new \Model_Currency();
@@ -183,14 +182,18 @@ class AdminTest extends \PHPUnit_Framework_TestCase
             ->method('getSimpleResultSet')
             ->will($this->returnValue($willReturn));
 
-        $di['db']    = $dbMock;
-        $di['pager'] = $pager;
+        $di              = new \Box_Di();
+        $di['db']        = $dbMock;
+        $di['pager']     = $pager;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $adminApi->setDi($di);
 
         $service = new \Box\Mod\Currency\Service();
         $adminApi->setService($service);
 
-        $result = $adminApi->get_list();
+        $result = $adminApi->get_list(array());
 
         $this->assertInternalType('array', $result);
         $this->assertInternalType('array', $result['list']);
@@ -221,55 +224,30 @@ class AdminTest extends \PHPUnit_Framework_TestCase
         $service->expects($this->atLeastOnce())
             ->method('getByCode')
             ->will($this->returnValue($model));
+        $service->expects($this->atLeastOnce())
+            ->method('toApiArray')
+            ->will($this->returnValue(array()));
+
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray');
+
+        $di              = new \Box_Di();
+        $di['validator'] = $validatorMock;
 
         $data = array(
             'code' => 'EUR'
         );
         $adminApi->setService($service);
+        $adminApi->setDi($di);
         $result = $adminApi->get($data);
-        $this->assertInternalType('object', $result);
-        $this->assertInstanceOf('Model_Currency', $result);
-    }
-
-    public function testGetExceptionProvider()
-    {
-        return array(
-            array(
-                array(
-                    'code' => '' //key 'code' is set, but value empty
-                ),
-            ),
-            array(
-                array( //array is empty
-                ),
-            ),
-        );
-    }
-
-    /**
-     * @expectedException \Box_Exception
-     * @dataProvider testGetExceptionProvider
-     */
-    public function testGetException($data)
-    {
-        $adminApi = new \Box\Mod\Currency\Api\Admin();
-        $model    = new \Model_Currency();
-        $model->loadBean(new \RedBeanPHP\OODBBean());
-
-        $service = $this->getMockBuilder('\Box\Mod\Currency\Service')->getMock();
-        $service->expects($this->never())
-            ->method('getByCode')
-            ->will($this->returnValue($model));
-
-        $adminApi->setService($service);
-        $adminApi->get($data); //Expecting Box_Exception
-
+        $this->assertInternalType('array', $result);
     }
 
     public function testGetDefault()
     {
-        $adminApi               = new \Box\Mod\Currency\Api\Admin();
-        $model                  = new \Model_Currency();
+        $adminApi = new \Box\Mod\Currency\Api\Admin();
+        $model    = new \Model_Currency();
         $model->loadBean(new \RedBeanPHP\OODBBean());
         $model->code            = 'EUR';
         $model->title           = 'Euro';
@@ -314,48 +292,11 @@ class AdminTest extends \PHPUnit_Framework_TestCase
 
     public function testCreateExceptionProvider()
     {
-        $model       = new \Model_Currency();
+        $model = new \Model_Currency();
         $model->loadBean(new \RedBeanPHP\OODBBean());
         $model->code = 'EUR';
 
         return array(
-            array(
-                array( //empty array
-                ),
-                $this->never(),
-                $model,
-                $this->never(),
-
-            ),
-            array(
-                array(
-                    'code' => '' //Currency code not set
-                ),
-                $this->never(),
-                $model,
-                $this->never(),
-
-            ),
-            array(
-                array(
-                    'code' => 'EUR',
-                    //format is missing
-                ),
-                $this->never(),
-                $model,
-                $this->never(),
-
-            ),
-            array(
-                array(
-                    'code'   => 'EUR',
-                    'format' => '' //format not set
-                ),
-                $this->never(),
-                $model,
-                $this->never(),
-
-            ),
             array(
                 array(
                     'code'   => 'EUR',
@@ -396,7 +337,17 @@ class AdminTest extends \PHPUnit_Framework_TestCase
             ->method('getAvailableCurrencies')
             ->will($this->returnValue($this->availableCurrencies));
 
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
+        $validatorMock->expects($this->atLeastOnce())->method('checkRequiredParamsForArray');
+
+        $di              = new \Box_Di();
+        $di['validator'] = $validatorMock;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+
         $adminApi->setService($service);
+        $adminApi->setDi($di);
         $adminApi->create($data); //Expecting \Box_Exception every time
     }
 
@@ -420,8 +371,17 @@ class AdminTest extends \PHPUnit_Framework_TestCase
             ->method('createCurrency')
             ->will($this->returnValue($data['code']));
 
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
+        $validatorMock->expects($this->atLeastOnce())->method('checkRequiredParamsForArray');
+
+        $di              = new \Box_Di();
+        $di['validator'] = $validatorMock;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
 
         $adminApi->setService($service);
+        $adminApi->setDi($di);
 
         $result = $adminApi->create($data);
 
@@ -430,7 +390,6 @@ class AdminTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($result, $data['code']);
 
     }
-
 
     public function testUpdate()
     {
@@ -449,6 +408,17 @@ class AdminTest extends \PHPUnit_Framework_TestCase
             ->method('updateCurrency')
             ->will($this->returnValue(true));
 
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray');
+
+        $di              = new \Box_Di();
+        $di['validator'] = $validatorMock;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+
+        $adminApi->setDi($di);
         $adminApi->setService($service);
 
         $result = $adminApi->update($data);
@@ -456,40 +426,6 @@ class AdminTest extends \PHPUnit_Framework_TestCase
         $this->assertInternalType('boolean', $result);
         $this->assertEquals($result, true);
 
-    }
-
-    /**
-     * @expectedException \Box_Exception
-     */
-    public function testUpdateCodeMissingException()
-    {
-        $adminApi = new \Box\Mod\Currency\Api\Admin();
-
-        $service = $this->getMockBuilder('\Box\Mod\Currency\Service')->getMock();
-        $service->expects($this->never())
-            ->method('updateCurrency')
-            ->will($this->returnValue(true));
-
-        $adminApi->setService($service);
-
-        $adminApi->update(array());
-    }
-
-    public function testUpdateRates()
-    {
-        $adminApi = new \Box\Mod\Currency\Api\Admin();
-
-        $service = $this->getMockBuilder('\Box\Mod\Currency\Service')->setMethods(array('updateCurrencyRates'))->getMock();
-        $service->expects($this->atLeastOnce())
-            ->method('updateCurrencyRates')
-            ->will($this->returnValue(true));
-
-        $adminApi->setService($service);
-
-        $result = $adminApi->update_rates(array());
-
-        $this->assertInternalType('boolean', $result);
-        $this->assertEquals($result, true);
     }
 
     /**
@@ -504,6 +440,14 @@ class AdminTest extends \PHPUnit_Framework_TestCase
             ->method('getByCode')
             ->will($this->returnValue(true));
 
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')->willThrowException(new \Box_Exception(''));
+
+        $di              = new \Box_Di();
+        $di['validator'] = $validatorMock;
+
+        $adminApi->setDi($di);
         $adminApi->setService($service);
         $adminApi->delete(array()); //Expecting \Box_Exception every time
     }
@@ -512,7 +456,7 @@ class AdminTest extends \PHPUnit_Framework_TestCase
     {
         $adminApi = new \Box\Mod\Currency\Api\Admin();
 
-        $model       = new \Model_Currency();
+        $model = new \Model_Currency();
         $model->loadBean(new \RedBeanPHP\OODBBean());
         $model->code = 'EUR';
 
@@ -526,6 +470,14 @@ class AdminTest extends \PHPUnit_Framework_TestCase
             ->method('deleteCurrencyByCode')
             ->will($this->returnValue(true));
 
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray');
+
+        $di              = new \Box_Di();
+        $di['validator'] = $validatorMock;
+
+        $adminApi->setDi($di);
         $adminApi->setService($service);
 
         $result = $adminApi->delete($data);
@@ -536,24 +488,11 @@ class AdminTest extends \PHPUnit_Framework_TestCase
 
     public function testSetDefaultExceptionProvider()
     {
-        $model       = new \Model_Currency();
+        $model = new \Model_Currency();
         $model->loadBean(new \RedBeanPHP\OODBBean());
         $model->code = 'EUR';
 
         return array(
-            array(
-                array( //empty array
-                ),
-                $this->never(),
-                $model,
-            ),
-            array(
-                array(
-                    'code' => '' //Currency code not set
-                ),
-                $this->never(),
-                $model,
-            ),
             array(
                 array(
                     'code' => 'EUR' //model is not instance of \Model_Currency
@@ -577,6 +516,15 @@ class AdminTest extends \PHPUnit_Framework_TestCase
             ->method('getByCode')
             ->will($this->returnValue($getByCodeReturn));
 
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray');
+
+        $di              = new \Box_Di();
+        $di['validator'] = $validatorMock;
+
+        $adminApi->setDi($di);
+
         $adminApi->setService($service);
         $adminApi->set_default($data); //Expecting \Box_Exception every time
     }
@@ -585,7 +533,7 @@ class AdminTest extends \PHPUnit_Framework_TestCase
     {
         $adminApi = new \Box\Mod\Currency\Api\Admin();
 
-        $model       = new \Model_Currency();
+        $model = new \Model_Currency();
         $model->loadBean(new \RedBeanPHP\OODBBean());
         $model->code = 'EUR';
 
@@ -602,9 +550,14 @@ class AdminTest extends \PHPUnit_Framework_TestCase
             ->method('setAsDefault')
             ->will($this->returnValue(true));
 
-        $di       = new \Box_Di();
-        $db       = $this->getMockBuilder('Box_Database')->getMock();
-        $di['db'] = $db;
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray');
+
+        $di              = new \Box_Di();
+        $db              = $this->getMockBuilder('Box_Database')->getMock();
+        $di['db']        = $db;
+        $di['validator'] = $validatorMock;
 
         $adminApi->setDi($di);
         $adminApi->setService($service);

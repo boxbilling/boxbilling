@@ -60,36 +60,28 @@ class Model_ProductTable implements \Box\InjectionAwareInterface
         switch ($code) {
             case '1W':
                 return 'w';
-                break;
 
             case '1M':
                 return 'm';
-                break;
 
             case '3M':
                 return 'q';
-                break;
 
             case '6M':
                 return 'b';
-                break;
 
             case '12M':
             case '1Y':
                 return 'a';
-                break;
 
             case '2Y':
                 return 'bia';
-                break;
 
             case '3Y':
                 return 'tria';
-                break;
 
             default:
-                throw new Exception('Unknown period selected ' . $code);
-                break;
+                throw new Box_Exception('Unknown period selected ' . $code);
         }
     }
 
@@ -108,7 +100,6 @@ class Model_ProductTable implements \Box\InjectionAwareInterface
      * Price for one unit
      *
      * @param Model_Product $product
-     * @param Model_Currency $currency
      * @param array $config
      * @return float
      */
@@ -145,7 +136,6 @@ class Model_ProductTable implements \Box\InjectionAwareInterface
      * Price for one unit
      *
      * @param Model_Product $product
-     * @param Model_Currency $currency
      * @param array $config
      * @return float
      */

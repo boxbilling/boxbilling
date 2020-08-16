@@ -56,6 +56,10 @@ abstract class Server_Manager
             $this->_config['accesshash'] = $options['accesshash'];
         }
 
+        if(isset($options['ssl'])) {
+            $this->_config['ssl'] = $options['ssl'];
+        }
+
         /**
          * Custom connection port to API.
          * If not provided, using default server manager port
@@ -152,6 +156,7 @@ abstract class Server_Manager
 
     /**
      * @param Server_Account
+     * @param string $new_domain
      * @return bool
      * @throws Server_Exception
      */

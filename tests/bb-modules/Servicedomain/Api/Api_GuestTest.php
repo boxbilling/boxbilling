@@ -1,7 +1,7 @@
 <?php
 namespace Box\Tests\Mod\Servicedomain\Api;
 
-class Api_GuestTest extends \PHPUnit_Framework_TestCase
+class Api_GuestTest extends \BBTestCase
 {
     /**
      * @var \Box\Mod\Servicedomain\Api\Guest
@@ -29,6 +29,10 @@ class Api_GuestTest extends \PHPUnit_Framework_TestCase
 
         $di       = new \Box_Di();
         $di['db'] = $dbMock;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+
         $this->guestApi->setDi($di);
 
         $result = $this->guestApi->tlds(array());
@@ -45,31 +49,17 @@ class Api_GuestTest extends \PHPUnit_Framework_TestCase
         $serviceMock->expects($this->atLeastOnce())->method('tldToApiArray')
             ->will($this->returnValue(array()));
 
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->disableOriginalConstructor()->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')
+            ->will($this->returnValue(null));
+        $di['validator'] = $validatorMock;
+        $this->guestApi->setDi($di);
         $this->guestApi->setService($serviceMock);
 
         $data = array(
             'tld' => '.com'
         );
-
-        $result = $this->guestApi->pricing($data);
-        $this->assertInternalType('array', $result);
-    }
-
-    /**
-     * @expectedException \Box_Exception
-     */
-    public function testPricingTldMissingException()
-    {
-        $serviceMock = $this->getMockBuilder('\Box\Mod\Servicedomain\Service')
-            ->setMethods(array('tldFindOneByTld', 'tldToApiArray'))->getMock();
-        $serviceMock->expects($this->never())->method('tldFindOneByTld')
-            ->will($this->returnValue(new \Model_Tld()));
-        $serviceMock->expects($this->never())->method('tldToApiArray')
-            ->will($this->returnValue(array()));
-
-        $this->guestApi->setService($serviceMock);
-
-        $data = array();
 
         $result = $this->guestApi->pricing($data);
         $this->assertInternalType('array', $result);
@@ -87,6 +77,12 @@ class Api_GuestTest extends \PHPUnit_Framework_TestCase
         $serviceMock->expects($this->never())->method('tldToApiArray')
             ->will($this->returnValue(array()));
 
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->disableOriginalConstructor()->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')
+            ->will($this->returnValue(null));
+        $di['validator'] = $validatorMock;
+        $this->guestApi->setDi($di);
         $this->guestApi->setService($serviceMock);
 
         $data = array(
@@ -128,33 +124,14 @@ class Api_GuestTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \Box_Exception
      */
-    public function testCheckTLdNotSetException()
-    {
-        $data = array();
-
-        $this->guestApi->check($data);
-    }
-
-    /**
-     * @expectedException \Box_Exception
-     */
-    public function testCheckSLdNotSetException()
-    {
-        $data = array(
-            'tld' => '.com'
-        );
-
-        $this->guestApi->check($data);
-    }
-
-    /**
-     * @expectedException \Box_Exception
-     */
     public function testCheckSldNotValidException()
     {
         $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
         $validatorMock->expects($this->atLeastOnce())->method('isSldValid')
             ->will($this->returnValue(false));
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')
+            ->will($this->returnValue(null));
 
         $di              = new \Box_Di();
         $di['validator'] = $validatorMock;
@@ -185,6 +162,9 @@ class Api_GuestTest extends \PHPUnit_Framework_TestCase
         $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
         $validatorMock->expects($this->atLeastOnce())->method('isSldValid')
             ->will($this->returnValue(true));
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')
+            ->will($this->returnValue(null));
 
         $di              = new \Box_Di();
         $di['validator'] = $validatorMock;
@@ -215,6 +195,9 @@ class Api_GuestTest extends \PHPUnit_Framework_TestCase
         $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
         $validatorMock->expects($this->atLeastOnce())->method('isSldValid')
             ->will($this->returnValue(true));
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')
+            ->will($this->returnValue(null));
 
         $di              = new \Box_Di();
         $di['validator'] = $validatorMock;
@@ -237,6 +220,13 @@ class Api_GuestTest extends \PHPUnit_Framework_TestCase
         $serviceMock->expects($this->atLeastOnce())->method('canBeTransfered')
             ->will($this->returnValue(true));
 
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->disableOriginalConstructor()->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')
+            ->will($this->returnValue(null));
+        $di['validator'] = $validatorMock;
+        $this->guestApi->setDi($di);
+
         $this->guestApi->setService($serviceMock);
 
         $data = array(
@@ -251,26 +241,6 @@ class Api_GuestTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \Box_Exception
      */
-    public function testCan_be_transferredTldMissingException()
-    {
-        $data = array();
-        $this->guestApi->can_be_transferred($data);
-    }
-
-    /**
-     * @expectedException \Box_Exception
-     */
-    public function testCan_be_transferredSldMissingException()
-    {
-        $data = array(
-            'tld' => '.com'
-        );
-        $this->guestApi->can_be_transferred($data);
-    }
-
-    /**
-     * @expectedException \Box_Exception
-     */
     public function testCan_be_transferredTldNotFoundException()
     {
         $serviceMock = $this->getMockBuilder('\Box\Mod\Servicedomain\Service')
@@ -280,6 +250,12 @@ class Api_GuestTest extends \PHPUnit_Framework_TestCase
         $serviceMock->expects($this->never())->method('canBeTransfered')
             ->will($this->returnValue(true));
 
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->disableOriginalConstructor()->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')
+            ->will($this->returnValue(null));
+        $di['validator'] = $validatorMock;
+        $this->guestApi->setDi($di);
         $this->guestApi->setService($serviceMock);
 
         $data = array(
@@ -301,6 +277,12 @@ class Api_GuestTest extends \PHPUnit_Framework_TestCase
         $serviceMock->expects($this->atLeastOnce())->method('canBeTransfered')
             ->will($this->returnValue(false));
 
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->disableOriginalConstructor()->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')
+            ->will($this->returnValue(null));
+        $di['validator'] = $validatorMock;
+        $this->guestApi->setDi($di);
         $this->guestApi->setService($serviceMock);
 
         $data = array(

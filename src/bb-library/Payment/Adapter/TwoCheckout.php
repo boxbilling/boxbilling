@@ -106,7 +106,6 @@ class Payment_Adapter_TwoCheckout implements \Box\InjectionAwareInterface
      * 
      * @param Api_Admin $api_admin
      * @param int $id - transaction id to process
-     * @param array $ipn - post, get, server, http_raw_post_data
      * @param int $gateway_id - payment gateway id on BoxBilling
      * 
      * @return mixed
@@ -117,63 +116,21 @@ class Payment_Adapter_TwoCheckout implements \Box\InjectionAwareInterface
         $ipn = array_merge($data['get'], $data['post']);
         
         if(APPLICATION_ENV != 'testing' && !$this->_isIpnValid($ipn)) {
-            throw new Exception('2Checkout IPN is not valid');
-        }
-        
-        if($ipn['message_type'] == 'ORDER_CREATED') {
-            $api_admin->invoice_transaction_update(array('id'=>$id, 'type'=>'ORDER_CREATED'));
-        }
-        
-        if($ipn['message_type'] == 'SHIP_STATUS_CHANGED') {
-            $api_admin->invoice_transaction_update(array('id'=>$id, 'type'=>'SHIP_STATUS_CHANGED'));
-        }
-        
-        if($ipn['message_type'] == 'INVOICE_STATUS_CHANGED') {
-            $api_admin->invoice_transaction_update(array('id'=>$id, 'type'=>'INVOICE_STATUS_CHANGED'));
-        }
-        
-        if($ipn['message_type'] == 'REFUND_ISSUED') {
-            $api_admin->invoice_transaction_update(array('id'=>$id, 'type'=>'REFUND_ISSUED'));
-        }
-        
-        if($ipn['message_type'] == 'FRAUD_STATUS_CHANGED') {
-            $api_admin->invoice_transaction_update(array('id'=>$id, 'type'=>'FRAUD_STATUS_CHANGED'));
-        }
-        
-        if($ipn['message_type'] == 'RECURRING_INSTALLMENT_SUCCESS') {
-            $api_admin->invoice_transaction_update(array('id'=>$id, 'type'=>'RECURRING_INSTALLMENT_SUCCESS'));
-        }
-        
-        if($ipn['message_type'] == 'RECURRING_STOPPED') {
-            $api_admin->invoice_transaction_update(array('id'=>$id, 'type'=>'RECURRING_STOPPED'));
-        }
-        
-        if($ipn['message_type'] == 'RECURRING_INSTALLMENT_FAILED') {
-            $api_admin->invoice_transaction_update(array('id'=>$id, 'type'=>'RECURRING_INSTALLMENT_FAILED'));
-        }
-        
-        if($ipn['message_type'] == 'RECURRING_COMPLETE') {
-            $api_admin->invoice_transaction_update(array('id'=>$id, 'type'=>'RECURRING_COMPLETE'));
-        }
-        
-        if($ipn['message_type'] == 'RECURRING_RESTARTED') {
-            $api_admin->invoice_transaction_update(array('id'=>$id, 'type'=>'RECURRING_RESTARTED'));
+            throw new Payment_Exception('2Checkout IPN is not valid');
         }
 
+        $api_admin->invoice_transaction_update(array('id' => $id, 'type' => 'ORDER CREATED'));
+
         $invoice_id = null;
-        if($tx['invoice_id']) {
+        if(isset($tx['invoice_id'])) {
             $invoice_id = $tx['invoice_id'];
-        } elseif($ipn['bb_invoice_id']) {
+        } elseif(isset($ipn['bb_invoice_id'])) {
             $invoice_id = $ipn['bb_invoice_id'];
             $api_admin->invoice_transaction_update(array('id'=>$id, 'invoice_id'=>$invoice_id));
-        } elseif(!isset($ipn['bb_invoice_id']) && isset($ipn['sale_id'])) {
-            $invoice_id = R::getCell('SELECT invoice_id FROM transaction WHERE txn_id = :id AND invoice_id IS NOT NULL', array('id'=>$ipn['sale_id']));
-        } elseif(!isset($ipn['bb_invoice_id']) && isset($ipn['order_number'])) {
-            $invoice_id = R::getCell('SELECT invoice_id FROM transaction WHERE txn_id = :id AND invoice_id IS NOT NULL', array('id'=>$ipn['order_number']));
         }
         
         if(!$invoice_id) {
-            throw new Exception('Invoice id could not be determined for this transaction');
+            throw new Payment_Exception('Invoice id could not be determined for this transaction');
         }
         
         $invoice = $api_admin->invoice_get(array('id'=>$invoice_id));
@@ -206,6 +163,11 @@ class Payment_Adapter_TwoCheckout implements \Box\InjectionAwareInterface
                 'type'          =>  '2Checkout',
                 'rel_id'        =>  $ipn['order_number'],
             );
+
+            if ($this->isIpnDuplicate($ipn)){
+                throw new Payment_Exception('IPN is duplicate');
+            }
+
             $api_admin->client_balance_add_funds($bd);
             
             $tx_data['txn_status']  = 'complete';
@@ -294,11 +256,6 @@ class Payment_Adapter_TwoCheckout implements \Box\InjectionAwareInterface
         } elseif(isset($ipn['order_number']) && isset($ipn['total']) && isset($ipn['key'])) {
             $md5_hash  = $ipn["key"];
             $check_key = strtoupper(md5($secret.$ipn['order_number'].$ipn["total"]));
-
-        // The following code would be applicable to orders placed using our Plug and Play cart and our proprietary third party set of parameters.  
-        } elseif(isset($ipn['invoice_id']) && isset($ipn['sale_id']) && $ipn["md5_hash"]) {
-            $md5_hash  = $ipn["md5_hash"];
-            $check_key = strtoupper(md5($ipn["sale_id"] . $vendorNumber . $ipn["invoice_id"] . $secret));
         }
         
         error_log(sprintf('Returned MD5 Hash %s should be equal to %s', $md5_hash, $check_key));
@@ -314,7 +271,6 @@ class Payment_Adapter_TwoCheckout implements \Box\InjectionAwareInterface
         $data['mode']               = '2CO';
         
         foreach($invoice['lines'] as $i=>$item) {
-            $data['li_'.$i.'_id']			= $invoice['id'];
             $data['li_'.$i.'_type']         = 'product';
             $data['li_'.$i.'_name']         = $item['title'];
             $data['li_'.$i.'_product_id']   = $item['id'];
@@ -333,11 +289,8 @@ class Payment_Adapter_TwoCheckout implements \Box\InjectionAwareInterface
        
         $data['merchant_order_id']  = $invoice['id'];
         
-        $data['return_url']         = $this->config['redirect_url'];
         $data['x_receipt_link_url'] = $this->config['redirect_url'];
-        $data['fixed']              = 'Y';
-        $data['skip_landing']       = 1;
-        
+
         return $data;
     }
 
@@ -366,7 +319,6 @@ class Payment_Adapter_TwoCheckout implements \Box\InjectionAwareInterface
         }
         
         foreach($invoice['lines'] as $i => $item) {
-        	$data['li_' . $i . '_id']			= $invoice['id'];
         	$data['li_' . $i . '_type']			= 'product';
         	$data['li_' . $i . '_name'] 		= $item['title'];
         	$data['li_' . $i . '_quantity']		= $item['quantity'];
@@ -387,14 +339,14 @@ class Payment_Adapter_TwoCheckout implements \Box\InjectionAwareInterface
        
         $data['merchant_order_id']  = $invoice['id'];
         
-        $data['return_url']         = $this->config['redirect_url'];
         $data['x_receipt_link_url'] = $this->config['redirect_url'];
-        $data['fixed']              = 'Y';
-        $data['skip_landing']       = 1;
 
         return $data;
     }
     
+    /**
+     * @param string $url
+     */
     private function _generateForm($url, $data, $method = 'post')
     {
         $form = '';
@@ -411,5 +363,28 @@ class Payment_Adapter_TwoCheckout implements \Box\InjectionAwareInterface
         }
 
         return $form;
+    }
+
+    public function isIpnDuplicate(array $ipn)
+    {
+        $sql = 'SELECT id
+                FROM transaction
+                WHERE txn_id = :transaction_id
+                  AND type = :transaction_type
+                  AND amount = :transaction_amount
+                LIMIT 2';
+
+        $bindings = array(
+            ':transaction_id' => $ipn['order_number'],
+            ':transaction_type' => $ipn['message_type'],
+            ':transaction_amount' => $ipn['total'],
+        );
+
+        $rows = $this->di['db']->getAll($sql, $bindings);
+        if (count($rows) > 1){
+            return true;
+        }
+
+        return false;
     }
 }

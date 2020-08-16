@@ -39,22 +39,25 @@ class Service implements InjectionAwareInterface
     public function attachOrderConfig(\Model_Product $product, array &$data)
     {
         $c = json_decode($product->config, 1);
-        if(!isset($c['filename'])) {
-            throw new \Box_Exception('Product is not configured completely.');
-        }
+        $required = array(
+            'filename' => 'Product is not configured completely.',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $c);
+
         $data['filename'] = $c['filename'];
         return array_merge($c, $data);
     }
     
     public function validateOrderData(array &$data)
     {
-        if(!isset($data['filename'])) {
-            throw new \Box_Exception('Filename is missing in product config.');
-        }
+        $required = array(
+            'filename' => 'Filename is missing in product config',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
     }
 
     /**
-     * @param Model_ClientOrder $order
+     * @param \Model_ClientOrder $order
      * @return \Model_ServiceDownloadable
      */
     public function action_create(\Model_ClientOrder $order)
@@ -69,8 +72,8 @@ class Service implements InjectionAwareInterface
         $model->client_id = $order->client_id;
         $model->filename = $c['filename'];
         $model->downloads = 0;
-        $model->created_at = date('c');
-        $model->updated_at = date('c');
+        $model->created_at = date('Y-m-d H:i:s');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
 
         return $model;
@@ -84,8 +87,8 @@ class Service implements InjectionAwareInterface
     /**
      *
      * @todo
-     * @param Model_ClientOrder $order
-     * @return void
+     * @param \Model_ClientOrder $order
+     * @return boolean
      */
     public function action_renew(\Model_ClientOrder $order)
     {
@@ -95,8 +98,8 @@ class Service implements InjectionAwareInterface
     /**
      *
      * @todo
-     * @param Model_ClientOrder $order
-     * @return void
+     * @param \Model_ClientOrder $order
+     * @return boolean
      */
     public function action_suspend(\Model_ClientOrder $order)
     {
@@ -106,8 +109,8 @@ class Service implements InjectionAwareInterface
     /**
      *
      * @todo
-     * @param Model_ClientOrder $order
-     * @return void
+     * @param \Model_ClientOrder $order
+     * @return boolean
      */
     public function action_unsuspend(\Model_ClientOrder $order)
     {
@@ -117,8 +120,8 @@ class Service implements InjectionAwareInterface
     /**
      *
      * @todo
-     * @param Model_ClientOrder $order
-     * @return void
+     * @param \Model_ClientOrder $order
+     * @return boolean
      */
     public function action_cancel(\Model_ClientOrder $order)
     {
@@ -128,8 +131,8 @@ class Service implements InjectionAwareInterface
     /**
      *
      * @todo
-     * @param Model_ClientOrder $order
-     * @return void
+     * @param \Model_ClientOrder $order
+     * @return boolean
      */
     public function action_uncancel(\Model_ClientOrder $order)
     {
@@ -139,7 +142,7 @@ class Service implements InjectionAwareInterface
     /**
      *
      * @todo
-     * @param Model_ClientOrder $order
+     * @param \Model_ClientOrder $order
      * @return void
      */
     public function action_delete(\Model_ClientOrder $order)
@@ -154,7 +157,7 @@ class Service implements InjectionAwareInterface
     public function hitDownload(\Model_ServiceDownloadable $model)
     {
         $model->downloads += 1;
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
     }
 
@@ -191,7 +194,7 @@ class Service implements InjectionAwareInterface
 
         $config['filename'] = $file->getName();
         $productModel->config = json_encode($config);
-        $productModel->updated_at = date('c');
+        $productModel->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($productModel);
 
         $this->di['logger']->info('Uploaded new file for product %s', $productModel->id);
@@ -217,7 +220,7 @@ class Service implements InjectionAwareInterface
         // End upload
 
         $serviceDownloadable->filename = $file->getName();
-        $serviceDownloadable->updated_at = date('c');
+        $serviceDownloadable->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($serviceDownloadable);
 
         $this->di['logger']->info('Uploaded new file for order %s', $order->id);

@@ -14,7 +14,7 @@
  * Notifications center management.
  *
  * Notifications are important messages for staff messages to get informed
- * about important events on boxbilling.
+ * about important events on BoxBilling.
  *
  * For example cron job can inform staff members
  */
@@ -31,7 +31,7 @@ class Admin extends \Api_Abstract
     public function get_list($data)
     {
         list($sql, $params) = $this->getService()->getSearchQuery($data);
-        $per_page = isset($data['per_page']) ? $data['per_page'] : $this->di['pager']->getPer_page();
+        $per_page = $this->di['array_get']($data, 'per_page', $this->di['pager']->getPer_page());
         return $resultSet = $this->di['pager']->getSimpleResultSet($sql, $params, $per_page);
     }
 
@@ -44,9 +44,10 @@ class Admin extends \Api_Abstract
      */
     public function get($data)
     {
-        if (!isset($data['id'])) {
-            throw new \Box_Exception('Notification id is missing');
-        }
+        $required = array(
+            'id' => 'Notification ID is missing',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
         $meta = $this->di['db']->load('extension_meta', $data['id']);
         if ($meta->extension != 'mod_notification' || $meta->meta_key != 'message') {
@@ -60,7 +61,7 @@ class Admin extends \Api_Abstract
      * Add new notification message
      *
      * @param string $message - message text
-     * @return int - new message id
+     * @return int|false - new message id
      */
     public function add($data)
     {
@@ -68,19 +69,9 @@ class Admin extends \Api_Abstract
             return false;
         }
 
-        $meta             = $this->di['db']->dispense('extension_meta');
-        $meta->extension  = 'mod_notification';
-        $meta->rel_type   = 'staff';
-        $meta->rel_id     = 1;
-        $meta->meta_key   = 'message';
-        $meta->meta_value = $data['message'];
-        $meta->created_at = date('c');
-        $meta->updated_at = date('c');
-        $id               = $this->di['db']->store($meta);
+        $message = htmlspecialchars($data['message'], ENT_QUOTES, 'UTF-8');
 
-        $this->di['events_manager']->fire(array('event' => 'onAfterAdminNotificationAdd', 'params' => array('id' => $id)));
-
-        return $id;
+        return $this->getService()->create($message);
     }
 
     /**
@@ -92,9 +83,10 @@ class Admin extends \Api_Abstract
      */
     public function delete($data)
     {
-        if (!isset($data['id'])) {
-            throw new \Box_Exception('Notification id is missing');
-        }
+        $required = array(
+            'id' => 'Notification ID is missing',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
         $meta = $this->di['db']->load('extension_meta', $data['id']);
         if ($meta->extension != 'mod_notification' || $meta->meta_key != 'message') {

@@ -70,8 +70,8 @@ class Service implements InjectionAwareInterface
         $bean = $this->di['db']->dispense('Form');
         $bean->name = $data['name'];
         $bean->style =  $data['style'];
-        $bean->created_at = date('c');
-        $bean->updated_at = date('c');
+        $bean->created_at = date('Y-m-d H:i:s');
+        $bean->updated_at = date('Y-m-d H:i:s');
 
         $form_id = $this->di['db']->store($bean);
         $this->di['logger']->info('Created new form %s with id %s', $data['name'], $form_id);
@@ -85,9 +85,9 @@ class Service implements InjectionAwareInterface
         $formId = $field['form_id'];
         $types = $this->getFormFieldsTypes();
         $type = $field["type"];
-        $label = isset($field['label']) ? $field['label'] : $types[$type] . " " . $field_number;
-        $name = isset($field['name']) ? $field['name'] : ($this->slugify("new_" . $type) . "_" . $field_number);
 
+        $label = $this->di['array_get']($field, 'label', $types[$type] . " " . $field_number);
+        $name  = $this->di['array_get']($field, 'name', ($this->slugify("new_" . $type) . "_" . $field_number));
 
         if ($type == "select" || $type == "checkbox" || $type == "radio") {
             $field['options'] = '{"First option":"1", "Second option": "2", "Third option":"3"}';
@@ -105,23 +105,23 @@ class Service implements InjectionAwareInterface
         $bean->form_id = $formId;
         $bean->name = $name;
         $bean->label = $label;
-        $bean->hide_label = isset($field['hide_label']) ? $field['hide_label'] : null;
-        $bean->description = isset($field['description']) ? $field['description'] : null;
+        $bean->hide_label = $this->di['array_get']($field, 'hide_label', null);
+        $bean->description = $this->di['array_get']($field, 'description', null);
         $bean->type = $field['type'];
-        $bean->default_value = isset($field['default_value']) ? $field['default_value'] : null;
-        $bean->required = isset($field['required']) ? $field['required'] : null;
-        $bean->hidden = isset($field['hidden']) ? $field['hidden'] : null;
-        $bean->readonly = isset($field['readonly']) ? $field['readonly'] : null;
-        $bean->options = isset($field['options']) ? $field['options'] : null;
-        $bean->prefix = isset($field['prefix']) ? $field['prefix'] : null;
-        $bean->suffix = isset($field['suffix']) ? $field['suffix'] : null;
-        $bean->show_initial = isset($field['show_initial']) ? $field['show_initial'] : null;
-        $bean->show_middle = isset($field['show_middle']) ? $field['show_middle'] : null;
-        $bean->show_prefix = isset($field['show_prefix']) ? $field['show_prefix'] : null;
-        $bean->show_suffix = isset ($field['show_suffix']) ? $field['show_suffix'] : null;
-        $bean->text_size = isset($field['text_size']) ? $field['text_size'] : null;
-        $bean->created_at = date('c');
-        $bean->updated_at = date('c');
+        $bean->default_value = $this->di['array_get']($field, 'default_value', null);
+        $bean->required = $this->di['array_get']($field, 'required', null);
+        $bean->hidden = $this->di['array_get']($field, 'hidden', null);
+        $bean->readonly = $this->di['array_get']($field, 'readonly', null);
+        $bean->options = $this->di['array_get']($field, 'options', null);
+        $bean->prefix = $this->di['array_get']($field, 'prefix', null);
+        $bean->suffix = $this->di['array_get']($field, 'suffix', null);
+        $bean->show_initial = $this->di['array_get']($field, 'show_initial', null);
+        $bean->show_middle = $this->di['array_get']($field, 'show_middle', null);
+        $bean->show_prefix = $this->di['array_get']($field, 'show_prefix', null);
+        $bean->show_suffix = $this->di['array_get']($field, 'show_suffix', null);
+        $bean->text_size = $this->di['array_get']($field, 'text_size', null);
+        $bean->created_at = date('Y-m-d H:i:s');
+        $bean->updated_at = date('Y-m-d H:i:s');
 
         $fieldId = $this->di['db']->store($bean);
         $this->di['logger']->info('Added new field %s to form %s', $fieldId, $field['form_id']);
@@ -204,21 +204,21 @@ class Service implements InjectionAwareInterface
         $bean->id = $fieldId;
         $bean->name = $name;
         $bean->label = $label;
-        $bean->hide_label = isset($field['hide_label']) ? $field['hide_label'] : null;
-        $bean->description = isset($field['description']) ? $field['description'] : null;
-        $bean->default_value = isset($field['default_value']) ? $field['default_value'] : null;
-        $bean->required = isset($field['required']) ? $field['required'] : null;
-        $bean->hidden = isset($field['hidden']) ? $field['hidden'] : null;
-        $bean->readonly = isset($field['readonly']) ? $field['readonly'] : null;
+        $bean->hide_label = $this->di['array_get']($field, 'hide_label', null);
+        $bean->description = $this->di['array_get']($field, 'description', null);
+        $bean->default_value = $this->di['array_get']($field, 'default_value', null);
+        $bean->required = $this->di['array_get']($field, 'required', null);
+        $bean->hidden = $this->di['array_get']($field, 'hidden', null);
+        $bean->readonly = $this->di['array_get']($field, 'readonly', null);
         $bean->options = $field['options'];
-        $bean->prefix = isset($field['prefix']) ? $field['prefix'] : null;
-        $bean->suffix = isset ($field['suffix']) ? $field['suffix'] : null;
-        $bean->show_initial = isset($field['show_initial']) ? $field['show_initial'] : null;
-        $bean->show_middle = isset($field['show_middle']) ? $field['show_middle'] : null;
-        $bean->show_prefix = isset($field['show_prefix']) ? $field['show_prefix'] : null;
-        $bean->show_suffix = isset($field['show_suffix']) ? $field['show_suffix'] : null;
-        $bean->text_size = isset($field['text_size']) ? $field['text_size'] : null;
-        $bean->updated_at = date('c');
+        $bean->prefix = $this->di['array_get']($field, 'prefix', null);
+        $bean->suffix = $this->di['array_get']($field, 'suffix', null);
+        $bean->show_initial = $this->di['array_get']($field, 'show_initial', null);
+        $bean->show_middle = $this->di['array_get']($field, 'show_middle', null);
+        $bean->show_prefix = $this->di['array_get']($field, 'show_prefix', null);
+        $bean->show_suffix = $this->di['array_get']($field, 'show_suffix', null);
+        $bean->text_size = $this->di['array_get']($field, 'text_size', null);
+        $bean->updated_at = date('Y-m-d H:i:s');
 
         $this->di['db']->store($bean);
         $this->di['logger']->info('Updated custom form %s', $fieldId);
@@ -227,10 +227,7 @@ class Service implements InjectionAwareInterface
 
     public function getForm($formId)
     {
-        $formModel = $this->di['db']->load('Form', $formId);
-        if (!$formModel instanceof \Model_Form) {
-            throw new \Box_Exception('Form not found', null, 9632);
-        }
+        $formModel = $this->di['db']->getExistingModelById('Form', $formId);
         $result = $this->di['db']->toArray($formModel);
 
         $result['style'] = json_decode($result['style'], true);
@@ -285,14 +282,15 @@ class Service implements InjectionAwareInterface
 
     public function getField($fieldId)
     {
-        $field = $this->di['db']->load('FormField', $fieldId);
-        if (!$field instanceof \Model_FormField){
-            throw new \Box_Exception ("Field was not found", null, 2575);
-        }
+        $field = $this->di['db']->getExistingModelById('FormField', $fieldId, "Field was not found");
+
         $result = $this->di['db']->toArray($field);
-        if (!isset($result['id'])) {
-            throw new \Box_Exception ("Field was not found", null, 2575);
-        }
+
+        $required = array(
+            'id' => 'Field was not found',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $result, null, 2575);
+
         if (substr($result["options"], 0, 1) == "{" || substr($result["options"], 0, 1) == "[") {
             $result['options'] = json_decode($result['options']);
         }
@@ -331,11 +329,7 @@ class Service implements InjectionAwareInterface
 
     public function removeField($data)
     {
-        $fieldModel = $this->di['db']->load('FormField', $data['id']);
-        if (!$fieldModel instanceof \Model_FormField){
-            throw new \Box_Exception ("Field was not found", null, 1641);
-        }
-
+        $fieldModel = $this->di['db']->getExistingModelById('FormField', $data['id'], "Field was not found");
         $this->di['db']->trash($fieldModel);
         $this->di['logger']->info('Deleted custom field %s', $data['id']);
         return true;

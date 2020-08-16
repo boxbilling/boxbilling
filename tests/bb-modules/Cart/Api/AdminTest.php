@@ -2,7 +2,7 @@
 
 namespace Box\Tests\Mod\Cart\Api;
 
-class AdminTest extends \PHPUnit_Framework_TestCase
+class AdminTest extends \BBTestCase
 {
     /**
      * @var \Box\Mod\Cart\Api\Admin
@@ -45,6 +45,9 @@ class AdminTest extends \PHPUnit_Framework_TestCase
         $di          = new \Box_Di();
         $di['pager'] = $paginatorMock;
         $di['db'] = $dbMock;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $this->adminApi->setDi($di);
 
         $this->adminApi->setService($serviceMock);
@@ -93,7 +96,7 @@ class AdminTest extends \PHPUnit_Framework_TestCase
         $dbMock = $this->getMockBuilder('\Box_Database')->disableOriginalConstructor()->getMock();
         $dbMock->expects($this->atLeastOnce())
             ->method('getAssoc')
-            ->will($this->returnValue(array(rand(1, 100), date('c'))));
+            ->will($this->returnValue(array(rand(1, 100), date('Y-m-d H:i:s'))));
         $dbMock->expects($this->atLeastOnce())
             ->method('exec')
             ->will($this->returnValue(null));

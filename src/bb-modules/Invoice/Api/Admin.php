@@ -26,7 +26,7 @@ class Admin extends \Api_Abstract
     {
         $service = $this->getService();
         list ($sql, $params) = $service->getSearchQuery($data);
-        $per_page = isset($data['per_page']) ? $data['per_page'] : $this->di['pager']->getPer_page();
+        $per_page = $this->di['array_get']($data, 'per_page', $this->di['pager']->getPer_page());
         $pager = $this->di['pager']->getAdvancedResultSet($sql, $params, $per_page);
         foreach ($pager['list'] as $key => $item) {
             $invoice             = $this->di['db']->getExistingModelById('Invoice', $item['id'], 'Invoice not found');
@@ -93,7 +93,8 @@ class Admin extends \Api_Abstract
 
         $client = $this->di['db']->getExistingModelById('Client', $data['client_id'], 'Client not found');
 
-        return $this->getService()->prepareInvoice($client, $data);
+        $invoice = $this->getService()->prepareInvoice($client, $data);
+        return $invoice->id;
     }
 
     /**
@@ -121,7 +122,7 @@ class Admin extends \Api_Abstract
     public function refund($data)
     {
         $model = $this->_getInvoice($data);
-        $note = isset($data['note']) ? $data['note'] : NULL;
+        $note = $this->di['array_get']($data, 'note', NULL);
 
         return $this->getService()->refundInvoice($model, $note);
     }
@@ -461,7 +462,7 @@ class Admin extends \Api_Abstract
     {
         $transactionService = $this->di['mod_service']('Invoice', 'Transaction');
         list ($sql, $params) = $transactionService->getSearchQuery($data);
-        $per_page = isset($data['per_page']) ? $data['per_page'] : $this->di['pager']->getPer_page();
+        $per_page = $this->di['array_get']($data, 'per_page', $this->di['pager']->getPer_page());
         $pager = $this->di['pager']->getSimpleResultSet($sql, $params, $per_page);
         foreach ($pager['list'] as $key => $item) {
             $transaction               = $this->di['db']->getExistingModelById('Transaction', $item['id'], 'Transaction not found');
@@ -532,7 +533,7 @@ class Admin extends \Api_Abstract
         $gatewayService = $this->di['mod_service']('Invoice', 'PayGateway');
         list ($sql, $params) = $gatewayService->getSearchQuery($data);
 
-        $per_page = isset($data['per_page']) ? $data['per_page'] : $this->di['pager']->getPer_page();
+        $per_page = $this->di['array_get']($data, 'per_page', $this->di['pager']->getPer_page());
         $pager = $this->di['pager']->getSimpleResultSet($sql, $params, $per_page);
         foreach ($pager['list'] as $key => $item) {
             $gateway               = $this->di['db']->getExistingModelById('PayGateway', $item['id'], 'Gateway not found');
@@ -673,7 +674,7 @@ class Admin extends \Api_Abstract
     {
         $subscriptionService = $this->di['mod_service']('Invoice', 'Subscription');
         list ($sql, $params) = $subscriptionService->getSearchQuery($data);
-        $per_page = isset($data['per_page']) ? $data['per_page'] : $this->di['pager']->getPer_page();
+        $per_page = $this->di['array_get']($data, 'per_page', $this->di['pager']->getPer_page());
         $pager = $this->di['pager']->getSimpleResultSet($sql, $params, $per_page);
         foreach ($pager['list'] as $key => $item) {
             $subscription               = $this->di['db']->getExistingModelById('Subscription', $item['id'], 'Subscription not found');
@@ -757,12 +758,11 @@ class Admin extends \Api_Abstract
     public function subscription_get($data)
     {
         if (!isset($data['id']) && !isset($data['sid'])) {
-            if (!isset($data['id'])){
-                throw new \Box_Exception('Subscription id not passed');
-            }
-            if (!isset($data['sid'])){
-                throw new \Box_Exception('Subscription sid not passed');
-            }
+            $required = array(
+                'id'  => 'Subscription id not passed',
+                'sid' => 'Subscription sid not passed',
+            );
+            $this->di['validator']->checkRequiredParamsForArray($required, $data);
         }
         $model = null;
         if(isset($data['id'])) {
@@ -807,7 +807,7 @@ class Admin extends \Api_Abstract
      * @param int $id - tax id
      * 
      * @return boolean
-     * @throws Box_Exception 
+     * @throws \Box_Exception
      */
     public function tax_delete($data)
     {
@@ -825,7 +825,7 @@ class Admin extends \Api_Abstract
      * Create new tax rule
      * 
      * @param string $name - tax name
-     * @param flaot $taxrate - tax rate
+     * @param float $taxrate - tax rate
      * 
      * @return int - new tax id
      */
@@ -842,6 +842,52 @@ class Admin extends \Api_Abstract
     }
 
     /**
+     * Update tax rule
+     *
+     * @param string $id - tax ID
+     *
+     * @return array
+     */
+    public function tax_get($data)
+    {
+        $required = array(
+            'id' => 'Tax id is missing'
+        );
+
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
+
+        $tax = $this->di['db']->getExistingModelById('Tax', $data['id'], 'Tax rule not found');
+
+        $taxService = $this->di['mod_service']('Invoice', 'Tax');
+        return $taxService->toApiArray($tax);
+    }
+
+    /**
+     * Update tax rule
+     *
+     * @param int $id - tax ID
+     * @param string $name - tax name
+     * @param float $taxrate - tax rate
+     *
+     * @return boolean
+     */
+    public function tax_update($data)
+    {
+        $required = array(
+            'id' => 'Tax id is missing',
+            'taxrate' => 'Tax rate is missing',
+            'name' => 'Tax name is missing'
+        );
+
+        $tax = $this->di['db']->getExistingModelById('Tax', $data['id'], 'Tax rule not found');
+
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
+        $taxService = $this->di['mod_service']('Invoice', 'Tax');
+
+        return $taxService->update($tax, $data);
+    }
+
+    /**
      * Get list of taxes
      * 
      * @return array
@@ -850,7 +896,7 @@ class Admin extends \Api_Abstract
     {
         $taxService = $this->di['mod_service']('Invoice', 'Tax');
         list ($sql, $params) = $taxService->getSearchQuery($data);
-        $per_page = isset($data['per_page']) ? $data['per_page'] : $this->di['pager']->getPer_page();
+        $per_page = $this->di['array_get']($data, 'per_page', $this->di['pager']->getPer_page());
         return $this->di['pager']->getSimpleResultSet($sql, $params, $per_page);
     }
     
@@ -865,11 +911,6 @@ class Admin extends \Api_Abstract
      */
     public function tax_setup_eu($data)
     {
-        $required = array(
-            'name' => 'Tax name is missing',
-            'taxrate' => 'Tax rate is missing or is not valid',
-        );
-        $this->di['validator']->checkRequiredParamsForArray($required, $data);
         $taxService = $this->di['mod_service']('Invoice', 'Tax');
         return $taxService->setupEUTaxes($data);
     }

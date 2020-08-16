@@ -31,11 +31,11 @@ class Payment_Adapter_PayPalEmail implements \Box\InjectionAwareInterface
         $this->config = $config;
         
         if(!function_exists('curl_exec')) {
-            throw new Exception('PHP Curl extension must be enabled in order to use PayPal gateway');
+            throw new Payment_Exception('PHP Curl extension must be enabled in order to use PayPal gateway');
         }
         
-        if(!$this->config['email']) {
-            throw new Exception('Payment gateway "PayPal" is not configured properly. Please update configuration parameter "PayPal Email address" at "Configuration -> Payments".');
+        if(!isset($this->config['email'])) {
+            throw new Payment_Exception('Payment gateway "PayPal" is not configured properly. Please update configuration parameter "PayPal Email address" at "Configuration -> Payments".');
         }
     }
 
@@ -58,86 +58,12 @@ class Payment_Adapter_PayPalEmail implements \Box\InjectionAwareInterface
     public function getHtml($api_admin, $invoice_id, $subscription)
     {
         $invoice = $api_admin->invoice_get(array('id'=>$invoice_id));
-        $buyer = $invoice['buyer'];
-        
-        $p = array(
-            ':id'=>sprintf('%05s', $invoice['nr']), 
-            ':serie'=>$invoice['serie'], 
-            ':title'=>$invoice['lines'][0]['title']
-        );
-        $title = __('Payment for invoice :serie:id [:title]', $p);
-        $number = $invoice['nr'];
-        
+
+        $data = array();
         if($subscription) {
-            
-            $subs = $invoice['subscription'];
-            
-            $data = array();
-            $data['item_name']          = $title;
-            $data['item_number']        = $number;
-            $data['no_shipping']        = '1';
-            $data['no_note']            = '1'; // Do not prompt payers to include a note with their payments. Allowable values for Subscribe buttons:
-            $data['currency_code']      = $invoice['currency'];
-            $data['return']             = $this->config['return_url'];
-            $data['cancel_return']      = $this->config['cancel_url'];
-            $data['notify_url']         = $this->config['notify_url'];
-            $data['business']           = $this->config['email'];
-
-            $data['cmd']                = '_xclick-subscriptions';
-            $data['rm']                 = '2';
-
-            $data['invoice_id']         = $invoice['id'];
-
-            // 1 period Trial data
-            //$data['a1']                 = $this->moneyFormat($invoice->totalAmount()); // Trial period 1 price. For a free trial period, specify 0.
-            //$data['p1']                 = $invoice->firstPeriod(); // Trial period 1 duration. Required if you specify a1. Specify an integer value in the allowable range for the units of duration that you specify with t1.
-            //$data['t1']                 = $invoice->firstPaymentTerm();
-
-            // Recurrence info
-            $data['a3']                 = $this->moneyFormat($invoice['total'], $invoice['currency']); // Regular subscription price.
-            $data['p3']                 = $subs['cycle']; //Subscription duration. Specify an integer value in the allowable range for the units of duration that you specify with t3.
-
-            /**
-             * t3: Regular subscription units of duration. Allowable values:
-             *  D – for days; allowable range for p3 is 1 to 90
-             *  W – for weeks; allowable range for p3 is 1 to 52
-             *  M – for months; allowable range for p3 is 1 to 24
-             *  Y – for years; allowable range for p3 is 1 to 5
-             */
-            $data['t3']                 = $subs['unit'];
-
-            $data['src']                = 1; //Recurring payments. Subscription payments recur unless subscribers cancel their subscriptions before the end of the current billing cycle or you limit the number of times that payments recur with the value that you specify for srt.
-    //        $data['srt']                = 1; //Recurring times. Number of times that subscription payments recur. Specify an integer above 1. Valid only if you specify src="1".
-            $data['sra']                = 1; //Reattempt on failure. If a recurring payment fails, PayPal attempts to collect the payment two more times before canceling the subscription.
-            $data['charset']			= 'UTF-8'; //Sets the character encoding for the billing information/log-in page, for the information you send to PayPal in your HTML button code, and for the information that PayPal returns to you as a result of checkout processes initiated by the payment button. The default is based on the character encoding settings in your account profile.
-
-            //client data
-            $data['address1']			= $buyer['address'];
-            $data['city']				= $buyer['city'];
-            $data['email']				= $buyer['email'];
-            $data['first_name']			= $buyer['first_name'];
-            $data['last_name']			= $buyer['last_name'];
-            $data['zip']				= $buyer['zip'];
-            $data['state']				= $buyer['state'];
-            $data['charset']            = "utf-8";
-            
+            $data = $this->getSubscriptionFields($invoice);
         } else {
-            $data = array();
-            $data['item_name']          = $title;
-            $data['item_number']        = $number;
-            $data['no_shipping']        = '1';
-            $data['no_note']            = '1';
-            $data['currency_code']      = $invoice['currency'];
-            $data['rm']                 = '2';
-            $data['return']             = $this->config['return_url'];
-            $data['cancel_return']      = $this->config['cancel_url'];
-            $data['notify_url']         = $this->config['notify_url'];
-            $data['business']           = $this->config['email'];
-            $data['cmd']                = '_xclick';
-            $data['amount']             = $this->moneyFormat($invoice['subtotal'], $invoice['currency']);
-            $data['tax']                = $this->moneyFormat($invoice['tax'], $invoice['currency']);
-            $data['bn']                 = "PP-BuyNowBF";
-            $data['charset']            = "utf-8";
+            $data = $this->getOneTimePaymentFields($invoice);
         }
         
         $url = $this->serviceUrl();
@@ -147,7 +73,7 @@ class Payment_Adapter_PayPalEmail implements \Box\InjectionAwareInterface
     public function processTransaction($api_admin, $id, $data, $gateway_id)
     {
         if(APPLICATION_ENV != 'testing' && !$this->_isIpnValid($data)) {
-            throw new Exception('IPN is not valid');
+            throw new Payment_Exception('IPN is not valid');
         }
         
         $ipn = $data['post'];
@@ -158,29 +84,29 @@ class Payment_Adapter_PayPalEmail implements \Box\InjectionAwareInterface
             $api_admin->invoice_transaction_update(array('id'=>$id, 'invoice_id'=>$data['get']['bb_invoice_id']));
         }
         
-        if(!$tx['type']) {
+        if(!$tx['type'] && isset($ipn['txn_type'])) {
             $api_admin->invoice_transaction_update(array('id'=>$id, 'type'=>$ipn['txn_type']));
         }
         
-        if(!$tx['txn_id']) {
+        if(!$tx['txn_id'] && isset($ipn['txn_id'])) {
             $api_admin->invoice_transaction_update(array('id'=>$id, 'txn_id'=>$ipn['txn_id']));
         }
         
-        if(!$tx['txn_status']) {
+        if(!$tx['txn_status'] && isset($ipn['payment_status'])) {
             $api_admin->invoice_transaction_update(array('id'=>$id, 'txn_status'=>$ipn['payment_status']));
         }
         
-        if(!$tx['amount']) {
+        if(!$tx['amount'] && isset($ipn['mc_gross'])) {
             $api_admin->invoice_transaction_update(array('id'=>$id, 'amount'=>$ipn['mc_gross']));
         }
         
-        if(!$tx['currency']) {
+        if(!$tx['currency'] && isset($ipn['mc_currency'])) {
             $api_admin->invoice_transaction_update(array('id'=>$id, 'currency'=>$ipn['mc_currency']));
         }
-        
+
         $invoice = $api_admin->invoice_get(array('id'=>$data['get']['bb_invoice_id']));
         $client_id = $invoice['client']['id'];
-        
+
         switch ($ipn['txn_type']) {
             
             case 'web_accept':
@@ -194,6 +120,9 @@ class Payment_Adapter_PayPalEmail implements \Box\InjectionAwareInterface
                         'type'          =>  'PayPal',
                         'rel_id'        =>  $ipn['txn_id'],
                     );
+                    if ($this->isIpnDuplicate($ipn)){
+                        throw new Payment_Exception('IPN is duplicate');
+                    }
                     $api_admin->client_balance_add_funds($bd);
                     if($tx['invoice_id']) {
                         $api_admin->invoice_pay_with_credits(array('id'=>$tx['invoice_id']));
@@ -238,7 +167,7 @@ class Payment_Adapter_PayPalEmail implements \Box\InjectionAwareInterface
                 break;
         }
         
-        if($ipn['payment_status'] == 'Refunded') {
+        if(isset($ipn['payment_status']) && $ipn['payment_status'] == 'Refunded') {
             $refd = array(
                 'id'    => $invoice['id'],
                 'note'  => 'PayPal refund '.$ipn['parent_txn_id'],
@@ -251,7 +180,7 @@ class Payment_Adapter_PayPalEmail implements \Box\InjectionAwareInterface
             'error'     => '',
             'error_code'=> '',
             'status'    => 'processed',
-            'updated_at'=> date('c'),
+            'updated_at'=> date('Y-m-d H:i:s'),
         );
         $api_admin->invoice_transaction_update($d);
     }
@@ -270,7 +199,7 @@ class Payment_Adapter_PayPalEmail implements \Box\InjectionAwareInterface
         // use http_raw_post_data instead of post due to encoding
         parse_str($data['http_raw_post_data'], $post);
 		$req = 'cmd=_notify-validate';
-		foreach ($post as $key => $value) {
+		foreach ((array) $post as $key => $value) {
 			$value = urlencode(stripslashes($value));
 			$req .= "&$key=$value";
 		}
@@ -288,6 +217,9 @@ class Payment_Adapter_PayPalEmail implements \Box\InjectionAwareInterface
         return number_format($amount, 2, '.', '');
     }
 
+	/**
+	 * @param string $url
+	 */
 	private function download($url, $post_vars = false, $phd = array(), $contentType = 'application/x-www-form-urlencoded')
     {
 		$post_contents = '';
@@ -309,8 +241,10 @@ class Payment_Adapter_PayPalEmail implements \Box\InjectionAwareInterface
 		$headers = Array(
 			($post_contents ? 'POST' : 'GET')." $path HTTP/1.1",
 			"Host: $host",
+            'Connection: Close',
+            'User-Agent: BoxBilling'
 		);
-		if ($phd) {
+		if (!empty($phd)) {
 			if (!is_array($phd)) {
 				$headers[count($headers)] = $phd;
 			} else {
@@ -345,6 +279,9 @@ class Payment_Adapter_PayPalEmail implements \Box\InjectionAwareInterface
 		return $data;
 	}
     
+    /**
+     * @param string $url
+     */
     private function _generateForm($url, $data, $method = 'post')
     {
         $form  = '';
@@ -361,5 +298,115 @@ class Payment_Adapter_PayPalEmail implements \Box\InjectionAwareInterface
         }
 
         return $form;
+    }
+
+    /**
+     * @param string $txn_id
+     */
+    public function isIpnDuplicate(array $ipn)
+    {
+        $sql = 'SELECT id
+                FROM transaction
+                WHERE txn_id = :transaction_id
+                  AND txn_status = :transaction_status
+                  AND type = :transaction_type
+                  AND amount = :transaction_amount
+                LIMIT 2';
+
+        $bindings = array(
+            ':transaction_id' => $ipn['txn_id'],
+            ':transaction_status' => $ipn['payment_status'],
+            ':transaction_type' => $ipn['txn_type'],
+            ':transaction_amount' => $ipn['mc_gross'],
+        );
+
+        $rows = $this->di['db']->getAll($sql, $bindings);
+        if (count($rows) > 1){
+            return true;
+        }
+
+
+        return false;
+    }
+
+    public function getInvoiceTitle(array $invoice)
+    {
+        $p = array(
+            ':id'=>sprintf('%05s', $invoice['nr']),
+            ':serie'=>$invoice['serie'],
+            ':title'=>$invoice['lines'][0]['title']
+        );
+        return __('Payment for invoice :serie:id [:title]', $p);
+    }
+
+    public function getSubscriptionFields(array $invoice)
+    {
+        $data = array();
+        $subs = $invoice['subscription'];
+
+        $data['item_name']          = $this->getInvoiceTitle($invoice);
+        $data['item_number']        = $invoice['nr'];
+        $data['no_shipping']        = '1';
+        $data['no_note']            = '1'; // Do not prompt payers to include a note with their payments. Allowable values for Subscribe buttons:
+        $data['currency_code']      = $invoice['currency'];
+        $data['return']             = $this->config['return_url'];
+        $data['cancel_return']      = $this->config['cancel_url'];
+        $data['notify_url']         = $this->config['notify_url'];
+        $data['business']           = $this->config['email'];
+
+        $data['cmd']                = '_xclick-subscriptions';
+        $data['rm']                 = '2';
+
+        $data['invoice_id']         = $invoice['id'];
+
+        // Recurrence info
+        $data['a3']                 = $this->moneyFormat($invoice['total'], $invoice['currency']); // Regular subscription price.
+        $data['p3']                 = $subs['cycle']; //Subscription duration. Specify an integer value in the allowable range for the units of duration that you specify with t3.
+
+        /**
+         * t3: Regular subscription units of duration. Allowable values:
+         *  D – for days; allowable range for p3 is 1 to 90
+         *  W – for weeks; allowable range for p3 is 1 to 52
+         *  M – for months; allowable range for p3 is 1 to 24
+         *  Y – for years; allowable range for p3 is 1 to 5
+         */
+        $data['t3']                 = $subs['unit'];
+
+        $data['src']                = 1; //Recurring payments. Subscription payments recur unless subscribers cancel their subscriptions before the end of the current billing cycle or you limit the number of times that payments recur with the value that you specify for srt.
+        $data['sra']                = 1; //Reattempt on failure. If a recurring payment fails, PayPal attempts to collect the payment two more times before canceling the subscription.
+        $data['charset']			= 'UTF-8'; //Sets the character encoding for the billing information/log-in page, for the information you send to PayPal in your HTML button code, and for the information that PayPal returns to you as a result of checkout processes initiated by the payment button. The default is based on the character encoding settings in your account profile.
+
+        //client data
+        $buyer = $invoice['buyer'];
+        $data['address1']			= $buyer['address'];
+        $data['city']				= $buyer['city'];
+        $data['email']				= $buyer['email'];
+        $data['first_name']			= $buyer['first_name'];
+        $data['last_name']			= $buyer['last_name'];
+        $data['zip']				= $buyer['zip'];
+        $data['state']				= $buyer['state'];
+        $data['bn']                             = "BoxBilling_SP";
+        return $data;
+    }
+
+    public function getOneTimePaymentFields(array $invoice)
+    {
+        $data = array();
+        $data['item_name']          = $this->getInvoiceTitle($invoice);
+        $data['item_number']        = $invoice['nr'];
+        $data['no_shipping']        = '1';
+        $data['no_note']            = '1';
+        $data['currency_code']      = $invoice['currency'];
+        $data['rm']                 = '2';
+        $data['return']             = $this->config['return_url'];
+        $data['cancel_return']      = $this->config['cancel_url'];
+        $data['notify_url']         = $this->config['notify_url'];
+        $data['business']           = $this->config['email'];
+        $data['cmd']                = '_xclick';
+        $data['amount']             = $this->moneyFormat($invoice['subtotal'], $invoice['currency']);
+        $data['tax']                = $this->moneyFormat($invoice['tax'], $invoice['currency']);
+        $data['bn']                 = "BoxBilling_SP";
+        $data['charset']            = "utf-8";
+        return $data;
     }
 }

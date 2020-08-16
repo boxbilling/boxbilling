@@ -47,5 +47,31 @@ class Box_DiTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\Model_Cart', $di['cart']);
         $this->assertInstanceOf('\GeoIp2\Database\Reader', $di['geoip']);
         $this->assertInstanceOf('\Box_Password', $di['password']);
+        $this->assertInstanceOf('\Box_Translate', $di['translate']());
     }
+
+    public function testArrayGet()
+    {
+        $di = $this->di;
+
+        $arr = array(
+            'box' => 'billing'
+        );
+
+        $val = $di['array_get']($arr, 'box', 'default');
+        $this->assertEquals($val, 'billing');
+
+        $val = $di['array_get']($arr, 'box');
+        $this->assertEquals($val, 'billing');
+
+        $val = $di['array_get']($arr, 'non-existing');
+        $this->assertEquals($val, '');
+
+        $val = $di['array_get']($arr, 'non-existing', 'default');
+        $this->assertEquals($val, 'default');
+
+        $val = $di['array_get']($arr, 'non-existing', null);
+        $this->assertNull($val);
+    }
+    
 }

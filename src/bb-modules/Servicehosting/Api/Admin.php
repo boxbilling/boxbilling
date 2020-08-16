@@ -31,10 +31,7 @@ class Admin extends \Api_Abstract
         }
 
         list($order, $s) = $this->_getService($data);
-        $plan = $this->di['db']->load('ServiceHostingHp', $data['plan_id']);
-        if(!$plan instanceof \Model_ServiceHostingHp) {
-            throw new \Box_Exception('Hosting plan not found');
-        }
+        $plan = $this->di['db']->getExistingModelById('ServiceHostingHp', $data['plan_id'], 'Hosting plan not found');
         
         $service = $this->getService();
         return (bool) $service->changeAccountPlan($order, $s, $plan);
@@ -129,7 +126,7 @@ class Admin extends \Api_Abstract
      */
     public function update($data)
     {
-        list($order, $s) = $this->_getService($data);
+        list(, $s) = $this->_getService($data);
         $service = $this->getService();
         return (bool) $service->update($s, $data);
     }
@@ -168,7 +165,7 @@ class Admin extends \Api_Abstract
         }
 
         list($sql, $params) = $this->getService()->getServersSearchQuery($data);
-        $per_page = isset($data['per_page']) ? $data['per_page'] : $this->di['pager']->getPer_page();
+        $per_page = $this->di['array_get']($data, 'per_page', $this->di['pager']->getPer_page());
         $result = $this->di['pager']->getSimpleResultSet($sql, $params, $per_page);
 
         $result['list'] = $serversArr;
@@ -192,7 +189,7 @@ class Admin extends \Api_Abstract
      * @optional string $password - server API login password
      * @optional string $accesshash - server API login access hash 
      * @optional string $port - server API port
-     * @optional bool $secure - flag to define wheather to use secure connection (https) to server or not (http)
+     * @optional bool $secure - flag to define whether to use secure connection (https) to server or not (http)
      * @optional bool $active - flag to enable/disable server
      * 
      * @return int - server id 
@@ -200,15 +197,12 @@ class Admin extends \Api_Abstract
      */
     public function server_create($data)
     {
-        if(!isset($data['name'])) {
-            throw new \Box_Exception('Server name is missing');
-        }
-        if(!isset($data['ip'])) {
-            throw new \Box_Exception('Server IP is missing');
-        }
-        if(!isset($data['manager'])) {
-            throw new \Box_Exception('Server manager is missing');
-        }
+        $required = array(
+            'name'    => 'Server name is missing',
+            'ip'      => 'Server IP is missing',
+            'manager' => 'Server manager is missing',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
         $service = $this->getService();
         return (int) $service->createServer($data['name'], $data['ip'], $data['manager'], $data);
@@ -224,13 +218,12 @@ class Admin extends \Api_Abstract
      */
     public function server_get($data)
     {
-        if(!isset($data['id'])) {
-            throw new \Box_Exception('Server id is missing');
-        }
-        $model = $this->di['db']->load('ServiceHostingServer', $data['id']);
-        if(!$model instanceof \Model_ServiceHostingServer) {
-            throw new \Box_Exception('Server not found');
-        }
+        $required = array(
+            'id'    => 'Server id is missing',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
+
+        $model = $this->di['db']->getExistingModelById('ServiceHostingServer', $data['id'], 'Server not found');
         $service = $this->getService();
         return $service->toHostingServerApiArray($model, true, $this->getIdentity());
     }
@@ -244,14 +237,12 @@ class Admin extends \Api_Abstract
      */
     public function server_delete($data)
     {
-        if(!isset($data['id'])) {
-            throw new \Box_Exception('Server id is missing');
-        }
+        $required = array(
+            'id'    => 'Server id is missing',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
-        $model = $this->di['db']->load('ServiceHostingServer', $data['id']);
-        if(!$model instanceof \Model_ServiceHostingServer) {
-            throw new \Box_Exception('Server not found');
-        }
+        $model = $this->di['db']->getExistingModelById('ServiceHostingServer', $data['id'], 'Server not found');
         return (bool) $this->getService()->deleteServer($model);
     }
 
@@ -269,7 +260,7 @@ class Admin extends \Api_Abstract
      * @optional string $password - server API login password
      * @optional string $accesshash - server API login access hash 
      * @optional string $port - server API port
-     * @optional bool $secure - flag to define wheather to use secure connection (https) to server or not (http)
+     * @optional bool $secure - flag to define whether to use secure connection (https) to server or not (http)
      * @optional bool $active - flag to enable/disable server
      * 
      * @return boolean
@@ -277,14 +268,12 @@ class Admin extends \Api_Abstract
      */
     public function server_update($data)
     {
-        if(!isset($data['id'])) {
-            throw new \Box_Exception('Server id is missing');
-        }
+        $required = array(
+            'id'    => 'Server id is missing',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
-        $model = $this->di['db']->load('ServiceHostingServer', $data['id']);
-        if(!$model instanceof \Model_ServiceHostingServer) {
-            throw new \Box_Exception('Server not found');
-        }
+        $model = $this->di['db']->getExistingModelById('ServiceHostingServer', $data['id'], 'Server not found');
         $service = $this->getService();
         return (bool) $service->updateServer($model, $data);
     }
@@ -299,14 +288,12 @@ class Admin extends \Api_Abstract
      */
     public function server_test_connection($data)
     {
-        if(!isset($data['id'])) {
-            throw new \Box_Exception('Server id is missing');
-        }
+        $required = array(
+            'id'    => 'Server id is missing',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
-        $model = $this->di['db']->load('ServiceHostingServer', $data['id']);
-        if(!$model instanceof \Model_ServiceHostingServer) {
-            throw new \Box_Exception('Server not found');
-        }
+        $model = $this->di['db']->getExistingModelById('ServiceHostingServer', $data['id'], 'Server not found');
 
         return (bool) $this->getService()->testConnection($model);
     }
@@ -329,7 +316,7 @@ class Admin extends \Api_Abstract
     public function hp_get_list($data)
     {
         list ($sql, $params) = $this->getService()->getHpSearchQuery($data);
-        $per_page = isset($data['per_page']) ? $data['per_page'] : $this->di['pager']->getPer_page();
+        $per_page = $this->di['array_get']($data, 'per_page', $this->di['pager']->getPer_page());
         $pager = $this->di['pager']->getSimpleResultSet($sql, $params, $per_page);
         foreach ($pager['list'] as $key => $item) {
             $model               = $this->di['db']->getExistingModelById('ServiceHostingHp', $item['id'], 'Post not found');
@@ -349,14 +336,12 @@ class Admin extends \Api_Abstract
      */
     public function hp_delete($data)
     {
-        if(!isset($data['id'])) {
-            throw new \Box_Exception('Hosting plan id is missing');
-        }
+        $required = array(
+            'id'    => 'Hosting plan ID is missing',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
-        $model = $this->di['db']->load('ServiceHostingHp', $data['id']);
-        if(!$model instanceof \Model_ServiceHostingHp) {
-            throw new \Box_Exception('Hosting plan not found');
-        }
+        $model = $this->di['db']->getExistingModelById('ServiceHostingHp', $data['id'], 'Hosting plan not found');
 
         return (bool) $this->getService()->deleteHp($model);
     }
@@ -371,14 +356,12 @@ class Admin extends \Api_Abstract
      */
     public function hp_get($data)
     {
-        if(!isset($data['id'])) {
-            throw new \Box_Exception('Hosting plan id is missing');
-        }
+        $required = array(
+            'id'    => 'Hosting plan ID is missing',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
-        $model = $this->di['db']->load('ServiceHostingHp', $data['id']);
-        if(!$model instanceof \Model_ServiceHostingHp) {
-            throw new \Box_Exception('Hosting plan not found');
-        }
+        $model = $this->di['db']->getExistingModelById('ServiceHostingHp', $data['id'], 'Hosting plan not found');
 
         return $this->getService()->toHostingHpApiArray($model, true, $this->getIdentity());
     }
@@ -395,14 +378,12 @@ class Admin extends \Api_Abstract
      */
     public function hp_update($data)
     {
-        if(!isset($data['id'])) {
-            throw new \Box_Exception('Hosting plan id is missing');
-        }
+        $required = array(
+            'id'    => 'Hosting plan ID is missing',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
-        $model = $this->di['db']->load('ServiceHostingHp', $data['id']);
-        if(!$model instanceof \Model_ServiceHostingHp) {
-            throw new \Box_Exception('Hosting plan not found');
-        }
+        $model = $this->di['db']->getExistingModelById('ServiceHostingHp', $data['id'], 'Hosting plan not found');
 
         $service = $this->getService();
         return (bool) $service->updateHp($model, $data);
@@ -418,13 +399,10 @@ class Admin extends \Api_Abstract
      */
     public function hp_create($data)
     {
-        if(!isset($data['name'])) {
-            throw new \Box_Exception('Hosting plan name is missing');
-        }
-        
-        if(empty($data['name'])) {
-            throw new \Box_Exception('Hosting plan name can not be empty');
-        }
+        $required = array(
+            'name'    => 'Hosting plan name is missing',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
         $service = $this->getService();
         return (int) $service->createHp($data['name'], $data);
@@ -432,14 +410,12 @@ class Admin extends \Api_Abstract
 
     public function _getService($data)
     {
-        if(!isset($data['order_id'])) {
-            throw new \Box_Exception('Order id is required');
-        }
+        $required = array(
+            'order_id'    => 'Order ID name is missing',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
         
-        $order = $this->di['db']->load('ClientOrder', $data['order_id']);
-        if(!$order instanceof \Model_ClientOrder ) {
-            throw new \Box_Exception('Order not found');
-        }
+        $order = $this->di['db']->getExistingModelById('ClientOrder', $data['order_id'], 'Order not found');
         $orderSerivce = $this->di['mod_service']('order');
         $s = $orderSerivce->getOrderService($order);
         if(!$s instanceof \Model_ServiceHosting) {

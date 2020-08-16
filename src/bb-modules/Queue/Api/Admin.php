@@ -29,7 +29,7 @@ class Admin extends \Api_Abstract
     public function get_list($data)
     {
         list($sql, $params) = $this->getService()->getSearchQuery($data);
-        $per_page = isset($data['per_page']) ? $data['per_page'] : $this->di['pager']->getPer_page();
+        $per_page = $this->di['array_get']($data, 'per_page', $this->di['pager']->getPer_page());
         $pager = $this->di['pager']->getSimpleResultSet($sql, $params, $per_page);
         foreach ($pager['list'] as $key => $item) {
             $pager['list'][$key] = $this->getService()->toApiArray($item);
@@ -61,14 +61,12 @@ class Admin extends \Api_Abstract
      */
     public function message_delete($data)
     {
-        if(!isset($data['id'])) {
-            throw new \Box_Exception('Queue message id is missing');
-        }
+        $required = array(
+            'id' => 'Queue message ID is required',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
         
-        $msg = $this->di['db']->load('queue_message', $data['id']);
-        if(!$msg) {
-            throw new \Box_Exception('Queue message not found');
-        }
+        $msg = $this->di['db']->getExistingModelById('queue_message', $data['id'], 'Queue message not found');
         
         $this->di['db']->trash($msg);
         return true;
@@ -82,7 +80,7 @@ class Admin extends \Api_Abstract
      * 
      * @optional string $execute_at - Message execution time. Schedule message to be executed later, ie: 2022-12-29 14:53:51
      * @optional mixed $params      - queue message params. Any serializable param
-     * @optional string $handler    - function hanlder. Static function name in extensions service class - default $queue name
+     * @optional string $handler    - function handler. Static function name in extensions service class - default $queue name
      * @optional int $interval      - Interval to execute messages in the queue.  Default 30
      * @optional int $max           - Maximum amount of messages to be executed per interval. Default 25
      * 
@@ -90,13 +88,11 @@ class Admin extends \Api_Abstract
      */
     public function message_add($data)
     {
-        if(!isset($data['queue'])){
-            throw new \Box_Exception('Queue name not provided');
-        }
-        
-        if(!isset($data['mod'])){
-            throw new \Box_Exception('Module name not provided');
-        }
+        $required = array(
+            'queue' => 'Queue name not provided',
+            'mod'   => 'Module name not provided',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
         
         $mod = $this->di['mod']($data['mod']);
         $service = $mod->getService();
@@ -111,15 +107,15 @@ class Admin extends \Api_Abstract
         if(!$q) {
             $q = $this->di['db']->dispense('queue');
             $q->name        = $data['queue'];
-            $q->mod         = $data['mod'];
-            $q->created_at  = date('c');
+            $q->module      = $data['mod'];
+            $q->created_at  = date('Y-m-d H:i:s');
         }
         $q->timeout = $interval;
         $q->iteration = $max;
-        $q->updated_at = date('c');
+        $q->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($q);
         
-        $params = isset($data['params']) ? $data['params'] : null;
+        $params = $this->di['array_get']($data, 'params', null);
         $body   = base64_encode(json_encode($params));
         
         $msg = $this->di['db']->dispense('queue_message');
@@ -127,11 +123,11 @@ class Admin extends \Api_Abstract
         $msg->handler = $handler;
         $msg->body = $body;
         $msg->hash = md5($body);
-        $msg->created_at = date('c');
-        $msg->updated_at = date('c');
+        $msg->created_at = date('Y-m-d H:i:s');
+        $msg->updated_at = date('Y-m-d H:i:s');
         
         if(isset($data['execute_at'])) {
-            $msg->execute_at = date('c', strtotime($data['execute_at']));
+            $msg->execute_at = date('Y-m-d H:i:s', strtotime($data['execute_at']));
         }
         
         $this->di['db']->store($msg);
@@ -154,9 +150,10 @@ class Admin extends \Api_Abstract
      */
     public function execute($data)
     {
-        if(!isset($data['queue'])){
-            throw new \Box_Exception('Queue name not provided');
-        }
+        $required = array(
+            'queue' => 'Queue name not provided',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
         
         $q = $this->di['db']->findOne('queue', 'name = :name', array('name'=>$data['queue']));
         if(!$q) {
@@ -181,7 +178,7 @@ class Admin extends \Api_Abstract
         $iterate = true;
         while($iterate) {
             $start = (float) array_sum(explode(' ',microtime())); 
-            $this->_execute($q, $max, $interval);
+            $r = $this->_execute($q, $max, $interval);
             $end = (float) array_sum(explode(' ',microtime())); 
             
             $wait_for = $interval - ($end-$start);
@@ -211,7 +208,7 @@ class Admin extends \Api_Abstract
     {
         $lsql = "UPDATE queue_message SET log = :log, updated_at = :u WHERE id = :id;";
         $dsql = "DELETE FROM queue_message WHERE id = :id;";
-        $mod = $this->di['mod']($q->mod);
+        $mod = $this->di['mod']($q->module);
         $service = $mod->getService();
         
         $msgs = $this->receiveQueueMessages($q->id, $max, $interval);
@@ -223,7 +220,7 @@ class Admin extends \Api_Abstract
                 $this->di['db']->exec($dsql, array('id'=>$msg['id']));
                 $result[$msg['id']] = array('status'=> 'executed', 'error'=>null);
             } catch(\Exception $e) {
-                $this->di['db']->exec($lsql, array('log'=>$e->getMessage(). ' '. $e->getCode(), 'id'=>$msg['id'], 'u'=>date('c')));
+                $this->di['db']->exec($lsql, array('log'=>$e->getMessage(). ' '. $e->getCode(), 'id'=>$msg['id'], 'u'=>date('Y-m-d H:i:s')));
                 $this->di['logger']->info(sprintf('Error executing queue %s message #%s %s', $q->name, $msg['id'], $e->getMessage()));
                 $result[$msg['id']] = array('status'=> 'fail', 'error' => $e->getMessage());
             }
@@ -234,9 +231,10 @@ class Admin extends \Api_Abstract
     
     private function _getQueue($data)
     {
-        if(!isset($data['queue'])){
-            throw new \Box_Exception('Queue name not provided');
-        }
+        $required = array(
+            'queue' => 'Queue name not provided',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
         
         $q = $this->di['db']->findOne('queue', 'name = :name', array('name'=>$data['queue']));
         if(!$q) {

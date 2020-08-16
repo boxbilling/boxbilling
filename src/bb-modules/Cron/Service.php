@@ -49,11 +49,13 @@ class Service
      */
     public function runCrons($interval = null)
     {
-        $api = $this->di['api_admin'];
+        $api = $this->di['api_system'];
         $this->di['logger']->info('- Started executing cron');
 
         //@core tasks
         $this->_exec($api, 'hook_batch_connect');
+        $this->di['events_manager']->fire(array('event'=>'onBeforeAdminCronRun'));
+
         $this->_exec($api, 'invoice_batch_pay_with_credits');
         $this->_exec($api, 'invoice_batch_activate_paid');
         $this->_exec($api, 'invoice_batch_send_reminders');
@@ -65,12 +67,16 @@ class Service
         $this->_exec($api, 'support_batch_public_ticket_auto_close');
         $this->_exec($api, 'client_batch_expire_password_reminders');
         $this->_exec($api, 'cart_batch_expire');
+
         $this->_exec($api, 'meteredbilling_cron_generate_invoices');
         $this->_exec($api, 'meteredbilling_cron_suspend_orders');
 
+        $this->_exec($api, 'email_batch_sendmail');
+
+
         $create = (APPLICATION_ENV == 'production');
         $ss = $this->di['mod_service']('system');
-        $ss->setParamValue('last_cron_exec', date('c'), $create);
+        $ss->setParamValue('last_cron_exec', date('Y-m-d H:i:s'), $create);
 
         $this->di['events_manager']->fire(array('event'=>'onAfterAdminCronRun'));
 
@@ -78,6 +84,9 @@ class Service
         return true;
     }
 
+    /**
+     * @param string $method
+     */
     protected function _exec($api, $method, $params = null)
     {
         try {
@@ -87,6 +96,9 @@ class Service
         }
     }
 
+    /**
+     * @return string|null
+     */
     public function getLastExecutionTime()
     {
         $service = $this->di['mod_service']('system');

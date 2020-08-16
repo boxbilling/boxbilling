@@ -83,6 +83,9 @@ class Service implements InjectionAwareInterface
         return $this->getDefault();
     }
 
+    /**
+     * @return \Model_Currency
+     */
     public function getByCode($code)
     {
         return $this->di['db']->findOne('Currency', 'code = :code', array(':code' => $code));
@@ -104,7 +107,7 @@ class Service implements InjectionAwareInterface
         $db = $this->di['db'];
         $default = $db->findOne('Currency', 'is_default = 1');
 
-        if (count($default) == 0) {
+        if (is_array($default) && count($default) == 0) {
             $default = $db->load('Currency', '1');
         }
 
@@ -232,7 +235,6 @@ class Service implements InjectionAwareInterface
             'LKR' => 'Sri Lanka rupee',
             'LRD' => 'Liberian dollar',
             'LSL' => 'Lesotho loti',
-            'LTL' => 'Lithuanian litas',
             'LYD' => 'Libyan dinar',
             'MAD' => 'Moroccan dirham',
             'MDL' => 'Moldovan leu',
@@ -353,8 +355,8 @@ class Service implements InjectionAwareInterface
         $model->title           = $title;
         $model->format          = $format;
         $model->conversion_rate = $conversionRate;
-        $model->created_at      = date('c');
-        $model->updated_at      = date('c');
+        $model->created_at      = date('Y-m-d H:i:s');
+        $model->updated_at      = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
 
         $this->di['logger']->info('Added new currency %s', $model->code);
@@ -398,7 +400,7 @@ class Service implements InjectionAwareInterface
             $model->conversion_rate = $conversionRate;
         }
 
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
         $db->store($model);
 
         $this->di['logger']->info('Updated currency %s', $model->code);

@@ -73,7 +73,7 @@ class Admin implements \Box\InjectionAwareInterface
      *
      * @example $app->get('/example/test',      'get_test', null, get_class($this)); // calls get_test method on this class
      * @example $app->get('/example/:id',        'get_index', array('id'=>'[0-9]+'), get_class($this));
-     * @param Box_App $app
+     * @param \Box_App $app
      */
     public function register(\Box_App &$app)
     {
@@ -86,14 +86,14 @@ class Admin implements \Box\InjectionAwareInterface
     public function get_index(\Box_App $app)
     {
         // always call this method to validate if admin is logged in
-        $api = $app->getApiAdmin();
+        $this->di['is_admin_logged'];
         return $app->render('mod_example_index');
     }
 
     public function get_test(\Box_App $app)
     {
         // always call this method to validate if admin is logged in
-        $api = $app->getApiAdmin();
+        $this->di['is_admin_logged'];
 
         $params = array();
         $params['youparamname'] = 'yourparamvalue';
@@ -104,7 +104,7 @@ class Admin implements \Box\InjectionAwareInterface
     public function get_user(\Box_App $app, $id)
     {
         // always call this method to validate if admin is logged in
-        $api = $app->getApiAdmin();
+        $this->di['is_admin_logged'];
 
         $params = array();
         $params['userid'] = $id;
@@ -114,7 +114,7 @@ class Admin implements \Box\InjectionAwareInterface
     public function get_api(\Box_App $app, $id)
     {
         // always call this method to validate if admin is logged in
-        $api = $app->getApiAdmin();
+        $api = $this->di['api_admin'];
         $list_from_controller = $api->example_get_something();
 
         $params = array();

@@ -4,27 +4,29 @@ namespace Box\Mod\Staff;
 
 class PdoMock extends \PDO
 {
-    public function __construct (){}
-}
-class PdoStatementMock extends \PDOStatement
-{
-    public function __construct (){}
+    public function __construct() { }
 }
 
-class ServiceTest extends \PHPUnit_Framework_TestCase {
+class PdoStatementMock extends \PDOStatement
+{
+    public function __construct() { }
+}
+
+class ServiceTest extends \BBTestCase
+{
 
     public function testLogin()
     {
-        $email = 'email@domain.com';
+        $email    = 'email@domain.com';
         $password = 'pass';
-        $ip = '127.0.0.1';
+        $ip       = '127.0.0.1';
 
         $admin = new \Model_Admin();
         $admin->loadBean(new \RedBeanPHP\OODBBean());
-        $admin->id = 1;
+        $admin->id    = 1;
         $admin->email = $email;
-        $admin->name = 'Admin';
-        $admin->role = 'admin';
+        $admin->name  = 'Admin';
+        $admin->role  = 'admin';
 
 
         $emMock = $this->getMockBuilder('\Box_EventManager')
@@ -52,12 +54,12 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
             ->with($admin, $password)
             ->willReturn($admin);
 
-        $di = new \Box_Di();
+        $di                   = new \Box_Di();
         $di['events_manager'] = $emMock;
-        $di['db'] = $dbMock;
-        $di['session'] = $sessionMock;
-        $di['logger'] = new \Box_Log();
-        $di['auth'] = $authMock;
+        $di['db']             = $dbMock;
+        $di['session']        = $sessionMock;
+        $di['logger']         = new \Box_Log();
+        $di['auth']           = $authMock;
 
         $service = new \Box\Mod\Staff\Service();
         $service->setDi($di);
@@ -65,10 +67,10 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $result = $service->login($email, $password, $ip);
 
         $expected = array(
-            'id'        =>  1,
-            'email'     =>  $email,
-            'name'      =>  'Admin',
-            'role'      =>  'admin',
+            'id'    => 1,
+            'email' => $email,
+            'name'  => 'Admin',
+            'role'  => 'admin',
         );
 
         $this->assertEquals($expected, $result);
@@ -76,9 +78,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
     public function testLogin_Exception()
     {
-        $email = 'email@domain.com';
+        $email    = 'email@domain.com';
         $password = 'pass';
-        $ip = '127.0.0.1';
+        $ip       = '127.0.0.1';
 
         $emMock = $this->getMockBuilder('\Box_EventManager')
             ->getMock();
@@ -92,9 +94,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
             ->method('findOne')
             ->will($this->returnValue(null));
 
-        $di = new \Box_Di();
+        $di                   = new \Box_Di();
         $di['events_manager'] = $emMock;
-        $di['db'] = $dbMock;
+        $di['db']             = $dbMock;
 
         $service = new \Box\Mod\Staff\Service();
         $service->setDi($di);
@@ -113,7 +115,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
             ->method('getCell')
             ->will($this->returnValue($countResult));
 
-        $di = new \Box_Di();
+        $di       = new \Box_Di();
         $di['db'] = $dbMock;
 
         $service = new \Box\Mod\Staff\Service();
@@ -233,12 +235,12 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
         $service = new \Box\Mod\Staff\Service();
 
-        $di = new \Box_Di();
-        $di['mod_service'] = $di->protect(function ($name) use($supportServiceMock, $emailServiceMock) {
-            if ($name == 'support'){
+        $di                = new \Box_Di();
+        $di['mod_service'] = $di->protect(function ($name) use ($supportServiceMock, $emailServiceMock) {
+            if ($name == 'support') {
                 return $supportServiceMock;
             }
-            if ($name == 'email'){
+            if ($name == 'email') {
                 return $emailServiceMock;
             }
         });
@@ -274,12 +276,12 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
         $service = new \Box\Mod\Staff\Service();
 
-        $di = new \Box_Di();
-        $di['mod_service'] = $di->protect(function ($name) use($supportServiceMock, $emailServiceMock) {
-            if ($name == 'support'){
+        $di                = new \Box_Di();
+        $di['mod_service'] = $di->protect(function ($name) use ($supportServiceMock, $emailServiceMock) {
+            if ($name == 'support') {
                 return $supportServiceMock;
             }
-            if ($name == 'email'){
+            if ($name == 'email') {
                 return $emailServiceMock;
             }
         });
@@ -314,12 +316,12 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
         $service = new \Box\Mod\Staff\Service();
 
-        $di = new \Box_Di();
-        $di['mod_service'] = $di->protect(function ($name) use($supportServiceMock, $emailServiceMock) {
-            if ($name == 'support'){
+        $di                = new \Box_Di();
+        $di['mod_service'] = $di->protect(function ($name) use ($supportServiceMock, $emailServiceMock) {
+            if ($name == 'support') {
                 return $supportServiceMock;
             }
-            if ($name == 'email'){
+            if ($name == 'email') {
                 return $emailServiceMock;
             }
         });
@@ -355,12 +357,12 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
         $service = new \Box\Mod\Staff\Service();
 
-        $di = new \Box_Di();
-        $di['mod_service'] = $di->protect(function ($name) use($supportServiceMock, $emailServiceMock) {
-            if ($name == 'support'){
+        $di                = new \Box_Di();
+        $di['mod_service'] = $di->protect(function ($name) use ($supportServiceMock, $emailServiceMock) {
+            if ($name == 'support') {
                 return $supportServiceMock;
             }
-            if ($name == 'email'){
+            if ($name == 'email') {
                 return $emailServiceMock;
             }
         });
@@ -380,10 +382,10 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
         $supportServiceMock = $this->getMockBuilder('\Box\Mod\Support\Service')->getMock();
         $supportServiceMock->expects($this->atLeastOnce())
-            ->method('getTicketById')
-            ->will($this->returnValue(new \Model_SupportTicket()));
+            ->method('getPublicTicketById')
+            ->will($this->returnValue(new \Model_SupportPTicket()));
         $supportServiceMock->expects($this->atLeastOnce())
-            ->method('toApiArray')
+            ->method('publicToApiArray')
             ->will($this->returnValue(array()));
 
         $emailServiceMock = $this->getMockBuilder('\Box\Mod\Email\Service')->getMock();
@@ -395,12 +397,12 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
         $service = new \Box\Mod\Staff\Service();
 
-        $di = new \Box_Di();
-        $di['mod_service'] = $di->protect(function ($name) use($supportServiceMock, $emailServiceMock) {
-            if ($name == 'support'){
+        $di                = new \Box_Di();
+        $di['mod_service'] = $di->protect(function ($name) use ($supportServiceMock, $emailServiceMock) {
+            if ($name == 'support') {
                 return $supportServiceMock;
             }
-            if ($name == 'email'){
+            if ($name == 'email') {
                 return $emailServiceMock;
             }
         });
@@ -420,10 +422,10 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
         $supportServiceMock = $this->getMockBuilder('\Box\Mod\Support\Service')->getMock();
         $supportServiceMock->expects($this->atLeastOnce())
-            ->method('getTicketById')
-            ->will($this->returnValue(new \Model_SupportTicket()));
+            ->method('getPublicTicketById')
+            ->will($this->returnValue(new \Model_SupportPTicket()));
         $supportServiceMock->expects($this->atLeastOnce())
-            ->method('toApiArray')
+            ->method('publicToApiArray')
             ->will($this->returnValue(array()));
 
         $emailServiceMock = $this->getMockBuilder('\Box\Mod\Email\Service')->getMock();
@@ -436,12 +438,12 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
         $service = new \Box\Mod\Staff\Service();
 
-        $di = new \Box_Di();
-        $di['mod_service'] = $di->protect(function ($name) use($supportServiceMock, $emailServiceMock) {
-            if ($name == 'support'){
+        $di                = new \Box_Di();
+        $di['mod_service'] = $di->protect(function ($name) use ($supportServiceMock, $emailServiceMock) {
+            if ($name == 'support') {
                 return $supportServiceMock;
             }
-            if ($name == 'email'){
+            if ($name == 'email') {
                 return $emailServiceMock;
             }
         });
@@ -461,10 +463,10 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
         $supportServiceMock = $this->getMockBuilder('\Box\Mod\Support\Service')->getMock();
         $supportServiceMock->expects($this->atLeastOnce())
-            ->method('getTicketById')
-            ->will($this->returnValue(new \Model_SupportTicket()));
+            ->method('getPublicTicketById')
+            ->will($this->returnValue(new \Model_SupportPTicket()));
         $supportServiceMock->expects($this->atLeastOnce())
-            ->method('toApiArray')
+            ->method('publicToApiArray')
             ->will($this->returnValue(array()));
 
         $emailServiceMock = $this->getMockBuilder('\Box\Mod\Email\Service')->getMock();
@@ -476,12 +478,12 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
         $service = new \Box\Mod\Staff\Service();
 
-        $di = new \Box_Di();
-        $di['mod_service'] = $di->protect(function ($name) use($supportServiceMock, $emailServiceMock) {
-            if ($name == 'support'){
+        $di                = new \Box_Di();
+        $di['mod_service'] = $di->protect(function ($name) use ($supportServiceMock, $emailServiceMock) {
+            if ($name == 'support') {
                 return $supportServiceMock;
             }
-            if ($name == 'email'){
+            if ($name == 'email') {
                 return $emailServiceMock;
             }
         });
@@ -501,10 +503,10 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
         $supportServiceMock = $this->getMockBuilder('\Box\Mod\Support\Service')->getMock();
         $supportServiceMock->expects($this->atLeastOnce())
-            ->method('getTicketById')
-            ->will($this->returnValue(new \Model_SupportTicket()));
+            ->method('getPublicTicketById')
+            ->will($this->returnValue(new \Model_SupportPTicket()));
         $supportServiceMock->expects($this->atLeastOnce())
-            ->method('toApiArray')
+            ->method('publicToApiArray')
             ->will($this->returnValue(array()));
 
         $emailServiceMock = $this->getMockBuilder('\Box\Mod\Email\Service')->getMock();
@@ -517,12 +519,12 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
         $service = new \Box\Mod\Staff\Service();
 
-        $di = new \Box_Di();
-        $di['mod_service'] = $di->protect(function ($name) use($supportServiceMock, $emailServiceMock) {
-            if ($name == 'support'){
+        $di                = new \Box_Di();
+        $di['mod_service'] = $di->protect(function ($name) use ($supportServiceMock, $emailServiceMock) {
+            if ($name == 'support') {
                 return $supportServiceMock;
             }
-            if ($name == 'email'){
+            if ($name == 'email') {
                 return $emailServiceMock;
             }
         });
@@ -554,12 +556,12 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
         $service = new \Box\Mod\Staff\Service();
 
-        $di = new \Box_Di();
-        $di['mod_service'] = $di->protect(function ($name) use($clientMock, $emailServiceMock) {
-            if ($name == 'client'){
+        $di                = new \Box_Di();
+        $di['mod_service'] = $di->protect(function ($name) use ($clientMock, $emailServiceMock) {
+            if ($name == 'client') {
                 return $clientMock;
             }
-            if ($name == 'email'){
+            if ($name == 'email') {
                 return $emailServiceMock;
             }
         });
@@ -592,12 +594,12 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
         $service = new \Box\Mod\Staff\Service();
 
-        $di = new \Box_Di();
-        $di['mod_service'] = $di->protect(function ($name) use($clientMock, $emailServiceMock) {
-            if ($name == 'client'){
+        $di                = new \Box_Di();
+        $di['mod_service'] = $di->protect(function ($name) use ($clientMock, $emailServiceMock) {
+            if ($name == 'client') {
                 return $clientMock;
             }
-            if ($name == 'email'){
+            if ($name == 'email') {
                 return $emailServiceMock;
             }
         });
@@ -635,22 +637,145 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
         $service = new \Box\Mod\Staff\Service();
 
-        $di = new \Box_Di();
-        $di['mod_service'] = $di->protect(function ($name) use($supportServiceMock, $emailServiceMock) {
-            if ($name == 'Support'){
+        $di                = new \Box_Di();
+        $di['mod_service'] = $di->protect(function ($name) use ($supportServiceMock, $emailServiceMock) {
+            if ($name == 'Support') {
                 return $supportServiceMock;
             }
-            if ($name == 'Email'){
+            if ($name == 'Email') {
                 return $emailServiceMock;
             }
         });
-        $di['db'] = $dbMock;
+        $di['db']          = $dbMock;
 
         $eventMock->expects($this->atLeastOnce())
             ->method('getDi')
             ->will($this->returnValue($di));
         $service->setDi($di);
         $service->onAfterGuestPublicTicketClose($eventMock);
+    }
+
+    public function testonAfterClientOpenTicket_mod_staff_ticket_open()
+    {
+        $di = new \Box_Di();
+
+        $ticketModel = new \Model_SupportTicket();
+        $ticketModel->loadBean(new \RedBeanPHP\OODBBean());
+
+        $supportServiceMock = $this->getMockBuilder('\Box\Mod\Support\Service')->getMock();
+        $supportServiceMock->expects($this->atLeastOnce())
+            ->method('getTicketById')
+            ->will($this->returnValue($ticketModel));
+
+        $supportTicketArray = array();
+        $supportServiceMock->expects($this->atLeastOnce())
+            ->method('toApiArray')
+            ->willReturn($supportTicketArray);
+
+        $emailServiceMock = $this->getMockBuilder('\Box\Mod\Email\Service')->getMock();
+
+        $emailConfig = array(
+            'to_staff' => true,
+            'code' => 'mod_staff_ticket_open',
+            'ticket' => $supportTicketArray,
+        );
+        $emailServiceMock->expects($this->once())
+            ->method('sendTemplate')
+            ->with($emailConfig)
+            ->willReturn(true);
+
+
+        $di['mod_service'] = $di->protect(function ($name) use ($supportServiceMock, $emailServiceMock) {
+            if ($name == 'support') {
+                return $supportServiceMock;
+            }
+            if ($name == 'email') {
+                return $emailServiceMock;
+            }
+        });
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('load')
+            ->willReturn(null);
+        $di['db'] = $dbMock;
+        $di['loggedin_admin'] = new \Model_Admin();
+
+        $eventMock = $this->getMockBuilder('\Box_Event')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $eventMock->expects($this->atLeastOnce())
+            ->method('getDi')
+            ->willReturn($di);
+
+        $eventMock->expects($this->atLeastOnce())
+            ->method('getparameters');
+
+        $service = new \Box\Mod\Staff\Service();
+        $service->onAfterClientOpenTicket($eventMock);
+    }
+
+    public function testonAfterClientOpenTicket_mod_support_helpdesk_ticket_open()
+    {
+        $di = new \Box_Di();
+
+        $ticketModel = new \Model_SupportTicket();
+        $ticketModel->loadBean(new \RedBeanPHP\OODBBean());
+
+        $supportServiceMock = $this->getMockBuilder('\Box\Mod\Support\Service')->getMock();
+        $supportServiceMock->expects($this->atLeastOnce())
+            ->method('getTicketById')
+            ->will($this->returnValue($ticketModel));
+
+        $supportTicketArray = array();
+        $supportServiceMock->expects($this->atLeastOnce())
+            ->method('toApiArray')
+            ->willReturn($supportTicketArray);
+
+        $helpdeskModel = new \Model_SupportHelpdesk();
+        $helpdeskModel->loadBean(new \RedBeanPHP\OODBBean());
+        $helpdeskModel->email = 'helpdesk@support.com';
+
+        $emailServiceMock = $this->getMockBuilder('\Box\Mod\Email\Service')->getMock();
+        $emailConfig = array(
+            'to' => $helpdeskModel->email,
+            'code' => 'mod_support_helpdesk_ticket_open',
+            'ticket' => $supportTicketArray,
+        );
+        $emailServiceMock->expects($this->once())
+            ->method('sendTemplate')
+            ->with($emailConfig)
+            ->willReturn(true);
+
+
+        $di['mod_service'] = $di->protect(function ($name) use ($supportServiceMock, $emailServiceMock) {
+            if ($name == 'support') {
+                return $supportServiceMock;
+            }
+            if ($name == 'email') {
+                return $emailServiceMock;
+            }
+        });
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('load')
+            ->willReturn($helpdeskModel);
+        $di['db'] = $dbMock;
+        $di['loggedin_admin'] = new \Model_Admin();
+
+        $eventMock = $this->getMockBuilder('\Box_Event')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $eventMock->expects($this->atLeastOnce())
+            ->method('getDi')
+            ->willReturn($di);
+
+        $eventMock->expects($this->atLeastOnce())
+            ->method('getparameters');
+
+        $service = new \Box\Mod\Staff\Service();
+        $service->onAfterClientOpenTicket($eventMock);
     }
 
     public function testgetList()
@@ -660,13 +785,16 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
             ->method('getSimpleResultSet')
             ->will($this->returnValue(array()));
 
-        $di = new \Box_Di();
-        $di['pager'] = $pagerMock;
+        $di              = new \Box_Di();
+        $di['pager']     = $pagerMock;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
 
         $service = new \Box\Mod\Staff\Service();
         $service->setDi($di);
 
-        $result =$service->getList(array());
+        $result = $service->getList(array());
         $this->assertInternalType('array', $result);
     }
 
@@ -697,8 +825,13 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
      */
     public function testgetSearchQuery($data, $expectedStr, $expectedParams)
     {
-        $service = new \Box\Mod\Staff\Service();
-        $result  = $service->getSearchQuery($data);
+        $di              = new \Box_Di();
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+        $service         = new \Box\Mod\Staff\Service();
+        $service->setDi($di);
+        $result = $service->getSearchQuery($data);
         $this->assertInternalType('string', $result[0]);
         $this->assertInternalType('array', $result[1]);
 
@@ -716,7 +849,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
             ->method('findOne')
             ->will($this->returnValue($adminModel));
 
-        $di = new \Box_Di();
+        $di       = new \Box_Di();
         $di['db'] = $dbMock;
 
         $service = new \Box\Mod\Staff\Service();
@@ -744,9 +877,14 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $dbMock->expects($this->atLeastOnce())
             ->method('store');
 
-        $di = new \Box_Di();
-        $di['db'] = $dbMock;
-        $di['tools'] = new \Box_Tools();
+        $passwordMock = $this->getMockBuilder('\Box_Password')->getMock();
+        $passwordMock->expects($this->atLeastOnce())
+            ->method('hashIt');
+
+        $di             = new \Box_Di();
+        $di['db']       = $dbMock;
+        $di['tools']    = new \Box_Tools();
+        $di['password'] = $passwordMock;
 
         $service = new \Box\Mod\Staff\Service();
         $service->setDi($di);
@@ -771,20 +909,20 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
         $expected =
             array(
-                'id'                =>  '',
-                'role'              =>  '',
-                'admin_group_id'    =>  '',
-                'email'             =>  '',
-                'name'              =>  '',
-                'status'            =>  '',
-                'signature'         =>  '',
-                'created_at'        =>  '',
-                'updated_at'        =>  '',
-                'protected'         =>  '',
-                'group'         =>  array('id' => '', 'name' => ''),
+                'id'             => '',
+                'role'           => '',
+                'admin_group_id' => '',
+                'email'          => '',
+                'name'           => '',
+                'status'         => '',
+                'signature'      => '',
+                'created_at'     => '',
+                'updated_at'     => '',
+                'protected'      => '',
+                'group'          => array('id' => '', 'name' => ''),
             );
 
-        $di = new \Box_Di();
+        $di       = new \Box_Di();
         $di['db'] = $dbMock;
 
         $service = new \Box\Mod\Staff\Service();
@@ -799,11 +937,11 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
     public function testupdate()
     {
         $data = array(
-            'email' => 'test@example.com',
+            'email'          => 'test@example.com',
             'admin_group_id' => '1',
-            'name' => 'testJohn',
-            'status' => 'active',
-            'signature' => '1345',
+            'name'           => 'testJohn',
+            'status'         => 'active',
+            'signature'      => '1345',
         );
 
         $adminModel = new \Model_Admin();
@@ -819,10 +957,13 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $dbMock->expects($this->atLeastOnce())
             ->method('store');
 
-        $di = new \Box_Di();
+        $di                   = new \Box_Di();
         $di['events_manager'] = $eventsMock;
-        $di['logger'] = $logMock;
-        $di['db'] = $dbMock;
+        $di['logger']         = $logMock;
+        $di['db']             = $dbMock;
+        $di['array_get']      = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
 
         $service = new \Box\Mod\Staff\Service();
         $service->setDi($di);
@@ -846,10 +987,10 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $dbMock->expects($this->atLeastOnce())
             ->method('trash');
 
-        $di = new \Box_Di();
+        $di                   = new \Box_Di();
         $di['events_manager'] = $eventsMock;
-        $di['logger'] = $logMock;
-        $di['db'] = $dbMock;
+        $di['logger']         = $logMock;
+        $di['db']             = $dbMock;
 
         $service = new \Box\Mod\Staff\Service();
         $service->setDi($di);
@@ -873,7 +1014,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
     public function testchangePassword()
     {
         $plainTextPassword = 'password';
-        $adminModel = new \Model_Admin();
+        $adminModel        = new \Model_Admin();
         $adminModel->loadBean(new \RedBeanPHP\OODBBean());
 
         $eventsMock = $this->getMockBuilder('\Box_EventManager')->getMock();
@@ -891,11 +1032,11 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
             ->method('hashIt')
             ->with($plainTextPassword);
 
-        $di = new \Box_Di();
+        $di                   = new \Box_Di();
         $di['events_manager'] = $eventsMock;
-        $di['logger'] = $logMock;
-        $di['db'] = $dbMock;
-        $di['password'] = $passwordMock;
+        $di['logger']         = $logMock;
+        $di['db']             = $dbMock;
+        $di['password']       = $passwordMock;
 
         $service = new \Box\Mod\Staff\Service();
         $service->setDi($di);
@@ -907,11 +1048,11 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
     public function testcreate()
     {
         $data = array(
-            'email' => 'test@example.com',
+            'email'          => 'test@example.com',
             'admin_group_id' => '1',
-            'name' => 'testJohn',
-            'status' => 'active',
-            'password' => '1345',
+            'name'           => 'testJohn',
+            'status'         => 'active',
+            'password'       => '1345',
         );
 
         $newId = 1;
@@ -942,12 +1083,15 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
             ->method('hashIt')
             ->with($data['password']);
 
-        $di = new \Box_Di();
+        $di                   = new \Box_Di();
         $di['events_manager'] = $eventsMock;
-        $di['logger'] = $logMock;
-        $di['db'] = $dbMock;
-        $di['mod_service'] = $di->protect(function() use($systemServiceMock){ return $systemServiceMock; });
-        $di['password'] = $passwordMock;
+        $di['logger']         = $logMock;
+        $di['db']             = $dbMock;
+        $di['mod_service']    = $di->protect(function () use ($systemServiceMock) { return $systemServiceMock; });
+        $di['password']       = $passwordMock;
+        $di['array_get']      = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
 
         $service = new \Box\Mod\Staff\Service();
         $service->setDi($di);
@@ -960,11 +1104,11 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
     public function testcreate_Exception()
     {
         $data = array(
-            'email' => 'test@example.com',
+            'email'          => 'test@example.com',
             'admin_group_id' => '1',
-            'name' => 'testJohn',
-            'status' => 'active',
-            'password' => '1345',
+            'name'           => 'testJohn',
+            'status'         => 'active',
+            'password'       => '1345',
         );
 
         $newId = 1;
@@ -986,7 +1130,6 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
             ->will($this->returnValue($adminModel));
         $dbMock->expects($this->atLeastOnce())
             ->method('store')
-
             ->willThrowException(new \RedBeanPHP\RedException());
 
         $logMock = $this->getMockBuilder('\Box_Log')->getMock();
@@ -996,12 +1139,15 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
             ->method('hashIt')
             ->with($data['password']);
 
-        $di = new \Box_Di();
+        $di                   = new \Box_Di();
         $di['events_manager'] = $eventsMock;
-        $di['logger'] = $logMock;
-        $di['db'] = $dbMock;
-        $di['mod_service'] = $di->protect(function() use($systemServiceMock){ return $systemServiceMock; });
-        $di['password'] = $passwordMock;
+        $di['logger']         = $logMock;
+        $di['db']             = $dbMock;
+        $di['mod_service']    = $di->protect(function () use ($systemServiceMock) { return $systemServiceMock; });
+        $di['password']       = $passwordMock;
+        $di['array_get']      = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
 
         $service = new \Box\Mod\Staff\Service();
         $service->setDi($di);
@@ -1013,11 +1159,11 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
     public function testcreateAdmin()
     {
         $data = array(
-            'email' => 'test@example.com',
+            'email'          => 'test@example.com',
             'admin_group_id' => '1',
-            'name' => 'testJohn',
-            'status' => 'active',
-            'password' => '1345',
+            'name'           => 'testJohn',
+            'status'         => 'active',
+            'password'       => '1345',
         );
 
         $newId = 1;
@@ -1035,7 +1181,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
         $logMock = $this->getMockBuilder('\Box_Log')->getMock();
 
-        $systemService= $this->getMockBuilder('\Box\Mod\System\Service')->getMock();
+        $systemService = $this->getMockBuilder('\Box\Mod\System\Service')->getMock();
         $systemService->expects($this->atLeastOnce())
             ->method('getParamValue');
 
@@ -1057,19 +1203,19 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
             ->method('hashIt')
             ->with($data['password']);
 
-        $di = new \Box_Di();
-        $di['logger'] = $logMock;
-        $di['db'] = $dbMock;
-        $di['mod_service'] = $di->protect(function($serviceName) use($systemService, $emailServiceMock) {
-            if ('system' == $serviceName){
+        $di                = new \Box_Di();
+        $di['logger']      = $logMock;
+        $di['db']          = $dbMock;
+        $di['mod_service'] = $di->protect(function ($serviceName) use ($systemService, $emailServiceMock) {
+            if ('system' == $serviceName) {
                 return $systemService;
             }
-            if ('Email' == $serviceName){
+            if ('Email' == $serviceName) {
                 return $emailServiceMock;
             }
         });
-        $di['url'] = $urlMock;
-        $di['password'] = $passwordMock;
+        $di['url']         = $urlMock;
+        $di['password']    = $passwordMock;
 
         $service = new \Box\Mod\Staff\Service();
         $service->setDi($di);
@@ -1083,11 +1229,11 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
     {
         $rows = array(
             array(
-                'id' => '1',
+                'id'   => '1',
                 'name' => 'First Jogh',
             ),
             array(
-                'id' => '2',
+                'id'   => '2',
                 'name' => 'Another Smith',
             ),
         );
@@ -1102,7 +1248,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
             ->method('getAll')
             ->will($this->returnValue($rows));
 
-        $di = new \Box_Di();
+        $di       = new \Box_Di();
         $di['db'] = $dbMock;
 
         $service = new \Box\Mod\Staff\Service();
@@ -1142,10 +1288,10 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
             ->method('store')
             ->will($this->returnValue($newGroupId));
 
-        $di = new \Box_Di();
-        $di['db'] = $dbMock;
-        $di['logger'] = new \Box_Log();
-        $di['mod_service'] = $di->protect(function() use($systemServiceMock){ return $systemServiceMock; });
+        $di                = new \Box_Di();
+        $di['db']          = $dbMock;
+        $di['logger']      = new \Box_Log();
+        $di['mod_service'] = $di->protect(function () use ($systemServiceMock) { return $systemServiceMock; });
 
         $service = new \Box\Mod\Staff\Service();
         $service->setDi($di);
@@ -1162,8 +1308,8 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
         $expected =
             array(
-                'id' => '',
-                'name' => '',
+                'id'         => '',
+                'name'       => '',
                 'created_at' => '',
                 'updated_at' => '',
             );
@@ -1188,8 +1334,8 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
             ->method('getCell')
             ->will($this->returnValue(0));
 
-        $di = new \Box_Di();
-        $di['db'] = $dbMock;
+        $di           = new \Box_Di();
+        $di['db']     = $dbMock;
         $di['logger'] = new \Box_Log();
 
         $service = new \Box\Mod\Staff\Service();
@@ -1222,7 +1368,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
             ->method('getCell')
             ->will($this->returnValue(2));
 
-        $di = new \Box_Di();
+        $di       = new \Box_Di();
         $di['db'] = $dbMock;
 
         $service = new \Box\Mod\Staff\Service();
@@ -1241,14 +1387,14 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $dbMock->expects($this->atLeastOnce())
             ->method('store');
 
-        $di = new \Box_Di();
-        $di['db'] = $dbMock;
+        $di           = new \Box_Di();
+        $di['db']     = $dbMock;
         $di['logger'] = new \Box_Log();
 
         $service = new \Box\Mod\Staff\Service();
         $service->setDi($di);
 
-        $data = array('name' => 'OhExampleName');
+        $data   = array('name' => 'OhExampleName');
         $result = $service->updateGroup($adminGroupModel, $data);
         $this->assertInternalType('bool', $result);
         $this->assertTrue($result);
@@ -1278,8 +1424,13 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
     public function testgetActivityAdminHistorySearchQuery($data, $expectedStr, $expectedParams)
     {
-        $service = new \Box\Mod\Staff\Service();
-        $result  = $service->getActivityAdminHistorySearchQuery($data);
+        $di              = new \Box_Di();
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+        $service         = new \Box\Mod\Staff\Service();
+        $service->setDi($di);
+        $result = $service->getActivityAdminHistorySearchQuery($data);
         $this->assertInternalType('string', $result[0]);
         $this->assertInternalType('array', $result[1]);
 
@@ -1294,12 +1445,12 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $adminHistoryModel->admin_id = 2;
 
         $expected = array(
-            'id' => '',
-            'ip' => '',
+            'id'         => '',
+            'ip'         => '',
             'created_at' => '',
-            'staff' => array(
-                'id' => $adminHistoryModel->admin_id,
-                'name' => '',
+            'staff'      => array(
+                'id'    => $adminHistoryModel->admin_id,
+                'name'  => '',
                 'email' => '',
 
             ),
@@ -1314,7 +1465,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
             ->method('load')
             ->will($this->returnValue($adminModel));
 
-        $di = new \Box_Di();
+        $di       = new \Box_Di();
         $di['db'] = $dbMock;
 
         $service = new \Box\Mod\Staff\Service();
@@ -1335,7 +1486,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $dbMock->expects($this->atLeastOnce())
             ->method('trash');
 
-        $di = new \Box_Di();
+        $di       = new \Box_Di();
         $di['db'] = $dbMock;
 
         $service = new \Box\Mod\Staff\Service();
@@ -1364,7 +1515,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $service->setDi($di);
 
         $member_id = 1;
-        $result = $service->setPermissions($member_id, array());
+        $result    = $service->setPermissions($member_id, array());
         $this->assertTrue($result);
     }
 
@@ -1390,7 +1541,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $service->setDi($di);
 
         $member_id = 1;
-        $result = $service->getPermissions($member_id);
+        $result    = $service->getPermissions($member_id);
         $this->assertInternalType('array', $result);
         $this->assertEquals(array(), $result);
     }
@@ -1418,8 +1569,8 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $service->setDi($di);
 
         $member_id = 1;
-        $expected = json_decode($queryResult, 1);
-        $result = $service->getPermissions($member_id);
+        $expected  = json_decode($queryResult, 1);
+        $result    = $service->getPermissions($member_id);
         $this->assertInternalType('array', $result);
         $this->assertEquals($expected, $result);
     }
@@ -1427,7 +1578,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
     public function testauthorizeAdmin_DidntFoundEmail()
     {
-        $email = 'example@boxbilling.vm';
+        $email    = 'example@boxbilling.vm';
         $password = '123456';
 
         $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
@@ -1436,7 +1587,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
             ->with('Admin', 'email = ? AND status = ?')
             ->willReturn(null);
 
-        $di = new \Box_Di();
+        $di       = new \Box_Di();
         $di['db'] = $dbMock;
 
         $service = new \Box\Mod\Staff\Service();
@@ -1448,7 +1599,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
     public function testauthorizeAdmin()
     {
-        $email = 'example@boxbilling.vm';
+        $email    = 'example@boxbilling.vm';
         $password = '123456';
 
         $model = new \Model_Admin();
@@ -1463,11 +1614,11 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $authMock = $this->getMockBuilder('\Box_Authorization')->disableOriginalConstructor()->getMock();
         $authMock->expects($this->atLeastOnce())
             ->method('authorizeUser')
-            ->with($model,$password)
+            ->with($model, $password)
             ->willReturn($model);
 
-        $di = new \Box_Di();
-        $di['db'] = $dbMock;
+        $di         = new \Box_Di();
+        $di['db']   = $dbMock;
         $di['auth'] = $authMock;
 
         $service = new \Box\Mod\Staff\Service();

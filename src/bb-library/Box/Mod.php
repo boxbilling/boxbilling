@@ -52,6 +52,9 @@ class Box_Mod
         'meteredbilling'
     );
     
+    /**
+     * @param string $mod
+     */
     public function __construct($mod)
     {
         if(!preg_match('#[a-zA-Z]#', $mod)) {
@@ -105,7 +108,7 @@ class Box_Mod
         $info['type'] = 'mod';
 
         if(!empty($info['icon_url'])) {
-            $info['icon_url'] = $this->di['url']->get('bb-modules/'.ucfirst($this->mod).'/'.$info['icon_url']);
+            $info['icon_url'] = '/bb-modules/'.ucfirst($this->mod).'/'.$info['icon_url'];
         }
 
         return $info;
@@ -113,7 +116,7 @@ class Box_Mod
     
     public function hasService($sub = '')
     {
-        $filename = sprintf('Service%s.php', $sub);
+        $filename = sprintf('Service%s.php', ucfirst($sub));
         return file_exists($this->_getModPath() . $filename);
     }
 
@@ -122,7 +125,7 @@ class Box_Mod
         if(!$this->hasService($sub)) {
             throw new \Box_Exception('Module :mod does not have service class', array(':mod'=>$this->mod), 5898);
         }
-        $class = 'Box\\Mod\\'.ucfirst($this->mod).'\\Service'.$sub;
+        $class = 'Box\\Mod\\'.ucfirst($this->mod).'\\Service'.ucfirst($sub);
     	$service = new $class();
         if(method_exists($service, 'setDi')) {
             $service->setDi($this->di);

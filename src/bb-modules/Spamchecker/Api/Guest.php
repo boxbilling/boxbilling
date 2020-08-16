@@ -23,11 +23,11 @@ class Guest extends \Api_Abstract
      */
     public function recaptcha($data)
     {
-        $api = $this->getApiAdmin();
-        $config      = $api->extension_config_get(array("ext"=>"mod_spamchecker"));
+        $config = $this->di['mod_config']('Spamchecker');
         $result = array(
-            'publickey' =>  isset($config['captcha_recaptcha_publickey']) ? $config['captcha_recaptcha_publickey'] : null,
-            'enabled'   =>  isset($config['captcha_enabled']) ? $config['captcha_enabled'] : false,
+            'publickey' =>  $this->di['array_get']($config, 'captcha_recaptcha_publickey', null),
+            'enabled'   =>  $this->di['array_get']($config, 'captcha_enabled', false),
+            'version'   =>  $this->di['array_get']($config, 'captcha_version', null),
         );
         return $result;
     }

@@ -93,19 +93,19 @@ class Service implements InjectionAwareInterface
 
         $model = $this->di['db']->dispense('ServiceLicense');
         $model->client_id = $order->client_id;
-        $model->validate_ip = isset($c['validate_ip']) ? (bool)$c['validate_ip'] : FALSE;
-        $model->validate_host = isset($c['validate_host']) ? (bool)$c['validate_host'] : FALSE;
-        $model->validate_path = isset($c['validate_path']) ? (bool)$c['validate_path'] : FALSE;
-        $model->validate_version = isset($c['validate_version']) ? (bool)$c['validate_version'] : FALSE;
-        $model->plugin = isset($c['plugin']) ? $c['plugin'] : 'Default';
+        $model->validate_ip = (bool) $this->di['array_get']($c, 'validate_ip', false);
+        $model->validate_host = (bool) $this->di['array_get']($c, 'validate_host', false);
+        $model->validate_path = (bool) $this->di['array_get']($c, 'validate_path', false);
+        $model->validate_version = (bool) $this->di['array_get']($c, 'validate_version', false);
+        $model->plugin = $this->di['array_get']($c, 'plugin', 'Simple');
         
         $model->ips = NULL;
         $model->versions = NULL;
         $model->hosts = NULL;
         $model->paths = NULL;
         
-        $model->created_at = date('c');
-        $model->updated_at = date('c');
+        $model->created_at = date('Y-m-d H:i:s');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
 
         return $model;
@@ -113,12 +113,13 @@ class Service implements InjectionAwareInterface
 
     /**
      * @param \Model_ClientOrder $order
-     * @return void
+     * @return boolean
      */
     public function action_activate(\Model_ClientOrder $order)
     {
         $orderService = $this->di['mod_service']('order');
         $c = $orderService->getConfig($order);
+        $iterations = $this->di['array_get']($c, 'iterations', 10);
         $model = $orderService->getOrderService($order);
         if(!$model instanceof \Model_ServiceLicense) {
             throw new \Box_Exception('Could not activate order. Service was not created');
@@ -133,9 +134,21 @@ class Service implements InjectionAwareInterface
         if(!method_exists($plugin, 'generate')) {
             throw new \Box_Exception('License plugin do not have generate method');
         }
-        
-        $model->license_key = $plugin->generate($model, $order, $c);
-        $model->updated_at = date('c');
+
+        if(method_exists($plugin, 'setDi')) {
+            $plugin->setDi($this->di);
+        }
+
+        $i = 0;
+        do {
+            $licenseKey = $plugin->generate($model, $order, $c);
+            if ($i++ >= $iterations) {
+                throw new \Box_Exception('Maximum number of iterations reached while generating license key');
+            }
+        } while (null !== $this->di['db']->findOne('ServiceLicense', 'license_key = :license_key', array(':license_key' => $licenseKey)));
+
+        $model->license_key = $licenseKey;
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
         return true;
     }
@@ -144,7 +157,7 @@ class Service implements InjectionAwareInterface
      *
      * @todo
      * @param \Model_ClientOrder $order
-     * @return void
+     * @return boolean
      */
     public function action_renew(\Model_ClientOrder $order)
     {
@@ -155,7 +168,7 @@ class Service implements InjectionAwareInterface
      *
      * @todo
      * @param \Model_ClientOrder $order
-     * @return void
+     * @return boolean
      */
     public function action_suspend(\Model_ClientOrder $order)
     {
@@ -166,7 +179,7 @@ class Service implements InjectionAwareInterface
      *
      * @todo
      * @param \Model_ClientOrder $order
-     * @return void
+     * @return boolean
      */
     public function action_unsuspend(\Model_ClientOrder $order)
     {
@@ -177,7 +190,7 @@ class Service implements InjectionAwareInterface
      *
      * @todo
      * @param \Model_ClientOrder $order
-     * @return void
+     * @return boolean
      */
     public function action_cancel(\Model_ClientOrder $order)
     {
@@ -188,7 +201,7 @@ class Service implements InjectionAwareInterface
      *
      * @todo
      * @param \Model_ClientOrder $order
-     * @return void
+     * @return boolean
      */
     public function action_uncancel(\Model_ClientOrder $order)
     {
@@ -210,13 +223,30 @@ class Service implements InjectionAwareInterface
 
     public function reset(\Model_ServiceLicense $model)
     {
+        $data = array(
+            'id'=>$model->id,
+            'ips'=>$model->ips,
+            'hosts'=>$model->hosts,
+            'paths'=>$model->paths,
+            'versions'=>$model->versions,
+            'client_id'=>$model->client_id
+        );
+        $this->di['events_manager']->fire(array('event'=>'onBeforeServicelicenseReset', 'params'=>$data));
+
         $model->ips = json_encode(array());
         $model->hosts = json_encode(array());
         $model->paths = json_encode(array());
         $model->versions = json_encode(array());
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
         $this->di['logger']->info('Reset license %s information', $model->id);
+
+        $data = array(
+            'id'=>$model->id,
+            'client_id'=>$model->client_id,
+            'updated_at'=>$model->updated_at
+        );
+        $this->di['events_manager']->fire(array('event'=>'onAfterServicelicenseReset', 'params'=>$data));
         return true;
     }
 
@@ -320,7 +350,7 @@ class Service implements InjectionAwareInterface
         if($o instanceof \Model_ClientOrder) {
             return $o->expires_at;
         }
-        return date('c');
+        return date('Y-m-d H:i:s');
     }
 
     public function toApiArray(\Model_ServiceLicense $model, $deep = false, $identity = null)
@@ -343,6 +373,9 @@ class Service implements InjectionAwareInterface
         return $result;
     }
 
+    /**
+     * @param string $key
+     */
     private function _addValue(\Model_ServiceLicense $model, $key, $value)
     {
         $m = "getAllowed".ucfirst($key);
@@ -350,7 +383,7 @@ class Service implements InjectionAwareInterface
         $allowed[] = $value;
 
         $model->{$key} = json_encode(array_unique($allowed));
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
     }
     
@@ -370,38 +403,25 @@ class Service implements InjectionAwareInterface
 
     public function update(\Model_ServiceLicense $s, array $data)
     {
-        if(isset($data['plugin'])) {
-            $s->plugin = $data['plugin'];
-        }
-
-        if(isset($data['validate_ip'])) {
-            $s->validate_ip = (bool)$data['validate_ip'];
-        }
-        if(isset($data['validate_host'])) {
-            $s->validate_host = (bool)$data['validate_host'];
-        }
-        if(isset($data['validate_path'])) {
-            $s->validate_path = (bool)$data['validate_path'];
-        }
-        if(isset($data['validate_version'])) {
-            $s->validate_version = (bool)$data['validate_version'];
-        }
-
+        $s->plugin           = $this->di['array_get']($data, 'plugin', $s->plugin);
+        $s->validate_ip      = (bool)$this->di['array_get']($data, 'validate_ip', $s->validate_ip);
+        $s->validate_host    = (bool)$this->di['array_get']($data, 'validate_host', $s->validate_host);
+        $s->validate_path    = (bool)$this->di['array_get']($data, 'validate_path', $s->validate_path);
+        $s->validate_version = (bool)$this->di['array_get']($data, 'validate_version', $s->validate_version);
         if(isset($data['license_key']) && !empty($data['license_key'])) {
             $s->license_key = $data['license_key'];
         }
 
-        $fn = create_function('&$val', '$val = trim($val);');
         foreach (array('ips', 'hosts', 'paths', 'versions') as $key) {
             if(isset($data[$key])) {
                 $array = explode(PHP_EOL, $data[$key]);
-                array_walk($array, $fn);
+                $array = array_map('trim', $array);
                 $array = array_diff($array, array(''));
                 $s->{$key} = json_encode($array);
             }
         }
 
-        $s->updated_at = date('c');
+        $s->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($s);
 
         return true;
@@ -419,7 +439,7 @@ class Service implements InjectionAwareInterface
 
         /**
          * Return error code in result field if related to license error
-         * If error comes from boxbilling core use $result['error'] field
+         * If error comes from BoxBilling core use $result['error'] field
          * @since v2.7.1
          */
         if(isset($data['format']) && $data['format'] == 2) {

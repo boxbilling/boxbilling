@@ -75,7 +75,7 @@ class Service implements InjectionAwareInterface
         
         $params = array();
         
-        $first_char = isset($data['first_char']) ? $data['first_char'] : NULL;
+        $first_char = $this->di['array_get']($data, 'first_char', NULL);
         
         if(NULL !== $first_char) {
             $sql .= ' AND c.first_name LIKE :first_char';
@@ -108,9 +108,9 @@ class Service implements InjectionAwareInterface
         $search          = (isset($data['q']) && !empty($data['q'])) ? $data['q'] : NULL;
         $search2         = (isset($data['search']) && !empty($data['search'])) ? $data['search'] : NULL;
         $forum_topic_id  = (isset($data['forum_topic_id']) && !empty($data['forum_topic_id'])) ? $data['forum_topic_id'] : NULL;
-        $forum_id        = isset($data['forum_id']) ? $data['forum_id'] : NULL;
-        $client_id       = isset($data['client_id']) ? $data['client_id'] : NULL;
-        $with_points       = isset($data['with_points']) ? $data['with_points'] : NULL;
+        $forum_id        = $this->di['array_get']($data, 'forum_id', NULL);
+        $client_id       = $this->di['array_get']($data, 'client_id', NULL);
+        $with_points       = $this->di['array_get']($data, 'with_points', NULL);
 
         if($with_points) {
             $sql .= ' AND fp.points IS NOT NULL AND fp.points != "" ';
@@ -160,23 +160,20 @@ class Service implements InjectionAwareInterface
             $amount = $meta->meta_value + $amount;
         }
         $meta->meta_value = $amount;
-        $meta->updated_at = date('c');
+        $meta->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($meta);
     }
-    
+
     public function declinePointsForPost($post_id)
     {
-        $post = $this->di['db']->load('forum_topic_message', $post_id);
-        if(!$post) {
-            throw new \Box_Exception('Message not found');
-        }
-        
+        $post = $this->di['db']->getExistingModelById('forum_topic_message', $post_id, 'Message not found');
+
         $minus_points = -$post->points;
-        
-        $post->points = null;
-        $post->updated_at = date('c');
+
+        $post->points     = null;
+        $post->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($post);
-        
+
         $this->updateTotalPoints($post->client_id, $minus_points, true);
     }
     
@@ -191,8 +188,8 @@ class Service implements InjectionAwareInterface
             $meta->client_id = $client_id;
             $meta->meta_key = 'points_total';
             $meta->meta_value = 0;
-            $meta->created_at = date('c');
-            $meta->updated_at = date('c');
+            $meta->created_at = date('Y-m-d H:i:s');
+            $meta->updated_at = date('Y-m-d H:i:s');
             $this->di['db']->store($meta);
         }        
         return $meta;
@@ -214,7 +211,6 @@ class Service implements InjectionAwareInterface
     
     public static function onAfterClientCreateForumTopic(\Box_Event $event)
     {
-        $api = $event->getApiAdmin();
         $params = $event->getParameters();
         $id = $params['id'];
     }
@@ -292,9 +288,9 @@ class Service implements InjectionAwareInterface
 
         $mod = $di['mod']('forum');
         $config = $mod->getConfig();
-        $points = isset($config['points']) ? $config['points'] : 0 ;
-        $points_forums = isset($config['points_forums']) ? $config['points_forums'] : array() ;
-        
+        $points = $di['array_get']($config, 'points', 0);
+        $points_forums = $di['array_get']($config, 'points_forums', array());
+
         if(isset($config['forum_points_enable']) 
             && $config['forum_points_enable'] 
             && !empty($points_forums)

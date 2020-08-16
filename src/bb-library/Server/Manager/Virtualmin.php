@@ -40,9 +40,9 @@ class Server_Manager_Virtualmin extends Server_Manager
 	public function getLoginUrl()
 	{
 		if ($this->_config['secure']) {
-        	return 'http://'.$this->_config['host'] . ':' . $this->_config['port'] . '/';
+        	return 'https://'.$this->_config['host'] . ':' . $this->_config['port'] . '/';
 		} else {
-			return 'https://'.$this->_config['host'] . ':' . $this->_config['port'] . '/';
+			return 'http://'.$this->_config['host'] . ':' . $this->_config['port'] . '/';
 		}
 	}
 
@@ -227,7 +227,7 @@ class Server_Manager_Virtualmin extends Server_Manager
      */
     private function _getUrl()
     {
-    	$url = $this->_config['ssl'] ? 'https://' : 'http://';
+    	$url = (isset($this->_config['ssl']) && $this->_config['ssl'])  ? 'https://' : 'http://';
     	$url .= $this->_config['host'] . ' : ' . $this->_config['port'] . '/virtual-server/remote.cgi';
 
     	return $url;
@@ -272,7 +272,7 @@ class Server_Manager_Virtualmin extends Server_Manager
     /**
      *
      * Creates reseller
-     * @param Box_ServerAccount $a
+     * @param Server_Account $a
      * @throws Server_Exception
      * @return boolean
      */
@@ -283,17 +283,18 @@ class Server_Manager_Virtualmin extends Server_Manager
     	}
 
     	$p = $a->getPackage();
+        $client = $a->getClient();
     	$params = array(
     		'name'			=>	$a->getUsername(),
     		'pass'			=>	$a->getPassword(),
-    		'email'			=>	$a->getEmail(),
+    		'email'			=>	$client->getEmail(),
     		'max-doms'		=>	($p->getMaxDomains() == 'unlimited') ? 'UNLIMITED' : (int)$p->getMaxDomains(),
     		'max-aliasdoms'	=>	($p->getMaxDomains() == 'unlimited') ? 'UNLIMITED' : (int)$p->getMaxDomains(),
     		'max-realdoms'	=>	($p->getMaxDomains() == 'unlimited') ? 'UNLIMITED' : (int)$p->getMaxDomains(),
     		'max-quota'		=>	($p->getQuota() == 'unlimited') ? 'UNLIMITED' : (int)$p->getQuota() * 1024,
-    		'max-mailboxes'	=>	(int)$p->getPop(),
+    		'max-mailboxes'	=>	(int)$p->getMaxPop(),
     		'max-aliases'	=>	(int)$p->getMaxDomains() ? $p->getMaxDomains() : 1,
-    		'max-dbs'		=>	($p->getMaxDb() == 'unlimited') ? 'UNLIMITED' : (int)$p->getMaxDb(),
+    		'max-dbs'		=>	($p->getMaxSql() == 'unlimited') ? 'UNLIMITED' : (int)$p->getMaxSql(),
     		'max-bw'		=>	($p->getBandwidth() == 'unlimited') ? 'UNLIMITED' : (int)$p->getBandwidth() * 1024 * 1024,
     		'allow1'		=>	'dns',		//BIND DNS domain
     		'allow2'		=>	'web',		//Apache website
@@ -368,10 +369,11 @@ class Server_Manager_Virtualmin extends Server_Manager
     private function _createUser(Server_Account $a)
     {
     	$p = $a->getPackage();
+        $client = $a->getClient();
     	$params = array(
     		'domain'			=>	$a->getDomain(),
     		'pass'				=>	$a->getPassword(),
-    		'email'				=>	$a->getEmail(),
+    		'email'				=>	$client->getEmail(),
     		'user'				=>	$a->getUsername(),
     		'dns'				=>	'',
     		'web'				=>	'',
@@ -527,10 +529,11 @@ class Server_Manager_Virtualmin extends Server_Manager
     private function _modifyDomain(Server_Account $a)
     {
     	$p = $a->getPackage();
+        $client = $a->getClient();
     	$params = array(
     		'domain'	=>	$a->getDomain(),
     		'pass'		=>	$a->getPassword(),
-    		'email'		=>	$a->getEmail(),
+    		'email'		=>	$client->getEmail(),
     	    'quota'		=>	($p->getQuota() == 'unlimited') ? 'UNLIMITED' : (int)$p->getMaxQuota(),
     		'uquota'	=>	($p->getQuota() == 'unlimited') ? 'UNLIMITED' : (int)$p->getMaxQuota(),
     		'bw'		=>	($p->getBandwidth() == 'unlimited') ? 'UNLIMITED' : (int)$p->getBandwidth(),
@@ -658,17 +661,18 @@ class Server_Manager_Virtualmin extends Server_Manager
     	}
 
 		$p = $a->getPackage();
+        $client = $a->getClient();
     	$params = array(
     		'name'			=>	$a->getUsername(),
     		'pass'			=>	$a->getPassword(),
-    		'email'			=>	$a->getEmail(),
+    		'email'			=>	$client->getEmail(),
     		'max-doms'		=>	($p->getMaxDomains() == 'unlimited') ? 'UNLIMITED' : $p->getMaxDomains(),
     		'max-aliasdoms'	=>	($p->getMaxDomains() == 'unlimited') ? 'UNLIMITED' : $p->getMaxDomains(),
     		'max-realdoms'	=>	($p->getMaxDomains() == 'unlimited') ? 'UNLIMITED' : $p->getMaxDomains(),
     		'max-quota'		=>	($p->getQuota() == 'unlimited') ? 'UNLIMITED' : (int)$p->getQuota() * 1024,
-    		'max-mailboxes'	=>	(int)$p->getPop(),
+    		'max-mailboxes'	=>	(int)$p->getMaxPop(),
     		'max-aliases'	=>	(int)$p->getMaxDomains() ? $p->getMaxDomains() : 1,
-    		'max-dbs'		=>	($p->getMaxDb() == 'unlimited') ? 'UNLIMITED' : (int)$p->getMaxDb(),
+    		'max-dbs'		=>	($p->getMaxSql() == 'unlimited') ? 'UNLIMITED' : (int)$p->getMaxSql(),
     		'max-bw'		=>	($p->getBandwidth() == 'unlimited') ? 'UNLIMITED' : (int)$p->getBandwidth() * 1024 * 1024,
     		'allow1'		=>	'dns',		//BIND DNS domain
     		'allow2'		=>	'web',		//Apache website

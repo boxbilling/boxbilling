@@ -42,45 +42,16 @@ class Admin extends \Api_Abstract
      */
     public function get_list($data)
     {
-        $orderConfig = $this->di['mod']('order')->getConfig();
+        $orderConfig         = $this->di['mod']('order')->getConfig();
         $data['hide_addons'] = (isset($orderConfig['show_addons']) && $orderConfig['show_addons']) ? 0 : 1;
         list($sql, $params) = $this->getService()->getSearchQuery($data);
         $paginator = $this->di['pager'];
-        $per_page = isset($data['per_page']) ? $data['per_page'] : $this->di['pager']->getPer_page();
+        $per_page  = $this->di['array_get']($data, 'per_page', $this->di['pager']->getPer_page());
         $resultSet = $paginator->getAdvancedResultSet($sql, $params, $per_page);
 
-        $meta = (isset($data['meta']) && is_array($data['meta'])) ? $data['meta'] : null;
-
         foreach ($resultSet['list'] as $key => $result) {
-            $orderObj = $this->di['db']->getExistingModelById('ClientOrder', $result['id'], 'Order not found');
-            $data     = $this->getService()->toApiArray($orderObj, true, $this->getIdentity());
-
-            $data['config'] = json_decode($orderObj->config, 1);
-            $data['total']  = $this->getService()->getTotal($orderObj);
-            $data['title']  = $orderObj->title;
-
-            if ($meta) {
-                $i     = 1;
-                $query = 'SELECT name, value FROM client_order_meta WHERE client_order_id = :id';
-                foreach ($meta as $k => $v) {
-                    $where[]                      = "(name = :meta_name$i AND value LIKE :meta_value$i)";
-                    $bindings[':meta_name' . $i]  = $k;
-                    $bindings[':meta_value' . $i] = $v . '%';
-                    $i++;
-                }
-
-                if (!empty($where)) {
-                    $query .= ' AND ' . implode(' AND ', $where);
-                }
-                $bindings[':id'] = $orderObj->id;
-
-                $data['meta'] = $this->di['db']->getAssoc($query, $bindings);
-
-            }
-            $supportService         = $this->di['mod_service']('support');
-            $data['active_tickets'] = $supportService->getActiveTicketsCountForOrder($orderObj);
-
-            $resultSet['list'][$key] = $data;
+            $orderObj                = $this->di['db']->getExistingModelById('ClientOrder', $result['id'], 'Order not found');
+            $resultSet['list'][$key] = $this->getService()->toApiArray($orderObj, true, $this->getIdentity());
         }
 
         return $resultSet;
@@ -94,11 +65,11 @@ class Admin extends \Api_Abstract
      *
      * @optional array $config - Depending on product type, you may need to pass product configuration options
      * @optional int $quantity - Quantity of products to order. Default 1
-     * @optional float $price - Overriden unit price in default currency. Default is product price for selected period.
+     * @optional float $price - Overridden unit price in default currency. Default is product price for selected period.
      * @optional string $group_id - Order group id. Assign order to be as an addon for other order
      * @optional string $currency - Order currency. If not passed, default is used
      * @optional string $title - Order title. If not passed, product title is used
-     * @optional bool $activate - activate imediately
+     * @optional bool $activate - activate immediately
      * @optional string $invoice_option - Options: "no-invoice", "issue-invoice"; Default: no-invoice
      * @optional string $created_at - date when order was created. Default: now
      * @optional string $updated_at - date when order was updated. Default: now
@@ -181,7 +152,7 @@ class Admin extends \Api_Abstract
      *
      * @param int $id - Order id
      *
-     * @optional string $reason - Suspendation reason message
+     * @optional string $reason - Suspension reason message
      * @optional bool $skip_event - Skip calling event hooks
      *
      * @return bool
@@ -191,7 +162,7 @@ class Admin extends \Api_Abstract
         $order      = $this->_getOrder($data);
         $skip_event = isset($data['skip_event']) ? (bool)$data['skip_event'] : false;
 
-        $reason = isset($data['reason']) ? $data['reason'] : NULL;
+        $reason = $this->di['array_get']($data, 'reason', NULL);
 
         return $this->getService()->suspendFromOrder($order, $reason, $skip_event);
     }
@@ -227,7 +198,7 @@ class Admin extends \Api_Abstract
         $order      = $this->_getOrder($data);
         $skip_event = isset($data['skip_event']) ? (bool)$data['skip_event'] : false;
 
-        $reason = isset($data['reason']) ? $data['reason'] : NULL;
+        $reason = $this->di['array_get']($data, 'reason', NULL);
 
         return $this->getService()->cancelFromOrder($order, $reason, $skip_event);
     }
@@ -343,13 +314,13 @@ class Admin extends \Api_Abstract
         $data['client_order_id'] = $order->id;
 
         list($sql, $bindings) = $this->getService()->getOrderStatusSearchQuery($data);
-        $per_page = isset($data['per_page']) ? $data['per_page'] : $this->di['pager']->getPer_page();
+        $per_page = $this->di['array_get']($data, 'per_page', $this->di['pager']->getPer_page());
         return $this->di['pager']->getSimpleResultSet($sql, $bindings, $per_page);
     }
 
 
     /**
-     * Add order status hitory change
+     * Add order status history change
      *
      * @param int $id - Order id
      * @param string $status - order status
@@ -365,7 +336,7 @@ class Admin extends \Api_Abstract
         );
         $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
-        $notes = isset($data['notes']) ? $data['notes'] : null;
+        $notes = $this->di['array_get']($data, 'notes', null);
 
         return $this->getService()->orderStatusAdd($order, $data['status'], $notes);
     }

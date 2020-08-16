@@ -25,6 +25,9 @@ class Box_License implements \Box\InjectionAwareInterface
         return $this->di;
     }
 
+    /**
+     * @return string
+     */
     public function getKey()
     {
         $license = $this->di['config']['license'];
@@ -110,8 +113,6 @@ class Box_License implements \Box\InjectionAwareInterface
             try {
                 $servers = array(
                     'http://www.boxbilling.com/api/guest/servicelicense/check',
-                    'http://api.boxbilling.com/license.php',
-                    'http://api.boxbilling.com/license-valid.php',
                 );
                 $l = $this->_getLicenseDetailsFromServer($servers);
             } catch(\LogicException $e) {
@@ -121,13 +122,13 @@ class Box_License implements \Box\InjectionAwareInterface
 
             $data = $l;
 
-            $systemService->updateParam($key, $this->di['crypt']->encrypt(serialize($l), $salt), true);
-            $systemService->updateParam($check_key, $this->di['crypt']->encrypt(time(), $salt), true);
+            $systemService->setParamValue($key, $this->di['crypt']->encrypt(serialize($l), $salt), true);
+            $systemService->setParamValue($check_key, $this->di['crypt']->encrypt(time(), $salt), true);
         } else {
             $data = @unserialize($this->di['crypt']->decrypt($cache, $salt));
             if (!is_array($data)) {
                 error_log('Invalid response from licensing server. 9115');
-                $systemService->updateParam($key, $this->di['crypt']->encrypt(serialize(false), $salt), true);
+                $systemService->setParamValue($key, $this->di['crypt']->encrypt(serialize(false), $salt), true);
             }
         }
 
@@ -188,16 +189,16 @@ class Box_License implements \Box\InjectionAwareInterface
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_VERBOSE, 0);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 20);
         curl_setopt($ch, CURLOPT_TIMEOUT, 20);
-        curl_setopt($ch, CURLOPT_POST,              true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS,        json_encode($params));
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
         $result = curl_exec($ch);
-        curl_close($ch);
 
+        curl_close($ch);
         return $result;
     }
 }

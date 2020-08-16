@@ -13,15 +13,14 @@
 
 class Box_Event implements ArrayAccess, \Box\InjectionAwareInterface
 {
-  protected
-    $di      = null,
-    $value      = null,
-    $processed  = false,
-    $subject    = null,
-    $name       = '',
-    $parameters = null,
-    $api_guest = null,
-    $api_admin = null;
+    protected $di         = null;
+    protected $value      = null;
+    protected $processed  = false;
+    protected $subject    = null;
+    protected $name       = '';
+    protected $parameters = null;
+    protected $api_guest  = null;
+    protected $api_admin  = null;
 
   /**
    * Constructs a new sfEvent.
@@ -42,7 +41,7 @@ class Box_Event implements ArrayAccess, \Box\InjectionAwareInterface
   }
 
     /**
-     * @param null $di
+     * @param Box_Di|null $di
      */
     public function setDi($di)
     {
@@ -50,7 +49,7 @@ class Box_Event implements ArrayAccess, \Box\InjectionAwareInterface
     }
 
     /**
-     * @return null
+     * @return Box_Di|null
      */
     public function getDi()
     {

@@ -64,12 +64,12 @@ class Api_Abstract implements InjectionAwareInterface
     }
 
     /**
-     * @return null
+     * @return Box_Mod
      */
     public function getMod()
     {
         if(!$this->mod) {
-            throw new Exception('Mod object is not set for the service');
+            throw new Box_Exception('Mod object is not set for the service');
         }
         return $this->mod;
     }
@@ -83,7 +83,7 @@ class Api_Abstract implements InjectionAwareInterface
     }
 
     /**
-     * @return null
+     * @return Model_Admin
      */
     public function getIdentity()
     {
@@ -115,7 +115,7 @@ class Api_Abstract implements InjectionAwareInterface
     }
 
     /**
-     * @return null
+     * @return string
      */
     public function getIp()
     {

@@ -16,7 +16,7 @@ class Box_Tools
     protected $di = null;
 
     /**
-     * @param null $di
+     * @param Box_Di|null $di
      */
     public function setDi($di)
     {
@@ -24,7 +24,7 @@ class Box_Tools
     }
 
     /**
-     * @return null
+     * @return Box_Di|null
      */
     public function getDi()
     {
@@ -159,9 +159,9 @@ class Box_Tools
         $d = dir($folder);
         while (false !== ($entry = $d->read())) {
             $isdir = is_dir($folder."/".$entry);
-            if (!$isdir and $entry!="." and $entry!="..") {
+            if (!$isdir && $entry!="." && $entry!="..") {
                 unlink($folder."/".$entry);
-            } elseif ($isdir  and $entry!="." and $entry!="..") {
+            } elseif ($isdir  &&  $entry!="." && $entry!="..") {
                 $this->emptyFolder($folder."/".$entry);
                 rmdir($folder."/".$entry);
             }
@@ -222,6 +222,8 @@ class Box_Tools
 			break;
 		}
 
+        $passOrder = array();
+
 		for ($i = 0; $i < $upper; $i++) {
         	$passOrder[] = $upper_letters[rand() % strlen($upper_letters)];
     	}
@@ -244,31 +246,14 @@ class Box_Tools
     public function autoLinkText($text)
     {
        $pattern  = '#\b(([\w-]+://?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/)))#';
-       $callback = create_function('$matches', '
+       $callback = function($matches){
            $url       = array_shift($matches);
            $url_parts = parse_url($url);
            if(!isset($url_parts["scheme"])) {
               $url = "http://".$url;
            }
-           return sprintf(\'<a target="_blank" href="%s">%s</a>\', $url, $url);
-       ');
-
-       /*
-       $callback = create_function('$matches', '
-           $url       = array_shift($matches);
-           $url_parts = parse_url($url);
-
-           $text = parse_url($url, PHP_URL_HOST) . parse_url($url, PHP_URL_PATH);
-           $text = preg_replace("/^www./", "", $text);
-
-           $last = -(strlen(strrchr($text, "/"))) + 1;
-           if ($last < 0) {
-               $text = substr($text, 0, $last) . "&hellip;";
-           }
-
-           return sprintf(\'<a target="_blank" href="%s">%s</a>\', $url, $text);
-       ');
-       */
+           return sprintf('<a target="_blank" href="%s">%s</a>', $url, $url);
+        };
        return preg_replace_callback($pattern, $callback, $text);
     }
 
@@ -293,6 +278,11 @@ class Box_Tools
     	return stripslashes($string);
     }
 
+    /**
+     * @Deprecated not used anywhere
+     * @param $filename
+     * @return mixed|string
+     */
     public function get_mime_content_type($filename)
     {
         $mime_types = array(
@@ -351,7 +341,9 @@ class Box_Tools
             'ods' => 'application/vnd.oasis.opendocument.spreadsheet',
         );
 
-        $ext = strtolower(array_pop(explode('.',$filename)));
+        $ext = explode('.',$filename);
+        $ext = array_pop($ext);
+        $ext = strtolower($ext);
         if (array_key_exists($ext, $mime_types)) {
             return $mime_types[$ext];
         }
@@ -370,13 +362,13 @@ class Box_Tools
         if($capitalise_first_char) {
             $str[0] = strtoupper($str[0]);
         }
-        $func = create_function('$c', 'return strtoupper($c[1]);');
+        $func = function($c){ return strtoupper($c[1]); };
         return preg_replace_callback('/-([a-z])/', $func, $str);
     }
 
     public function from_camel_case($str) {
         $str[0] = strtolower($str[0]);
-        $func = create_function('$c', 'return "-" . strtolower($c[1]);');
+        $func = function($c){ return "-" . strtolower($c[1]); };
         return preg_replace_callback('/([A-Z])/', $func, $str);
     }
 
@@ -420,7 +412,7 @@ class Box_Tools
             $file_path = BB_PATH_CACHE .DIRECTORY_SEPARATOR. md5($cacheKey);
 
             // If the file hasn't yet been created or is out of date then call the require function and store it's result.
-            if(!file_exists($file_path) OR filemtime($file_path) < (time() - $timeoutSeconds)){
+            if(!file_exists($file_path) || filemtime($file_path) < (time() - $timeoutSeconds)){
                     $result = call_user_func_array($buildCallback, $args);
                     file_put_contents($file_path, serialize($result), LOCK_EX);
             // Else, grab the result from the cache.

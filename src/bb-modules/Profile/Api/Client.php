@@ -19,7 +19,7 @@ namespace Box\Mod\Profile\Api;
 class Client extends \Api_Abstract
 {
     /**
-     * Get currencly logged in client details
+     * Get currently logged in client details
      */
     public function get()
     {
@@ -47,7 +47,7 @@ class Client extends \Api_Abstract
      * @optional string $state - country state
      * @optional string $phone - Phone number
      * @optional string $phone_cc - Phone country code
-     * @optional string $document_type - Related document type, ie: passpord, driving license
+     * @optional string $document_type - Related document type, ie: passport, driving license
      * @optional string $document_nr - Related document number, ie: passport number: LC45698122
      * @optional string $notes - Notes about client. Visible for admin only
      * @optional string $lang - language option
@@ -92,13 +92,11 @@ class Client extends \Api_Abstract
      */
     public function change_password($data)
     {
-        if (!isset($data['password'])) {
-            throw new \Box_Exception('Password required');
-        }
-
-        if (!isset($data['password_confirm'])) {
-            throw new \Box_Exception('Password confiration required');
-        }
+        $required = array(
+            'password'         => 'Password required',
+            'password_confirm' => 'Password confirmation required',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
         if ($data['password'] != $data['password_confirm']) {
             throw new \Box_Exception('Passwords do not match.');

@@ -25,7 +25,7 @@ class Service
         $this->di = $di;
     }
 
-    public function searchArticles($status = null, $search = null, $cat = null)
+    public function searchArticles($status = null, $search = null, $cat = null, $per_page = 100, $page = null)
     {
         $filter = array();
 
@@ -46,13 +46,13 @@ class Service
         }
 
         if ($search) {
-            $sql .= " title LIKE :q OR content LIKE :q";
+            $sql .= " AND title LIKE :q OR content LIKE :q";
             $filter[':q'] = "%$search%";
         }
 
         $sql .= " ORDER BY kb_article_category_id DESC, views DESC";
 
-        return $this->di['pager']->getSimpleResultSet($sql, $filter);
+        return $this->di['pager']->getSimpleResultSet($sql, $filter, $per_page, $page);
     }
 
 
@@ -106,7 +106,7 @@ class Service
             'updated_at' => $model->updated_at,
         );
 
-        $cat = $this->di['db']->load('KbArticleCategory', $model->kb_article_category_id);
+        $cat = $this->di['db']->getExistingModelById('KbArticleCategory', $model->kb_article_category_id, 'Knowledge Base category not found');
         $data['category'] = array(
             'id'    => $cat->id,
             'slug'  => $cat->slug,
@@ -137,8 +137,8 @@ class Service
         $model->slug                   = $this->di['tools']->slug($title);
         $model->status                 = $status;
         $model->content                = $content;
-        $model->updated_at             = date('c');
-        $model->created_at             = date('c');
+        $model->updated_at             = date('Y-m-d H:i:s');
+        $model->created_at             = date('Y-m-d H:i:s');
         $id                            = $this->di['db']->store($model);
 
         $this->di['logger']->info('Created new knowledge base article #%s', $id);
@@ -177,7 +177,7 @@ class Service
         if (isset($views)) {
             $model->views = $views;
         }
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
 
         $this->di['db']->store($model);
 
@@ -193,8 +193,8 @@ class Service
         FROM kb_article_category kac
         LEFT JOIN kb_article ka ON kac.id  = ka.kb_article_category_id";
 
-        $article_status = isset($data['article_status']) ? $data['article_status'] : NULL;
-        $query          = isset($data['q']) ? $data['q'] : NULL;
+        $article_status = $this->di['array_get']($data, 'article_status', NULL);
+        $query          = $this->di['array_get']($data, 'q', NULL);
 
         $where    = array();
         $bindings = array();
@@ -298,8 +298,8 @@ class Service
         $model->title       = $title;
         $model->description = $description;
         $model->slug        = $this->di['tools']->slug($title);
-        $model->updated_at  = date('c');
-        $model->created_at  = date('c');
+        $model->updated_at  = date('Y-m-d H:i:s');
+        $model->created_at  = date('Y-m-d H:i:s');
 
         $id = $this->di['db']->store($model);
 
@@ -322,7 +322,7 @@ class Service
             $model->description = $description;
         }
 
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
 
         $this->di['db']->store($model);
 
@@ -333,7 +333,7 @@ class Service
 
     public function findCategoryById($id)
     {
-        return $this->di['db']->load('KbArticleCategory', $id);
+        return $this->di['db']->getExistingModelById('KbArticleCategory', $id, 'Knowledge base category not found');
     }
 
     public function findCategoryBySlug($slug)

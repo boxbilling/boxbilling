@@ -4,7 +4,7 @@
 namespace Box\Mod\Cron;
 
 
-class ServiceTest extends \PHPUnit_Framework_TestCase {
+class ServiceTest extends \BBTestCase {
 
     public function testgetDi()
     {
@@ -31,10 +31,11 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
     public function testrunCrons()
     {
-        $apiAdmin = new \Api_Handler(new \Model_Admin());
+        $apiSystem = new \Api_Handler(new \Model_Admin());
         $serviceMock = $this->getMockBuilder('\Box\Mod\Cron\Service')
             ->setMethods(array('_exec'))
             ->getMock();
+
 
         $serviceMock->expects($this->exactly(14))
             ->method('_exec')
@@ -53,6 +54,24 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
                 array($this->equalTo($apiAdmin), $this->equalTo('cart_batch_expire')),
                 array($this->equalTo($apiAdmin), $this->equalTo('meteredbilling_cron_generate_invoices')),
                 array($this->equalTo($apiAdmin), $this->equalTo('meteredbilling_cron_suspend_orders'))
+
+        $serviceMock->expects($this->exactly(13))
+            ->method('_exec')
+            ->withConsecutive(
+                array($this->equalTo($apiSystem), $this->equalTo('hook_batch_connect')),
+                array($this->equalTo($apiSystem), $this->equalTo('invoice_batch_pay_with_credits')),
+                array($this->equalTo($apiSystem), $this->equalTo('invoice_batch_activate_paid')),
+                array($this->equalTo($apiSystem), $this->equalTo('invoice_batch_send_reminders')),
+                array($this->equalTo($apiSystem), $this->equalTo('invoice_batch_generate')),
+                array($this->equalTo($apiSystem), $this->equalTo('invoice_batch_invoke_due_event')),
+                array($this->equalTo($apiSystem), $this->equalTo('order_batch_suspend_expired')),
+                array($this->equalTo($apiSystem), $this->equalTo('order_batch_cancel_suspended')),
+                array($this->equalTo($apiSystem), $this->equalTo('support_batch_ticket_auto_close')),
+                array($this->equalTo($apiSystem), $this->equalTo('support_batch_public_ticket_auto_close')),
+                array($this->equalTo($apiSystem), $this->equalTo('client_batch_expire_password_reminders')),
+                array($this->equalTo($apiSystem), $this->equalTo('cart_batch_expire')),
+                array($this->equalTo($apiSystem), $this->equalTo('email_batch_sendmail'))
+
             );
 
         $systemServiceMock = $this->getMockBuilder('\Box\Mod\System\Service')->getMock();
@@ -66,7 +85,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $di = new \Box_Di();
         $di['logger'] = new \Box_Log();
         $di['events_manager'] = $eventsMock;
-        $di['api_admin'] = $apiAdmin;
+        $di['api_system'] = $apiSystem;
         $di['mod_service'] = $di->protect(function() use($systemServiceMock) {return $systemServiceMock;});
         $serviceMock->setDi($di);
 

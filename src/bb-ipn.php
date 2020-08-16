@@ -12,6 +12,7 @@
 
 require_once dirname(__FILE__) . '/bb-load.php';
 $di = include dirname(__FILE__) . '/bb-di.php';
+$di['translate']();
 
 $bb_invoice_id = null;
 if(isset($_GET['bb_invoice_id'])) {
@@ -25,7 +26,7 @@ $bb_gateway_id = null;
 if(isset($_GET['bb_gateway_id'])) {
     $bb_gateway_id = $_GET['bb_gateway_id'];
 }
-if(isset($_POST['bb_invoice_id'])) {
+if(isset($_POST['bb_gateway_id'])) {
     $bb_gateway_id = $_POST['bb_gateway_id'];
 }
 
@@ -44,19 +45,13 @@ try {
     $output = $service->createAndProcess($ipn);
     $res = array('result'=>$output, 'error'=>null);
 } catch(Exception $e) {
-    $res = array('result'=>null, 'error'=>$e->getMessage());
+    $res = array('result'=>null, 'error'=> array('message' => $e->getMessage()));
     $output = false;
-}
-
-// print transaction output if available
-if(!is_bool($output)) {
-    print $output;
-    exit;
 }
 
 // redirect to invoice if gateways requires
 if(isset($_GET['bb_redirect']) && isset($_GET['bb_invoice_hash'])) {
-    $url = $di['url']->get('invoice/'.$_GET['bb_invoice_hash']);
+    $url = $di['url']->link('invoice/'.$_GET['bb_invoice_hash']);
     header("Location: $url");
     exit;
 } else {

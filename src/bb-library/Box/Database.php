@@ -95,14 +95,26 @@ class Box_Database implements InjectionAwareInterface
         return $beans;
     }
 
-    public function load($modelName,$id)
+    /**
+     * @param string $modelName
+     * @param integer $id
+     */
+    public function load($modelName, $id)
     {
+        /* If RedBean finds the bean it will return
+         * the OODB Bean object; if it cannot find the bean
+         * RedBean will return a new bean of type $modelName and with
+         * primary key ID 0. In the latter case it acts basically the
+         * same as dispense().
+         */
+
         $type = $this->_getTypeFromModelName($modelName);
         $bean = $this->orm->load($type, $id);
-        if($type == $modelName) return $bean;
-        if($bean && $bean->id) {
+        if ($type == $modelName) return $bean;
+        if ($bean && $bean->id) {
             return $bean->box();
         }
+
         return null;
     }
 
@@ -155,33 +167,12 @@ class Box_Database implements InjectionAwareInterface
      */
     public function getExistingModelById($modelName, $id, $message = "Model not found")
     {
-        /*If RedBean finds the bean it will return
-	    * the OODB Bean object; if it cannot find the bean
-        * RedBean will return a new bean of type $modelName and with
-        * primary key ID 0. In the latter case it acts basically the
-        * same as dispense().*/
-
         $model = $this->load($modelName, (int)$id);
         if (null === $model) {
             throw new \Box_Exception($message);
         }
 
         return $model;
-    }
-
-    /**
-     * @param string $modelName
-     * @param array $records
-     * @return array
-     */
-    public function convertToModels($modelName, array $records)
-    {
-        $result = array();
-        $beans = $this->orm->convertToBeans($modelName, $records);
-        foreach($beans as $bean){
-            $result[] = $bean->box();
-        }
-        return $result;
     }
 
     private function _getTypeFromModelName($modelName)

@@ -1,13 +1,13 @@
 {% block subject %}[{{ guest.system_company.name }}] Payment Reminder{% endblock %}
 {% block content %}
-{% filter markdown %}
+{% apply markdown %}
 Hello {{ c.first_name }} {{ c.last_name }},
 
 This is to remind that your proforma invoice **{{ invoice.serie_nr }}** is due
 in {{ invoice.due_at|daysleft }} days.   
 
 Amount due: {{ invoice.total | money(invoice.currency) }}
-Due Date: {{ invoice.due_at|date }}
+Due Date: {{ invoice.due_at|bb_date }}
 
 You can view and pay the invoice at: {{'invoice'|link}}/{{invoice.hash}}
 
@@ -19,5 +19,5 @@ View and manage invoices: {{'invoice'|link}}
 
 {{ guest.system_company.signature }}
 
-{% endfilter %}
+{% endapply %}
 {% endblock %}

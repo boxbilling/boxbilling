@@ -2,7 +2,7 @@
 
 namespace Box\Tests\Mod\Currency\Api;
 
-class GuestTest extends \PHPUnit_Framework_TestCase
+class GuestTest extends \BBTestCase
 {
     public function testGetPairs()
     {
@@ -169,7 +169,11 @@ class GuestTest extends \PHPUnit_Framework_TestCase
 
         $service = $this->getMockBuilder('\Box\Mod\Currency\Service')->getMock();
 
-
+        $di = new \Box_Di();
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+        $guestApi->setDi($di);
         $guestApi->setService($service);
 
         $result = $guestApi->format($data);
@@ -227,7 +231,10 @@ class GuestTest extends \PHPUnit_Framework_TestCase
 
         $service = $this->getMockBuilder('\Box\Mod\Currency\Service')->getMock();
 
-
+        $di = new \Box_Di();
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });$guestApi->setDi($di);
         $guestApi->setService($service);
 
         $result = $guestApi->format($data);

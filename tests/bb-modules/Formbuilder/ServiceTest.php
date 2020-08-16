@@ -4,7 +4,7 @@
 namespace Box\Mod\Formbuilder;
 
 
-class ServiceTest extends \PHPUnit_Framework_TestCase {
+class ServiceTest extends \BBTestCase {
 
     /**
      * @var \Box\Mod\Formbuilder\Service
@@ -135,7 +135,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $di = new \Box_Di();
         $di['db'] = $dbMock;
         $di['logger'] = new \Box_Log();
-
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $this->service->setDi($di);
 
         $result = $this->service->addNewField($data);
@@ -189,7 +191,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
             ->will($this->returnValue($updateFIeldId));
 
         $dbMock->expects($this->atLeastOnce())
-            ->method('load')
+            ->method('getExistingModelById')
             ->will($this->returnValue($model));
 
         $dbMock->expects($this->atLeastOnce())
@@ -199,6 +201,15 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $di = new \Box_Di();
         $di['db'] = $dbMock;
         $di['logger'] = new \Box_Log();
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->disableOriginalConstructor()->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')
+            ->will($this->returnValue(null));
+        $di['validator'] = $validatorMock;
 
         $this->service->setDi($di);
 
@@ -332,7 +343,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
 
         $dbMock->expects($this->atLeastOnce())
-            ->method('load')
+            ->method('getExistingModelById')
             ->will($this->returnValue($model));
 
         $dbMock->expects($this->atLeastOnce())
@@ -350,25 +361,6 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $this->service->setDi($di);
         $result = $this->service->getForm($formId);
         $this->assertInternalType('array', $result);
-    }
-
-    public function testgetFormNotFoundException()
-    {
-        $modelArray = null;
-
-        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
-
-        $dbMock->expects($this->atLeastOnce())
-            ->method('load');
-
-        $di = new \Box_Di();
-        $di['db'] = $dbMock;
-
-        $formId = 1;
-
-        $this->service->setDi($di);
-        $this->setExpectedException('\Box_Exception', 'Form not found', 9632);
-        $this->service->getForm($formId);
     }
 
     public function testgetFormFields()
@@ -436,35 +428,24 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
         $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
         $dbMock->expects($this->atLeastOnce())
-            ->method('load')
+            ->method('getExistingModelById')
             ->will($this->returnValue($model));
         $dbMock->expects($this->atLeastOnce())
             ->method('toArray')
             ->will($this->returnValue($modelArray));
 
         $di = new \Box_Di();
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->disableOriginalConstructor()->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')
+            ->will($this->returnValue(null));
+        $di['validator'] = $validatorMock;
         $di['db'] = $dbMock;
 
         $this->service->setDi($di);
         $result = $this->service->getField($fieldId);
         $this->assertInternalType('array', $result);
         $this->assertEquals($expectedArray, $result);
-    }
-
-    public function testgetFieldFieldNotFound()
-    {
-        $fieldId = 2;
-
-        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
-        $dbMock->expects($this->atLeastOnce())
-            ->method('load');
-
-        $di = new \Box_Di();
-        $di['db'] = $dbMock;
-
-        $this->service->setDi($di);
-        $this->setExpectedException('\Box_Exception', 'Field was not found', 2575);
-        $this->service->getField($fieldId);
     }
 
     public function testremoveForm()
@@ -492,7 +473,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
         $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
         $dbMock->expects($this->atLeastOnce())
-            ->method('load')
+            ->method('getExistingModelById')
             ->will($this->returnValue($model));
 
         $dbMock->expects($this->atLeastOnce())
@@ -505,22 +486,6 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $this->service->setDi($di);
         $result = $this->service->removeField($data);
         $this->assertTrue($result);
-    }
-
-    public function testremoveFieldNotFoundException()
-    {
-        $data = array('id' => 1);
-        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
-        $dbMock->expects($this->atLeastOnce())
-            ->method('load')
-            ->will($this->returnValue(null));
-
-        $di = new \Box_Di();
-        $di['db'] = $dbMock;
-
-        $this->service->setDi($di);
-        $this->setExpectedException('\Box_Exception', 'Field was not found', 1641);
-        $this->service->removeField($data);
     }
 
     public function testformFieldNameExists()

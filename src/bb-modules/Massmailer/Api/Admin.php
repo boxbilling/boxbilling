@@ -26,7 +26,7 @@ class Admin extends \Api_Abstract
     public function get_list($data)
     {
         list($sql, $params) = $this->getService()->getSearchQuery($data);
-        $per_page = isset($data['per_page']) ? $data['per_page'] : $this->di['pager']->getPer_page();
+        $per_page = $this->di['array_get']($data, 'per_page', $this->di['pager']->getPer_page());
         $pager = $this->di['pager']->getSimpleResultSet($sql, $params, $per_page);
         foreach ($pager['list'] as $key => $item) {
             $pager['list'][$key] = $this->getService()->toApiArray($item);
@@ -65,18 +65,9 @@ class Admin extends \Api_Abstract
     {
         $model = $this->_getMessage($data);
 
-        if(isset($data['content'])) {
-            $model->content = $data['content'];
-        }
-
-        if(isset($data['subject'])) {
-            $model->subject = $data['subject'];
-        }
-
-        if(isset($data['status'])) {
-            $model->status = $data['status'];
-        }
-
+        $model->content = $this->di['array_get']($data, 'content', $model->content);
+        $model->subject = $this->di['array_get']($data, 'subject', $model->subject);
+        $model->status = $this->di['array_get']($data, 'status', $model->status);
         if(isset($data['filter'])) {
             $model->filter = json_encode($data['filter']);
         }
@@ -93,7 +84,7 @@ class Admin extends \Api_Abstract
             $model->from_email = $data['from_email'];
         }
 
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
 
         $this->di['logger']->info('Updated mail message #%s', $model->id);
@@ -111,11 +102,12 @@ class Admin extends \Api_Abstract
      */
     public function create($data)
     {
-        if(!isset($data['subject'])) {
-            throw new \Box_Exception('Message subject not passed');
-        }
+        $required = array(
+            'subject' => 'Message subject not passed',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
-        $default_content = '{% filter markdown %}
+        $default_content = '{% apply markdown %}
 Hi {{ c.first_name }} {{ c.last_name }},
 
 Your email is: {{ c.email }}
@@ -131,7 +123,7 @@ vut amet et nunc! Elementum dolor, dictumst porta ultrices. Rhoncus, amet.
 Order our services at {{ "order"|link }}
 
 {{ guest.system_company.name }} - {{ guest.system_company.signature }}
-{% endfilter %}
+{% endapply %}
         ';
         $systemService = $this->di['mod_service']('system');
         $company = $systemService->getCompany();
@@ -142,8 +134,8 @@ Order our services at {{ "order"|link }}
         $model->subject = $data['subject'];
         $model->content = isset($data['content']) ? $data['content'] : $default_content;
         $model->status = 'draft';
-        $model->created_at = date('c');
-        $model->updated_at = date('c');
+        $model->created_at = date('Y-m-d H:i:s');
+        $model->updated_at = date('Y-m-d H:i:s');
 
         $id = $this->di['db']->store($model);
 
@@ -207,7 +199,7 @@ Order our services at {{ "order"|link }}
         }
 
         $model->status = 'sent';
-        $model->sent_at = date('c');
+        $model->sent_at = date('Y-m-d H:i:s');
         $id = $this->di['db']->store($model);
 
         $this->di['logger']->info('Added mass mail messages #%s to queue', $id);
@@ -232,8 +224,8 @@ Order our services at {{ "order"|link }}
         $copy->content    = $model->content;
         $copy->filter     = $model->filter;
         $copy->status     = 'draft';
-        $copy->created_at = date('c');
-        $copy->updated_at = date('c');
+        $copy->created_at = date('Y-m-d H:i:s');
+        $copy->updated_at = date('Y-m-d H:i:s');
 
         $copyId = $this->di['db']->store($copy);
 
@@ -296,18 +288,20 @@ Order our services at {{ "order"|link }}
         $mod = $this->di['mod']('massmailer');
         $c = $mod->getConfig();
 
-        if(!isset($c['test_client_id']) || empty($c['test_client_id'])) {
-            throw new \Box_Exception('Client ID needs to be configured in mass mailer settings.');
-        }
+        $required = array(
+            'test_client_id' => 'Client ID needs to be configured in mass mailer settings.',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $c);
 
         return (int)$c['test_client_id'];
     }
 
     private function _getMessage($data)
     {
-        if(!isset($data['id'])) {
-            throw new \Box_Exception('Message id not passed');
-        }
+        $required = array(
+            'id' => 'Message ID not passed',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
         $model = $this->di['db']->getExistingModelById('mod_massmailer', $data['id'], 'Message not found');
 

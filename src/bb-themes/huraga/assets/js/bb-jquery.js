@@ -1,4 +1,10 @@
 var bb = {
+    event: function(name, params){
+        var event = new CustomEvent(name, { detail: params });
+        // Dispatch/Trigger/Fire the event
+        document.dispatchEvent(event);
+    },
+
     post: function(url, params, jsonp) {
         $.ajax({
             type: "POST",
@@ -12,6 +18,7 @@ var bb = {
             success: function(data) {
                 if(data.error) {
                     $('.wait').hide();
+                    bb.event('bb_ajax_post_message_error', data);
                     bb.msg(data.error.message, 'error');
                 } else {
                     if(typeof jsonp === 'function') {
@@ -255,6 +262,12 @@ jQuery(function ($) {
 
     if(jQuery().tipsy) {
         $('a.show-tip').tipsy({fade: true, delayIn: 500});
-    }
+    };
+
+    $("li.language_selector").bind('click', function(){
+        bb.cookieCreate('BBLANG', $(this).attr('data-language-code'), 7);
+        bb.reload();
+        return false;
+    }).val(bb.cookieRead('BBLANG'));
 
 });

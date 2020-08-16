@@ -89,9 +89,9 @@ class Service implements \Box\InjectionAwareInterface
         
         if(APPLICATION_ENV == 'testing') {
             $config = array();
-            $config['url']      = 'http://castdemo.centova.com';
+            $config['url']      = 'http://castdemo.centova.com:2199';
             $config['secret']   = 'example';
-            $config['ip']       = '123.123.123';
+            $config['ip']       = '123.123.123.123';
             $config['hostname'] = 'castdemo.centova.com';
             return $config;
         }
@@ -107,8 +107,8 @@ class Service implements \Box\InjectionAwareInterface
     {
         $model = $this->di['db']->dispense('service_centovacast');
         $model->client_id    = $order->client_id;
-        $model->created_at   = date('c');
-        $model->updated_at   = date('c');
+        $model->created_at   = date('Y-m-d H:i:s');
+        $model->updated_at   = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
         return $model;
     }
@@ -130,21 +130,17 @@ class Service implements \Box\InjectionAwareInterface
         $client = $api->client_get(array('id'=>$order->client_id));
         $product = $api->product_get(array('id'=>$order->product_id));
         $pc = $product['config'];
-        
+
         $required = array(
-            'server_id',
-            'maxclients',
-            'maxbitrate',
-            'transferlimit',
-            'diskquota',
-            'template',
-            'autostart',
+            'server_id'     => 'CentovaCast product is not configured properly. Field server_id is missing',
+            'maxclients'    => 'CentovaCast product is not configured properly. Field maxclients is missing',
+            'maxbitrate'    => 'CentovaCast product is not configured properly. Field maxbitrate is missing',
+            'transferlimit' => 'CentovaCast product is not configured properly. Field transferlimit is missing',
+            'diskquota'     => 'CentovaCast product is not configured properly. Field diskquota is missing',
+            'template'      => 'CentovaCast product is not configured properly. Field template is missing',
+            'autostart'     => 'CentovaCast product is not configured properly. Field autostart is missing',
         );
-        foreach($required as $key) {
-            if(!isset($pc[$key])) {
-                throw new \Box_Exception("CentovaCast product is not configured properly. Field :field is missing", array(':field'=>$key));
-            }
-        }
+        $this->di['validator']->checkRequiredParamsForArray($required, $pc);
         
         $server         = $this->getServer($pc['server_id']);
         $username       = ( isset($oc['username']) && !empty($oc['username']) ) ? $oc['username'] : $this->_genUsername($client);
@@ -175,8 +171,8 @@ class Service implements \Box\InjectionAwareInterface
 			'timezone'			=>	'auto',
 			'allowproxy'		=>	'0',
 			'charset'			=>	'ISO-8859-1',
-			'servertype'		=>	'ShoutCast2',
-			'sourcetype'		=>	'sctrans2',
+			'servertype'		=>	$pc['servertype'],
+			'sourcetype'		=>	$pc['sourcetype'],
 			'template'			=>	$pc['template'],
     	);
         
@@ -188,7 +184,7 @@ class Service implements \Box\InjectionAwareInterface
         $model->server_id       = $pc['server_id'];
         $model->username        = $username;
         $model->pass            = $this->encryptPass($password);
-        $model->updated_at      = date('c');
+        $model->updated_at      = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
         
         return array_merge($params, array('server'=>$server));
@@ -224,7 +220,7 @@ class Service implements \Box\InjectionAwareInterface
     	);
         $this->_apiSystemCall($server, 'setstatus', $params);
         
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
         return true;
     }
@@ -246,7 +242,7 @@ class Service implements \Box\InjectionAwareInterface
     	);
         $this->_apiSystemCall($server, 'setstatus', $params);
         
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
         return true;
     }
@@ -367,6 +363,9 @@ class Service implements \Box\InjectionAwareInterface
         return $server['url'];
     }
     
+    /**
+     * @param string $method
+     */
     private function _apiServerCall($model, $method, $arguments = array(), $admin = false)
     {
         $account_username = $model->username;
@@ -381,6 +380,7 @@ class Service implements \Box\InjectionAwareInterface
         
         require_once(dirname(__FILE__).'/ccapiclient/ccapiclient.php');
         $server = new CCServerAPIClient($centovacast_url);
+        $server->cc_initialize($centovacast_url);
         $server->call($method, $account_username, $account_password, $arguments);
 
         if (!$server->success) {
@@ -390,12 +390,16 @@ class Service implements \Box\InjectionAwareInterface
         return $server->bb_data;
     }
     
+    /**
+     * @param string $method
+     */
     private function _apiSystemCall($server, $method, $params = array())
     {
-        require_once(dirname(__FILE__).'/ccapiclient/ccapiclient.php');
+        require_once(dirname(__FILE__).'/ccapiclient.php');
         $centovacast_url    = $server['url'];
         $admin_password     = $server['secret'];
         $system = new CCSystemAPIClient($centovacast_url);
+        $system->cc_initialize($centovacast_url);
         $system->call($method, $admin_password, $params);
         
         if (!$system->success) {

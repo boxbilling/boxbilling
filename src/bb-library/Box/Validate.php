@@ -17,7 +17,7 @@ class Box_Validate
     protected $di = null;
 
     /**
-     * @param null $di
+     * @param Box_Di|null $di
      */
     public function setDi($di)
     {
@@ -25,7 +25,7 @@ class Box_Validate
     }
 
     /**
-     * @return null
+     * @return Box_Di|null
      */
     public function getDi()
     {
@@ -82,12 +82,36 @@ class Box_Validate
         return true;
     }
 
-    public function checkRequiredParamsForArray($required, $data)
+    /**
+     * @param array $required - Array with required keys and messages to show if the key is not found
+     * @param array $data - Array to search for keys
+     * @param array $variables - Array of variables for message placeholders (:placeholder)
+     * @param integer $code - Exception code
+     * @throws Box_Exception
+     */
+    public function checkRequiredParamsForArray(array $required, array $data, array $variables = NULL, $code = 0)
     {
         foreach ($required as $key => $msg) {
-            if (!isset($data[$key]) || empty($data[$key])) {
-                throw new \Box_Exception($msg);
+
+            if(!isset($data[$key])){
+                throw new \Box_Exception($msg, $variables, $code);
+            }
+
+            if (is_string($data[$key]) && strlen(trim($data[$key])) === 0){
+                throw new \Box_Exception($msg, $variables, $code);
+            }
+
+            if (!is_numeric($data[$key]) && empty($data[$key])){
+                throw new \Box_Exception($msg, $variables, $code);
             }
         }
+    }
+
+    public function isBirthdayValid($birthday = '')
+    {
+        if (strlen(trim($birthday)) > 0 && strtotime($birthday) === false) {
+            throw new \Box_Exception('Invalid birth date value');
+        }
+        return true;
     }
 }

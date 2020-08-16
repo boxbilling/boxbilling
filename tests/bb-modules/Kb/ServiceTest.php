@@ -1,7 +1,7 @@
 <?php
 namespace Box\Tests\Mod\Kb;
 
-class ServiceTest extends \PHPUnit_Framework_TestCase
+class ServiceTest extends \BBTestCase
 {
     public function testSearchArticles()
     {
@@ -150,8 +150,8 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $model->title                  = "Title";
         $model->views                  = rand(1, 100);
         $model->content                = 'Content';
-        $model->created_at             = '2013-01-01T12:00:00+00:00';
-        $model->updated_at             = '2014-01-01T12:00:00+00:00';
+        $model->created_at             = '2013-01-01 12:00:00';
+        $model->updated_at             = '2014-01-01 12:00:00';
         $model->status                 = 'active';
         $model->kb_article_category_id = rand(1, 100);
 
@@ -238,7 +238,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
 
         $db = $this->getMockBuilder('Box_Database')->getMock();
         $db->expects($this->atLeastOnce())
-            ->method('load')
+            ->method('getExistingModelById')
             ->will($this->returnValue($category));
         $di       = new \Box_Di();
         $di['db'] = $db;
@@ -406,6 +406,12 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
     public function testCategoryGetSearchQuery($data, $query, $bindings)
     {
         $service = new \Box\Mod\Kb\Service();
+
+        $di = new \Box_Di();
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+        $service->setDi($di);
 
         $result = $service->categoryGetSearchQuery($data);
 
@@ -607,7 +613,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $model = new \Model_KbArticleCategory();
         $db    = $this->getMockBuilder('Box_Database')->getMock();
         $db->expects($this->atLeastOnce())
-            ->method('load')
+            ->method('getExistingModelById')
             ->will($this->returnValue($model));
 
         $di       = new \Box_Di();

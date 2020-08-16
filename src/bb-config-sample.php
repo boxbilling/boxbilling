@@ -5,6 +5,7 @@
  * If you are not using the web-installer, you can rename this file
  * to "bb-config.php" and fill in the values.
  * Import /install/structure.sql to your database
+ * Import /install/content.sql to your database
  * Open browser http://www.youdomain.com/index.php?_url=/bb-admin to create new admin account.
  * Remove /install directory
  */
@@ -21,7 +22,7 @@ return array(
     /**
      * Full URL where BoxBilling is installed with trailing slash
      */
-    'url'     => 'http://www.boxbilling.vm/',
+    'url'     => 'http://www.boxbilling.test/',
 
     'admin_area_prefix' =>  '/bb-admin',
 
@@ -87,12 +88,12 @@ return array(
         /**
          * Database username
          */
-        'user'   =>'root',
+        'user'   =>'foo',
 
         /**
          * Database password
          */
-        'password'   =>'',
+        'password'   =>'foo',
     ),
 
     'twig'   =>  array(

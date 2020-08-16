@@ -136,8 +136,26 @@ var bb = {
         });
         matches.parents('li').addClass('active');
     },
+    cookieCreate: function (name,value,days) {
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime()+(days*24*60*60*1000));
+            var expires = "; expires="+date.toGMTString();
+        }
+        else var expires = "";
+        document.cookie = name+"="+value+expires+"; path=/";
+    },
+    cookieRead: function (name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for(var i=0;i < ca.length;i++) {
+            var c = ca[i];
+            while (c.charAt(0)==' ') c = c.substring(1,c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+        }
+        return null;
+    },
     insertToTextarea: function(areaId, text){
-
         var txtarea = document.getElementById(areaId);
         var scrollPos = txtarea.scrollTop;
         var strPos = 0;
@@ -169,6 +187,9 @@ var bb = {
             txtarea.focus();
         }
         txtarea.scrollTop = scrollPos;
+        if ('undefined' !== typeof CKEDITOR ){
+            CKEDITOR.instances[areaId].insertText(text);
+        }
 
         return false
     }
@@ -214,7 +235,6 @@ $(function() {
 
 	//===== Global ajax methods =====//
     $('.loading').ajaxStart(function() {
-        //bb.msg('Loading...');
         $(this).show();
     }).ajaxStop(function() {
         $(this).hide();
@@ -270,4 +290,10 @@ $(function() {
 	$(".hideit").click(function() {
 		$(this).fadeOut(400);
 	});
+
+    $("select.language_selector").bind('change', function(){
+        bb.cookieCreate('BBLANG', $(this).val(), 7);
+        bb.reload();
+        return false;
+    }).val(bb.cookieRead('BBLANG'));
 });

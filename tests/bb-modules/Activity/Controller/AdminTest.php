@@ -4,7 +4,7 @@
 namespace Box\Tests\Mod\Activity\Controller;
 
 
-class AdminTest extends \PHPUnit_Framework_TestCase {
+class AdminTest extends \BBTestCase {
 
     public function testDi()
     {
@@ -51,8 +51,6 @@ class AdminTest extends \PHPUnit_Framework_TestCase {
     public function testget_index()
     {
         $boxAppMock = $this->getMockBuilder('\Box_App')->disableOriginalConstructor()->getMock();
-        $boxAppMock->expects($this->atLeastOnce())
-            ->method('getApiAdmin');
         $boxAppMock->expects($this->atLeastOnce())
             ->method('render')
             ->with('mod_activity_index');

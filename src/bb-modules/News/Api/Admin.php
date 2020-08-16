@@ -27,11 +27,11 @@ class Admin extends \Api_Abstract
     {
         $service = $this->getService();
         list ($sql, $params) = $service->getSearchQuery($data);
-        $per_page = isset($data['per_page']) ? $data['per_page'] : $this->di['pager']->getPer_page();
-        $pager = $this->di['pager']->getSimpleResultSet($sql, $params, $per_page);
+        $per_page = $this->di['array_get']($data, 'per_page', $this->di['pager']->getPer_page());
+        $pager    = $this->di['pager']->getSimpleResultSet($sql, $params, $per_page);
         foreach ($pager['list'] as $key => $item) {
-            $post               = $this->di['db']->getExistingModelById('Post', $item['id'], 'Post not found');
-            $pager['list'][$key] = $this->getService()->toApiArray($post);
+            $post                = $this->di['db']->getExistingModelById('Post', $item['id'], 'Post not found');
+            $pager['list'][$key] = $this->getService()->toApiArray($post, 'admin');
         }
 
         return $pager;
@@ -46,14 +46,27 @@ class Admin extends \Api_Abstract
      */
     public function get($data)
     {
-        if(!isset($data['id']) && !isset($data['slug'])) {
+        if (!isset($data['id']) && !isset($data['slug'])) {
             throw new \Box_Exception('ID or slug is missing');
         }
 
-        $id = isset($data['id']) ? $data['id'] : NULL;
-        $service = $this->getService();
-        $model = $this->di['db']->getExistingModelById('Post', $id, 'News item not found');
-        return $service->toApiArray($model, 'admin');
+        $id   = $this->di['array_get']($data, 'id');
+        $slug = $this->di['array_get']($data, 'slug');
+
+        $model = null;
+        if ($id) {
+            $model = $this->di['db']->load('Post', $id);
+        } else {
+            if (!empty($slug)) {
+                $model = $this->di['db']->findOne('Post', 'slug = :slug', array('slug' => $slug));
+            }
+        }
+
+        if (!$model instanceof \Model_Post) {
+            throw new \Box_Exception('News item not found');
+        }
+
+        return $this->getService()->toApiArray($model, 'admin');
     }
 
     /**
@@ -65,65 +78,54 @@ class Admin extends \Api_Abstract
      * @optional string $slug - news item slug
      * @optional string $content - news item content
      * @optional string $status - news item status
-     * 
+     *
      * @return bool
      */
     public function update($data)
     {
-        if(!isset($data['id'])) {
-            throw new \Box_Exception('Post id not passed');
-        }
+        $required = array(
+            'id' => 'Post id not passed',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
         $model = $this->di['db']->getExistingModelById('Post', $data['id'], 'News item not found');
 
-        if(isset($data['content'])) {
-            $model->content = $data['content'];
+        $model->content = $this->di['array_get']($data, 'content', $model->content);
+        $model->title   = $this->di['array_get']($data, 'title', $model->title);
+        $model->slug    = $this->di['array_get']($data, 'slug', $model->slug);
+        $model->image   = $this->di['array_get']($data, 'image', $model->image);
+        $model->section = $this->di['array_get']($data, 'section', $model->section);
+        $model->status  = $this->di['array_get']($data, 'status', $model->status);
+
+        $publish_at = $this->di['array_get']($data, 'publish_at', 0);
+        if ($publish_at) {
+            $model->publish_at = date('Y-m-d H:i:s', strtotime($publish_at));
         }
 
-        if(isset($data['title'])) {
-            $model->title = $data['title'];
+        $published_at = $this->di['array_get']($data, 'published_at', 0);
+        if ($published_at) {
+            $model->published_at = date('Y-m-d H:i:s', strtotime($published_at));
         }
 
-        if(isset($data['slug'])) {
-            $model->slug = $data['slug'];
-        }
-        
-        if(isset($data['image'])) {
-            $model->image = $data['image'];
-        }
-        
-        if(isset($data['section'])) {
-            $model->section = $data['section'];
-        }
-        
-        if(isset($data['publish_at'])) {
-            $model->publish_at = $data['publish_at'];
-        }
-        
-        if(isset($data['published_at'])) {
-            $model->published_at = $data['published_at'];
-        }
-        
-        if(isset($data['expires_at'])) {
-            $model->publish_at = $data['expires_at'];
+        $expires_at = $this->di['array_get']($data, 'expires_at', 0);
+        if ($expires_at) {
+            $model->expires_at = date('Y-m-d H:i:s', strtotime($expires_at));
         }
 
-        if(isset($data['status'])) {
-             $model->status = $data['status'];
+        $created_at = $this->di['array_get']($data, 'created_at', 0);
+        if ($created_at) {
+            $model->created_at = date('Y-m-d H:i:s', strtotime($created_at));
         }
-        
-        if(isset($data['created_at'])) {
-             $model->created_at = date('c', strtotime($data['created_at']));
+
+        $updated_at = $this->di['array_get']($data, 'updated_at', 0);
+        if ($created_at) {
+            $model->updated_at = date('Y-m-d H:i:s', strtotime($updated_at));
         }
-        
-        if(isset($data['updated_at'])) {
-             $model->updated_at = date('c', strtotime($data['updated_at']));
-        }
-        
         $model->admin_id = $this->getIdentity()->id;
         $this->di['db']->store($model);
 
         $this->di['logger']->info('Updated news item #%s', $model->id);
+
         return TRUE;
     }
 
@@ -131,7 +133,7 @@ class Admin extends \Api_Abstract
      * Creat new news item.
      *
      * @param string $title - news item title
-     * 
+     *
      * @optional string $content - news item content
      * @optional string $status - news item status
      *
@@ -139,21 +141,23 @@ class Admin extends \Api_Abstract
      */
     public function create($data)
     {
-        if(!isset($data['title'])) {
-            throw new \Box_Exception('Post title not passed');
-        }
+        $required = array(
+            'title' => 'Post title not passed',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
-        $model = $this->di['db']->dispense('Post');
-        $model->admin_id = $this->getIdentity()->id;
-        $model->title = $data['title'];
-        $model->slug = $this->di['tools']->slug($data['title']);
-        $model->status = isset($data['status']) ? $data['status'] : NULL;
-        $model->content = isset($data['content']) ? $data['content'] : NULL;
-        $model->created_at = date('c');
-        $model->updated_at = date('c');
+        $model             = $this->di['db']->dispense('Post');
+        $model->admin_id   = $this->getIdentity()->id;
+        $model->title      = $data['title'];
+        $model->slug       = $this->di['tools']->slug($data['title']);
+        $model->status     = $this->di['array_get']($data, 'status', NULL);
+        $model->content    = $this->di['array_get']($data, 'content', NULL);
+        $model->created_at = date('Y-m-d H:i:s');
+        $model->updated_at = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
-        
+
         $this->di['logger']->info('Created news item #%s', $model->id);
+
         return $model->id;
     }
 
@@ -166,14 +170,16 @@ class Admin extends \Api_Abstract
      */
     public function delete($data)
     {
-        if(!isset($data['id'])) {
-            throw new \Box_Exception('Post id not passed');
-        }
+        $required = array(
+            'id' => 'Post ID not passed',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
         $model = $this->di['db']->getExistingModelById('Post', $data['id'], 'News item not found');
-        $id = $model->id;
+        $id    = $model->id;
         $this->di['db']->trash($model);
         $this->di['logger']->info('Removed news item #%s', $id);
+
         return true;
     }
 

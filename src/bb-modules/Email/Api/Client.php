@@ -26,21 +26,21 @@ class Client extends \Api_Abstract
     {
         $client            = $this->getIdentity();
         $data['client_id'] = $client->id;
-        $per_page          = isset($data['per_page']) ? $data['per_page'] : $this->di['pager']->getPer_page();
+        $per_page          = $this->di['array_get']($data, 'per_page', $this->di['pager']->getPer_page());
         list($sql, $params) = $this->getService()->getSearchQuery($data);
         $pager = $this->di['pager']->getSimpleResultSet($sql, $params, $per_page);
 
         foreach ($pager['list'] as $key => $item) {
             $pager['list'][$key] = array(
-                'id'           => isset($item['id']) ? $item['id'] : '',
-                'client_id'    => isset($item['client_id']) ? $item['client_id'] : '',
-                'sender'       => isset($item['sender']) ? $item['sender'] : '',
-                'recipients'   => isset($item['recipients']) ? $item['recipients'] : '',
-                'subject'      => isset($item['subject']) ? $item['subject'] : '',
-                'content_html' => isset($item['content_html']) ? $item['content_html'] : '',
-                'content_text' => isset($item['content_text']) ? $item['content_text'] : '',
-                'created_at'   => isset($item['created_at']) ? $item['created_at'] : '',
-                'updated_at'   => isset($item['updated_at']) ? $item['updated_at'] : '',
+                'id'           => $item['id'],
+                'client_id'    => $item['client_id'],
+                'sender'       => $item['sender'],
+                'recipients'   => $item['recipients'],
+                'subject'      => $item['subject'],
+                'content_html' => $item['content_html'],
+                'content_text' => $item['content_text'],
+                'created_at'   => $item['created_at'],
+                'updated_at'   => $item['updated_at'],
             );
         }
 
@@ -56,9 +56,11 @@ class Client extends \Api_Abstract
      */
     public function get($data)
     {
-        if (!isset($data['id'])) {
-            throw new \Box_Exception('Email ID is required');
-        }
+        $required = array(
+            'id'         => 'Email ID is required',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
+
         $model = $this->getService()->findOneForClientById($this->getIdentity(), $data['id']);
 
         if (!$model instanceof \Model_ActivityClientEmail) {
@@ -78,9 +80,10 @@ class Client extends \Api_Abstract
      */
     public function resend($data)
     {
-        if(!isset($data['id'])) {
-            throw new \Box_Exception('Email ID is required');
-        }
+        $required = array(
+            'id'         => 'Email ID is required',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
         $model = $this->getService()->findOneForClientById($this->getIdentity(), $data['id']);
         if(!$model instanceof \Model_ActivityClientEmail) {
@@ -99,9 +102,10 @@ class Client extends \Api_Abstract
      */
     public function delete($data)
     {
-        if (!isset($data['id'])) {
-            throw new \Box_Exception('Email ID is required');
-        }
+        $required = array(
+            'id'         => 'Email ID is required',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
         $model = $this->getService()->findOneForClientById($this->getIdentity(), $data['id']);
         if (!$model instanceof \Model_ActivityClientEmail) {

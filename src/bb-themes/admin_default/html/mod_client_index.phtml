@@ -1,3 +1,4 @@
+{% import "macro_functions.phtml" as mf %}
 {% extends "layout_default.phtml" %}
 {% set active_menu = 'client' %}
 {% block meta_title %}{% trans 'Clients' %}{% endblock %}
@@ -150,12 +151,12 @@
                     {% endfor %}
                 </tbody>
             </table>
-            
+
+            {% include "partial_batch_delete.phtml" with {'action' : 'admin/client/batch_delete'} %}
             {% include "partial_pagination.phtml" with {'list': clients, 'url':'client'} %}
         </div>
 
         <div class="fix"></div>
-        {% include "partial_batch_delete.phtml" with {'action' : 'admin/client/batch_delete'} %}
 
         <div class="tab_content nopadding" id="tab-new">
 

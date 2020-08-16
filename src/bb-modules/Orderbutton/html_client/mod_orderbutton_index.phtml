@@ -39,7 +39,7 @@
 </head>
 
 <body>
-<article class="data-block decent" id="orderbutton">
+<article class="data-block decent" id="orderbutton" style="margin-bottom: 0">
     <div class="data-container">
         {#
         <header>
@@ -167,7 +167,7 @@
                                     $('#payment-html').collapse('show');
                                 });
                             } else {
-                                var link = 'invoice/banklink/' + result.invoice_hash + '/' + result.gateway_id;
+                                var link = '{{"invoice/banklink"|link}}' + '/' + result.invoice_hash + '/' + result.gateway_id;
                                 $('#payment-html-inner').html('<a href="'+link+'" target="_parent" id="redirect-to-gateway">Redirect to payment gateway</a>');
                                 $('#checkout').collapse('hide');
                                 $('#checkout-inner').remove();

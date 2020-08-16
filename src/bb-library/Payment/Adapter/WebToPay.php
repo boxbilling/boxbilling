@@ -68,7 +68,7 @@ class Payment_Adapter_WebToPay extends Payment_AdapterAbstract
 	 * Init single payment call to webservice
 	 * Invoice id is passed via notify_url
      *
-	 * @return mixed
+	 * @return string
 	*/
     public function singlePayment(Payment_Invoice $invoice)
     {
@@ -150,6 +150,9 @@ class Payment_Adapter_WebToPay extends Payment_AdapterAbstract
         }
     }
 
+    /**
+     * @param double $amount
+     */
     public function moneyFormat($amount, $currency = null)
     {
         return $amount * 100;
@@ -253,29 +256,27 @@ class WebToPay {
      */
     public static function throwResponseError($code) {
         $errors = array(
-            '0x1'    => self::_('mokėjimo suma per maža'),
-            '0x2'    => self::_('mokėjimo suma per didelė'),
-            '0x3'    => self::_('nurodyta valiuta neaptarnaujama'),
-            '0x4'    => self::_('nėra sumos arba valiutos'),
-            '0x6'    => self::_('klaidos kodas nebenaudojamas'),
-            '0x7'    => self::_('išjungtas testavimo režimas'),
-            '0x8'    => self::_('jūs uždraudėte šį mokėjimo būdą'),
-            '0x9'    => self::_('blogas "paytext" kintamojo kodavimas (turi būti utf-8)'),
-            '0x10'   => self::_('tuščias arba neteisingai užpildytas "orderid"'),
-            '0x11'   => self::_('mokėjimas negalimas, kol projektas nepatvirtintas arba jeigu jis yra blokuotas'),
-            '0x12'   => self::_('negautas "projectid" parametras, nors jis yra privalomas'),
-            '0x13'   => self::_('"accepturl", "cancellurl" arba "callbacurl" skiriasi nuo projekte patvirtintų adresų'),
-            '0x14'   => self::_('blogai sugeneruotas paraštas ("sign" parametras)'),
-            '0x15'   => self::_('klaidingi kai kurie iš perduotų parametrų'),
-            '0x15x0' => self::_('neteisingas vienas iš šių parametrų: cancelurl, accepturl, callbackurl'),
-            '0x15x1' => self::_('neteisingas parametras: time_limit'),
+            '0x1'   => self::_('Payment amount is too small.'),
+            '0x2'   => self::_('Payment amount is too big.'),
+            '0x3'   => self::_('Selected currency is not available.'),
+            '0x4'   => self::_('Amount or currency is missing.'),
+            '0x6'   => self::_('projectId is missing or such ID does not exist.'),
+            '0x7'   => self::_('Testing mode is turned off, but you have still tried to make a test payment.'),
+            '0x8'   => self::_('You have banned this way of payment.'),
+            '0x9'   => self::_('Coding of variable "paytext" is not suitable (has to be utf-8).'),
+            '0x10'  => self::_('Empty or not correctly filled "orderID".'),
+            '0x11'  => self::_('Project has not been checked by our administrator.'),
+            '0x13'  => self::_('Accepturl, cancellurl, callbacurl or referer base address differs from the addresses confirmed in the project.'),
+            '0x14'  => self::_('Invalid "sign" parameter.'),
+            '0x15x0'  => self::_('At least one of these parameters is incorrect: cancelurl, accepturl, callbackurl.'),
+            '0x15x1'  => self::_('Parameter time_limit is not valid (wrong format or not valid value)'),
         );
 
         if (isset($errors[$code])) {
             $msg = $errors[$code];
         }
         else {
-            $msg = self::_('Nenumatyta klaida');
+            $msg = self::_('Unknown error');
         }
 
         throw new WebToPayException($msg);
@@ -521,7 +522,7 @@ class WebToPay {
      * https://www.mokejimai.lt/makro_specifikacija.html
      *
      * @param  array $data Information about current payment request.
-     * @return array
+     * @return string
      */
     public static function buildRequest($data) {
         $specs = self::getRequestSpec();
@@ -544,7 +545,7 @@ class WebToPay {
      * https://www.mokejimai.lt/makro_specifikacija.html
      *
      * @param  array $data Information about current payment request.
-     * @return array
+     * @return string
      */
     public static function buildRepeatRequest($data) {
         $specs = self::getRepeatRequestSpec();
@@ -569,7 +570,7 @@ class WebToPay {
     /**
      * Check is response certificate is valid
      *
-     * @param  string $response
+     * @param  array $response
      * @param  string $cert
      * @return bool
      */
@@ -743,7 +744,7 @@ class WebToPay {
      * Downloads xml data from webtopay.com
      *
      * @param int       $projectID
-     * @return string
+     * @return boolean
      */
     public static function getXML($projectID) {
         $response = self::getUrlContent(self::XML_URL.$projectID.'/');
@@ -795,7 +796,7 @@ class WebToPay {
     /**
      * Parses xml to array, serializes it and writes it to file CACHE_URL
      *
-     * @param obj   $xml
+     * @param SimpleXMLElement   $xml
      */
     public static function parseXML($xml){
 
@@ -1025,6 +1026,9 @@ class WebToPay {
     }
 
 
+    /**
+     * @param string $prefix
+     */
     public static function getPrefixed($data, $prefix) {
         if (empty($prefix)) return $data;
         $ret = array();
@@ -1036,6 +1040,9 @@ class WebToPay {
         return $ret;
     }
 
+    /**
+     * @param string $URL
+     */
     private static function getUrlContent($URL){
         $url = parse_url($URL);
         if ('https' == $url['scheme']) {
@@ -1095,7 +1102,7 @@ class WebToPay {
      *
      * @param array     $response       Response array.
      * @param array     $user_data
-     * @return void
+     * @return array
      */
     public static function checkResponse($response, $user_data=array()) {
         self::$verified = false;
@@ -1170,6 +1177,9 @@ class WebToPay {
         return $response;
     }
 
+    /**
+     * @param string $type
+     */
     public static function responseToLog($type, $req) {
         if ('mikro' == $type) {
             return self::mikroResponseToLog($req);
@@ -1206,6 +1216,10 @@ class WebToPay {
         return 'MIKRO [answer] '.implode(', ', $ret);
     }
 
+    /**
+     * @param string $type
+     * @param string $msg
+     */
     public static function log($type, $msg, $logfile=null) {
         if (!isset($logfile)) {
             return false;

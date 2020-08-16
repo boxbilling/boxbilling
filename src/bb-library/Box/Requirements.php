@@ -27,6 +27,7 @@ class Box_Requirements implements \Box\InjectionAwareInterface
 
     private $_all_ok = true;
     private $_app_path = BB_PATH_ROOT;
+    private $_options = array();
 
     public function __construct()
     {
@@ -37,10 +38,10 @@ class Box_Requirements implements \Box\InjectionAwareInterface
                     'curl',
                     'zlib',
                     'gettext',
-                    'mcrypt',
+                    'openssl',
                  ),
                 'version'       =>  PHP_VERSION,
-                'min_version'   =>  '5.3',
+                'min_version'   =>  '7.2',
                 'safe_mode'     =>  ini_get('safe_mode'),
             ),
             'writable_folders' => array(
@@ -87,13 +88,12 @@ class Box_Requirements implements \Box\InjectionAwareInterface
         );
         
         $data['extensions']    = array(
-            'ionCube Loader'       => extension_loaded('ionCube Loader'),
             'apc'           => extension_loaded('apc'),
             'curl'          => extension_loaded('curl'),
             'pdo_mysql'     => extension_loaded('pdo_mysql'),
             'zlib'          => extension_loaded('zlib'),
             'mbstring'      => extension_loaded('mbstring'),
-            'mcrypt'        => extension_loaded('mcrypt'),
+            'openssl'        => extension_loaded('openssl'),
             'gettext'       => extension_loaded('gettext'),
         );
         
@@ -160,6 +160,7 @@ class Box_Requirements implements \Box\InjectionAwareInterface
     {
         $folders = $this->_options['writable_folders'];
 
+        $result = array();
         foreach($folders as $folder) {
             if($this->checkPerms($folder)) {
                 $result[$folder] = true;

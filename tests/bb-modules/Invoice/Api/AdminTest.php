@@ -4,7 +4,7 @@
 namespace Box\Mod\Invoice\Api;
 
 
-class AdminTest extends \PHPUnit_Framework_TestCase {
+class AdminTest extends \BBTestCase {
     /**
     * @var \Box\Mod\Invoice\Api\Admin
     */
@@ -38,6 +38,9 @@ class AdminTest extends \PHPUnit_Framework_TestCase {
 
         $di = new \Box_Di();
         $di['pager'] = $paginatorMock;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
 
         $this->api->setDi($di);
         $this->api->setService($serviceMock);
@@ -117,10 +120,14 @@ class AdminTest extends \PHPUnit_Framework_TestCase {
         );
         $newInvoiceId = 1;
 
+        $invoiceModel = new \Model_Invoice();
+        $invoiceModel->loadBean(new \RedBeanPHP\OODBBean());
+        $invoiceModel->id = $newInvoiceId;
+
         $serviceMock = $this->getMockBuilder('\Box\Mod\Invoice\Service')->getMock();
         $serviceMock->expects($this->atLeastOnce())
             ->method('prepareInvoice')
-            ->will($this->returnValue($newInvoiceId));
+            ->will($this->returnValue($invoiceModel));
 
         $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
         $validatorMock->expects($this->atLeastOnce())
@@ -204,6 +211,9 @@ class AdminTest extends \PHPUnit_Framework_TestCase {
         $di = new \Box_Di();
         $di['validator'] = $validatorMock;
         $di['db'] = $dbMock;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
 
         $this->api->setDi($di);
         $this->api->setService($serviceMock);
@@ -747,6 +757,9 @@ class AdminTest extends \PHPUnit_Framework_TestCase {
         $di = new \Box_Di();
         $di['pager'] = $paginatorMock;
         $di['mod_service'] = $di->protect(function () use($transactionService) {return $transactionService;});
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
 
         $this->api->setDi($di);
         $result = $this->api->transaction_get_list(array());
@@ -848,6 +861,9 @@ class AdminTest extends \PHPUnit_Framework_TestCase {
         $di = new \Box_Di();
         $di['pager'] = $paginatorMock;
         $di['mod_service'] = $di->protect(function () use($gatewayService) {return $gatewayService;});
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
 
         $this->api->setDi($di);
         $result = $this->api->gateway_get_list(array());
@@ -1331,27 +1347,18 @@ class AdminTest extends \PHPUnit_Framework_TestCase {
 
     public function testtax_setup_eu()
     {
-        $data = array(
-            'id' => 1,
-        );
-
         $taxService = $this->getMockBuilder('\Box\Mod\Invoice\ServiceTax')->getMock();
         $taxService->expects($this->atLeastOnce())
             ->method('setupEUTaxes')
             ->will($this->returnValue(true));
 
-        $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
-        $validatorMock->expects($this->atLeastOnce())
-            ->method('checkRequiredParamsForArray');
-
 
         $di = new \Box_Di();
-        $di['validator'] = $validatorMock;
         $di['mod_service'] = $di->protect(function () use($taxService) {return $taxService;});
 
         $this->api->setDi($di);
 
-        $result = $this->api->tax_setup_eu($data);
+        $result = $this->api->tax_setup_eu(array());
         $this->assertInternalType('bool', $result);
         $this->assertTrue($result);
     }
@@ -1430,6 +1437,71 @@ class AdminTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(true, $result);
     }
 
+    public function testgetTax()
+    {
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray');
+
+        $taxService = $this->getMockBuilder('\Box\Mod\Invoice\ServiceTax')->getMock();
+        $taxService->expects($this->atLeastOnce())
+            ->method('toApiArray')
+            ->will($this->returnValue(array()));
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $model  = new \Model_Tax();
+        $model->loadBean(new \RedBeanPHP\OODBBean());
+        $dbMock->expects($this->atLeastOnce())
+            ->method('getExistingModelById')
+            ->will($this->returnValue($model));
+
+        $di                = new \Box_Di();
+        $di['validator']   = $validatorMock;
+        $di['db']          = $dbMock;
+        $di['mod_service'] = $di->protect(function () use ($taxService) { return $taxService; });
+
+        $this->api->setDi($di);
+        $this->api->setService($taxService);
+        $this->api->setIdentity(new \Model_Admin());
+
+        $data['id'] = 1;
+        $result     = $this->api->tax_get($data);
+        $this->assertInternalType('array', $result);
+    }
+
+
+    public function testupdateTax()
+    {
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray');
+
+        $taxService = $this->getMockBuilder('\Box\Mod\Invoice\ServiceTax')->getMock();
+        $taxService->expects($this->atLeastOnce())
+            ->method('update')
+            ->will($this->returnValue(true));
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $model  = new \Model_Tax();
+        $model->loadBean(new \RedBeanPHP\OODBBean());
+        $dbMock->expects($this->atLeastOnce())
+            ->method('getExistingModelById')
+            ->will($this->returnValue($model));
+
+        $di                = new \Box_Di();
+        $di['validator']   = $validatorMock;
+        $di['db']          = $dbMock;
+        $di['mod_service'] = $di->protect(function () use ($taxService) { return $taxService; });
+
+        $this->api->setDi($di);
+        $this->api->setService($taxService);
+        $this->api->setIdentity(new \Model_Admin());
+
+        $data['id'] = 1;
+        $result     = $this->api->tax_update($data);
+        $this->assertInternalType('boolean', $result);
+        $this->assertTrue($result);
+    }
 
 }
  

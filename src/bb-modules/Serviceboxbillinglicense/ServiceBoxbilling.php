@@ -73,7 +73,11 @@ class ServiceBoxbilling implements \Box\InjectionAwareInterface
             $this->_api_url = $options['api_url'];
         }
 
-        $this->_cookie = sys_get_temp_dir() . 'bbcookie.txt';
+        if (isset($options['api_role'])) {
+            $this->_api_role = $options['api_role'];
+        }
+
+        $this->_cookie = sys_get_temp_dir() . '/bbcookie.txt';
     }
 
     public function __call($method, $arguments)

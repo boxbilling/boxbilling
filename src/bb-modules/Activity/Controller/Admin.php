@@ -41,6 +41,7 @@ class Admin implements \Box\InjectionAwareInterface
                 'location'  =>  'activity',
                 'label' => 'Activity',
                 'class'     => 'graphs',
+                'sprite_class' => 'dark-sprite-icon sprite-graph',
                 ),
             'subpages'=> array(
                 array(
@@ -61,7 +62,7 @@ class Admin implements \Box\InjectionAwareInterface
 
     public function get_index(\Box_App $app)
     {
-        $api = $app->getApiAdmin();
+        $this->di['is_admin_logged'];
         return $app->render('mod_activity_index');
     }
 }

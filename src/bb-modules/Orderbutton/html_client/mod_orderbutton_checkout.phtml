@@ -12,6 +12,7 @@
                 <tr>
                     <th>{% trans 'Product' %}</th>
                     <th>{% trans 'Price' %}</th>
+                    <th style="width: 3%; text-align: center"></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -29,12 +30,15 @@
                     </td>
                     <td>
                         {% if item.discount_price %}
-                            <del>{{ (item.price * item.quantity) | money_convert }}</del>
-                            <strong class="text-success">{{ (item.price * item.quantity - item.discount_price) | money_convert }}</strong>
+                        <del>{{ item.total | money_convert }}</del>
+                        <strong class="text-success">{{ (item.total-item.discount_price) | money_convert }}</strong>
+							
+								
                         {% else %}
-                            {{ (item.price * item.quantity) | money_convert }}
+                            {{ (item.total) | money_convert }}
                         {% endif %}
                     </td>
+                    <td><button data-cart-item-id="{{ item.id }}" class="btn btn-inverse btn-mini remove-cart-item" title="{% trans 'Remove item' %}"><strong><i class="awe-remove"></i></strong></button></td>
                 </tr>
 
                 {% if request.show_custom_form_values %}
@@ -95,6 +99,7 @@
                     {% endif %}
                 </tr>
                 {% endif %}
+			
                 {% endfor %}
                 </tbody>
             </table>
@@ -135,24 +140,34 @@
                         {% if cart.discount >0 %}
                         <tr>
                             <td><strong>{% trans 'Subtotal:' %}</strong></td>
-                            <td><strong>{{ (cart.total + cart.discount)| money_convert }}</strong></td>
+                            <td><strong>{{ (cart.subtotal)| money_convert }}</strong></td>
                         </tr>
                         <tr>
                             <td><strong>{% trans 'Discount:' %}</strong></td>
-                            <td><strong>{{ cart.discount | money_convert }}</strong></td>
+                            <td><strong>- {{ cart.discount | money_convert }}</strong></td>
                         </tr>
                         {% endif %}
 
+                        {% set tax_amount = 0 %}
+                        {% if client.client_is_taxable %}
+                        {% set tax_rate = client.invoice_get_tax_rate %}
+                        {% set tax_amount = cart.total * tax_rate / 100 %}
+                        <tr>
+                            <td><strong>{% trans 'VAT'%} ({{ tax_rate }}%) :</strong></td>
+                            <td><strong>{{ tax_amount | money_convert }}</strong></td>
+                        </tr>
+                        {% endif %}
                         <tr>
                             <td><strong>{% trans 'Total:' %}</strong></td>
-                            <td><strong>{{ cart.total | money_convert }}</strong></td>
+                            <td><strong>{{ (cart.total + tax_amount) | money_convert }}</strong></td>
                         </tr>
 
                     </table>
 
                     <form method="post" action="client/cart/checkout" class="form-horizontal" id="checkout-form" onsubmit="return false;">
                         <fieldset>
-                            {% if cart.total %}
+                            {% set enough_in_balance = client.client_balance_get_total >= cart.total %}
+                            {% if cart.total and not enough_in_balance %}
                             <div class="control-group">
                                 {% for gtw in guest.invoice_gateways %}
                                 {% if cart.currency.code in gtw.accepted_currencies %}
@@ -166,6 +181,9 @@
                             {% endif %}
                             <div class="control-group">
                                 <div class="controls">
+                                    {% if enough_in_balance %}
+                                        <p>{% trans 'Total amount will be deducted from account balance' %}</p>
+                                    {% endif %}
                                     <button class="btn btn-primary btn-large" type="submit">{% trans 'Checkout' %}</button>
                                 </div>
                             </div>
@@ -185,6 +203,20 @@
                 bb.msg("{% trans 'Promo code was removed' %}");
                 location.reload(false);
         });
+
+    });
+
+    $('.remove-cart-item').click(function(e){
+        e.preventDefault();
+        var btn = $(this);
+        if (confirm('{% trans 'Are you sure you want to remove this item from cart?' %}')){
+            var item_id = $(btn).attr('data-cart-item-id');
+            bb.post("guest/cart/remove_item", {id: item_id}, function(r){
+                bb.msg("{% trans 'Item was removed from cart' %}");
+                location.reload(false);
+            });
+        }
+
 
     });
 </script>

@@ -30,28 +30,18 @@ class Service implements InjectionAwareInterface
     public function logEvent($data)
     {
         $entry = $this->di['db']->dispense('ActivitySystem');
-        $entry->client_id       = isset($data['client_id']) ? $data['client_id'] : NULL;
-        $entry->admin_id        = isset($data['admin_id']) ? $data['admin_id'] : NULL;
-        $entry->priority        = isset($data['priority']) ? $data['priority'] : NULL;
+        $entry->client_id       = $this->di['array_get']($data, 'client_id', NULL);
+        $entry->admin_id        = $this->di['array_get']($data, 'admin_id', NULL);
+        $entry->priority        = $this->di['array_get']($data, 'priority', NULL);
         $entry->message         = $data['message'];
-        $entry->created_at      = date('c');
-        $entry->updated_at      = date('c');
+        $entry->created_at      = date('Y-m-d H:i:s');
+        $entry->updated_at      = date('Y-m-d H:i:s');
         $entry->ip              = $this->di['request']->getClientAddress();
         $this->di['db']->store($entry);
     }
 
     /** EVENTS  **/
-    
-    /*
-    public static function onEventAdminLoginFailed(Box_Event $event)
-    {
-        $api = $event->getApiAdmin();
-        $params = $event->getParameters();
-        $ip = $params['ip'];
-        throw new Exception('Wait 2 minutes');
-    }
-    */
-    
+
     public static function onAfterClientLogin(\Box_Event $event)
     {
         $params = $event->getParameters();
@@ -60,8 +50,8 @@ class Service implements InjectionAwareInterface
         $log = $di['db']->dispense('ActivityClientHistory');
         $log->client_id       = $params['id'];
         $log->ip              = $params['ip'];
-        $log->created_at      = date('c');
-        $log->updated_at      = date('c');
+        $log->created_at      = date('Y-m-d H:i:s');
+        $log->updated_at      = date('Y-m-d H:i:s');
 
         $di['db']->store($log);
     }
@@ -74,8 +64,8 @@ class Service implements InjectionAwareInterface
         $log= $di['db']->dispense('ActivityAdminHistory');
         $log->admin_id        = $params['id'];
         $log->ip              = $params['ip'];
-        $log->created_at      = date('c');
-        $log->updated_at      = date('c');
+        $log->created_at      = date('Y-m-d H:i:s');
+        $log->updated_at      = date('Y-m-d H:i:s');
 
         $di['db']->store($log);
     }
@@ -89,12 +79,13 @@ class Service implements InjectionAwareInterface
                 left join client as c on c.id = m.client_id';
 
         $params = array();
-        $search = isset($data['search']) ? $data['search'] : NULL;
-        $priority = isset($data['priority']) ? $data['priority'] : NULL;
-        $only_staff = isset($data['only_staff']) ? $data['only_staff'] : NULL;
-        $only_clients = isset($data['only_clients']) ? $data['only_clients'] : NULL;
-        $no_info = isset($data['no_info']) ? $data['no_info'] : NULL;
-        $no_debug = isset($data['no_debug']) ? $data['no_debug'] : NULL;
+        $search = $this->di['array_get']($data, 'search', NULL);
+        $priority = $this->di['array_get']($data, 'priority', NULL);
+        $only_staff = $this->di['array_get']($data, 'only_staff', NULL);
+        $admin_id = $this->di['array_get']($data, 'admin_id', NULL);
+        $only_clients = $this->di['array_get']($data, 'only_clients', NULL);
+        $no_info = $this->di['array_get']($data, 'no_info', NULL);
+        $no_debug = $this->di['array_get']($data, 'no_debug', NULL);
         $where = array ();
         if($priority) {
             $where[] = 'm.priority = :priority';
@@ -113,6 +104,11 @@ class Service implements InjectionAwareInterface
 
         if($only_staff) {
             $where[] = 'm.admin_id IS NOT NULL';
+        }
+
+        if($admin_id) {
+            $where[] = 'm.admin_id = :admin_id';
+            $params[':admin_id'] = $admin_id;
         }
 
         if($only_clients) {
@@ -144,8 +140,8 @@ class Service implements InjectionAwareInterface
         $entry->subject      = $subject;
         $entry->content_html = $content_html;
         $entry->content_text = $content_text;
-        $entry->created_at   = date('c');
-        $entry->updated_at   = date('c');
+        $entry->created_at   = date('Y-m-d H:i:s');
+        $entry->updated_at   = date('Y-m-d H:i:s');
 
         $this->di['db']->store($entry);
 

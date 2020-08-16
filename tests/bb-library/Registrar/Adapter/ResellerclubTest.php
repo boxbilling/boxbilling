@@ -8,36 +8,38 @@ class Registrar_Adapter_ResellerclubTest extends PHPUnit_Framework_TestCase
     {
         $options = array(
             'userid' => '12345',
-            'password' => 'password'
+            'api-key' => 'api-token'
         );
         return new \Registrar_Adapter_Resellerclub($options);
     }
 
-
-
     public function testConstruction_MissingUserId()
     {
         $options = array();
-        $this->setExpectedException('Registrar_Exception', 'Domain registrar "Resellerclub" is not configured properly. Please update configuration parameter "Resellerclub Username" at "Configuration -> Domain registration".');
+        $this->setExpectedException('Registrar_Exception', 'Domain registrar "ResellerClub" is not configured properly. Please update configuration parameter "ResellerClub Reseller ID" at "Configuration -> Domain registration".');
         $adapter = new \Registrar_Adapter_Resellerclub($options);
     }
 
-    public function testConstruction_MissingPassword()
+    public function testConstruction_MissingApiKey()
     {
         $options = array(
             'userid' => '12345',
         );
-        $this->setExpectedException('Registrar_Exception', 'Domain registrar "Resellerclub" is not configured properly. Please update configuration parameter "Resellerclub Pasword" at "Configuration -> Domain registration".');
-        $adapter = new \Registrar_Adapter_Resellerclub($options);
+        $this->setExpectedException('Registrar_Exception', 'Domain registrar "ResellerClub" is not configured properly. Please update configuration parameter "ResellerClub API Key" at "Configuration -> Domain registration".');
+        new \Registrar_Adapter_Resellerclub($options);
     }
 
     public function testConstruction()
     {
         $options = array(
             'userid' => '12345',
-            'password' => 'password'
+            'api-key' => 'api-key Token'
         );
-        new \Registrar_Adapter_Resellerclub($options);
+        $adapter = new \Registrar_Adapter_Resellerclub($options);
+
+        $this->assertEquals($options['userid'], $adapter->config['userid']);
+        $this->assertEquals($options['api-key'], $adapter->config['api-key']);
+        $this->assertNull($adapter->config['password']);
     }
 
     public function testgetConfig()
@@ -233,8 +235,67 @@ class Registrar_Adapter_ResellerclubTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($result);
     }
 
+    public function testincludeAuthorizationParams_ApiKeyProvided()
+    {
+        $options = array(
+            'userid' => '12345',
+            'api-key' => 'password'
+        );
+        $adapter = new \Registrar_Adapter_Resellerclub($options);
+
+        $params = array();
+        $result = $adapter->includeAuthorizationParams($params);
+        $this->assertArrayHasKey('auth-userid', $result);
+        $this->assertArrayHasKey('api-key', $result);
+    }
+
+    public function testincludeAuthorizationParams_BothProvided_ApiKeyIsUsed()
+    {
+        $options = array(
+            'userid' => '12345',
+            'password' => 'password',
+            'api-key' => 'password'
+        );
+        $adapter = new \Registrar_Adapter_Resellerclub($options);
+
+        $params = array();
+        $result = $adapter->includeAuthorizationParams($params);
+        $this->assertArrayHasKey('auth-userid', $result);
+        $this->assertArrayHasKey('api-key', $result);
+        $this->assertArrayNotHasKey('auth-password', $result);
+    }
 
 
+    public function providerTestArray()
+    {
+        return array(
+            array(
+                array(), 'NotExistingKey', false,
+            ),
+            array(
+                array('api-key' => ''), 'api-key', false,
+            ),
+            array(
+                array('api-key' => '   '), 'api-key', false,
+            ),
+            array(
+                array('api-key' => '123'), 'api-key', true,
+            ),
+        );
+    }
 
+    /**
+     * @dataProvider providerTestArray
+     */
+    public function testisKeyValueNotEmpty($array, $key, $expected)
+    {
+        $adapterMock = $this->getMockBuilder('\Registrar_Adapter_Resellerclub')
+            ->disableOriginalConstructor()
+            ->setMethods(null)
+            ->getMock();
+
+        $result = $adapterMock->isKeyValueNotEmpty($array, $key);
+        $this->assertEquals($expected, $result);
+    }
 
 }

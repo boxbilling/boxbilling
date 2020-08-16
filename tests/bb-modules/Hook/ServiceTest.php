@@ -4,7 +4,7 @@
 namespace Box\Mod\Hook;
 
 
-class ServiceTest extends \PHPUnit_Framework_TestCase {
+class ServiceTest extends \BBTestCase {
 
     /**
      * @var \Box\Mod\Hook\Service
@@ -201,7 +201,11 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
                 return $extensionServiceMock;
             }
         });
-
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->disableOriginalConstructor()->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')
+            ->will($this->returnValue(null));
+        $di['validator'] = $validatorMock;
         $this->service->setDi($di);
         $result = $this->service->batchConnect($mod);
         $this->assertTrue($result);

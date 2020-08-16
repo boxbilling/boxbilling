@@ -132,13 +132,11 @@ class Service implements InjectionAwareInterface
      */
     private function connect($data)
     {
-        if(!isset($data['event'])) {
-            throw new \Box_Exception('Hook event not passed');
-        }
-
-        if(!isset($data['mod'])) {
-            throw new \Box_Exception('Param mod not passed');
-        }
+        $required = array(
+            'event' => 'Hook event not passed',
+            'mod'   => 'Param mod not passed',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
         $event = $data['event'];
         $mod = $data['mod'];
@@ -162,8 +160,8 @@ class Service implements InjectionAwareInterface
         $meta->rel_id       = $mod;
         $meta->meta_key     = 'listener';
         $meta->meta_value   = $event;
-        $meta->created_at   = date('c');
-        $meta->updated_at   = date('c');
+        $meta->created_at   = date('Y-m-d H:i:s');
+        $meta->updated_at   = date('Y-m-d H:i:s');
         $this->di['db']->store($meta);
 
         return true;

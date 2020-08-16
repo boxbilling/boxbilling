@@ -90,6 +90,9 @@ class Box_Request implements \Box\InjectionAwareInterface
         return $this->_filterValue($value, $filters);
     }
 
+    /**
+     * @param string $name
+     */
     public function getServer($name)
     {
         return isset($this->_server[$name]) ? $this->_server[$name] : null;
@@ -119,6 +122,9 @@ class Box_Request implements \Box\InjectionAwareInterface
         return isset($this->_get[$name]);
     }
 
+    /**
+     * @param string $name
+     */
     public function hasServer($name)
     {
         return isset($this->_server[$name]);
@@ -522,7 +528,7 @@ class Box_Request implements \Box\InjectionAwareInterface
 
         preg_match_all('@(' . $keys . ')=(?:([\'"])([^\2]+?)\2|([^\s,]+))@', $digest, $matches, PREG_SET_ORDER);
 
-        foreach ($matches as $m) {
+        foreach ((array) $matches as $m) {
             $data[$m[1]] = $m[3] ? $m[3] : $m[4];
             unset($needed_parts[$m[1]]);
         }
@@ -532,6 +538,7 @@ class Box_Request implements \Box\InjectionAwareInterface
 
     /**
      * Process a request header and return an array of values with their qualities
+     * @param string $q
      * @return array
      */
     protected function _getQualityHeader($header, $q)
@@ -565,7 +572,7 @@ class Box_Request implements \Box\InjectionAwareInterface
     /**
      * @todo implement filtering
      * @param $value - value to filter
-     * @param [string|array $filters] - list of filter to apply on value
+     * @param string|array $filters - list of filter to apply on value
      */
     private function _filterValue($value, $filters)
     {

@@ -1,7 +1,7 @@
 <?php
 namespace Box\Tests\Mod\Email\Api;
 
-class AdminTest extends \PHPUnit_Framework_TestCase
+class AdminTest extends \BBTestCase
 {
 
     public function testEmail_get_list()
@@ -21,10 +21,14 @@ class AdminTest extends \PHPUnit_Framework_TestCase
             ->method('getSimpleResultSet')
             ->will($this->returnValue($willReturn));
 
-        $di          = new \Box_Di();
-        $di['pager'] = $pager;
+        $di              = new \Box_Di();
+        $di['pager']     = $pager;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
 
         $adminApi->setDi($di);
+        $emailService->setDi($di);
 
         $service = $emailService;
         $adminApi->setService($service);
@@ -51,10 +55,10 @@ class AdminTest extends \PHPUnit_Framework_TestCase
         $subject      = 'Subject';
         $content_html = 'HTML';
         $content_text = 'TEXT';
-        $created      = date('c', time() - 86400);
-        $updated      = date('c');
+        $created      = date('Y-m-d H:i:s', time() - 86400);
+        $updated      = date('Y-m-d H:i:s');
 
-        $model               = new \Model_ActivityClientEmail();
+        $model = new \Model_ActivityClientEmail();
         $model->loadBean(new \RedBeanPHP\OODBBean());
         $model->id           = $id;
         $model->client_id    = $client_id;
@@ -86,6 +90,14 @@ class AdminTest extends \PHPUnit_Framework_TestCase
             ->method('toApiArray')
             ->will($this->returnValue($expected));
 
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray');
+
+        $di              = new \Box_Di();
+        $di['validator'] = $validatorMock;
+
+        $adminApi->setDi($di);
         $adminApi->setService($service);
 
         $result = $adminApi->email_get($data);
@@ -107,7 +119,7 @@ class AdminTest extends \PHPUnit_Framework_TestCase
             'content'   => 'Content'
         );
 
-        $model     = new \Model_ActivityClientEmail();
+        $model = new \Model_ActivityClientEmail();
         $model->loadBean(new \RedBeanPHP\OODBBean());
         $model->id = 1;
 
@@ -116,70 +128,20 @@ class AdminTest extends \PHPUnit_Framework_TestCase
             ->method('sendMail')
             ->will($this->returnValue(true));
 
+        $di              = new \Box_Di();
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+        $validatorMock   = $this->getMockBuilder('\Box_Validate')->getMock();
+        $validatorMock->expects($this->atLeastOnce())->method('checkRequiredParamsForArray');
+        $di['validator'] = $validatorMock;
 
+        $adminApi->setDi($di);
         $adminApi->setService($emailService);
 
         $result = $adminApi->send($data);
 
         $this->assertTrue($result);
-    }
-
-    public function testSendExceptionsProvider()
-    {
-        return array(
-            array(
-                array()
-            ),
-            array(
-                array(
-                    'to' => 'to@example.com',
-                )
-            ),
-            array(
-                array(
-                    'to'      => 'to@example.com',
-                    'to_name' => 'Recipient Name',
-                )
-            ),
-            array(
-                array(
-                    'to'      => 'to@example.com',
-                    'to_name' => 'Recipient Name',
-                    'from'    => 'from@example.com',
-                )
-            ),
-            array(
-                array(
-                    'to'        => 'to@example.com',
-                    'to_name'   => 'Recipient Name',
-                    'from'      => 'from@example.com',
-                    'from_name' => 'Sender Name',
-                )
-            ),
-            array(
-                array(
-                    'to'        => 'to@example.com',
-                    'to_name'   => 'Recipient Name',
-                    'from'      => 'from@example.com',
-                    'from_name' => 'Sender Name',
-                    'subject'   => 'Subject',
-                )
-            )
-        );
-    }
-
-    /**
-     * @dataProvider testSendExceptionsProvider
-     * @expectedException \Box_Exception
-     */
-    public function testSendExceptions($data)
-    {
-        $adminApi = new \Box\Mod\Email\Api\Admin();
-
-        $emailService = new \Box\Mod\Email\Service();
-        $adminApi->setService($emailService);
-
-        $adminApi->send($data);
     }
 
     public function testResend()
@@ -190,7 +152,7 @@ class AdminTest extends \PHPUnit_Framework_TestCase
             'id' => 1
         );
 
-        $model     = new \Model_ActivityClientEmail();
+        $model = new \Model_ActivityClientEmail();
         $model->loadBean(new \RedBeanPHP\OODBBean());
         $model->id = 1;
 
@@ -199,8 +161,14 @@ class AdminTest extends \PHPUnit_Framework_TestCase
             ->method('findOne')
             ->will($this->returnValue($model));
 
-        $di           = new \Box_Di();
-        $di['db']     = $db;
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray');
+
+        $di              = new \Box_Di();
+        $di['db']        = $db;
+        $di['validator'] = $validatorMock;
+
         $adminApi->setDi($di);
 
         $emailService = $this->getMockBuilder('Box\Mod\Email\Service')->setMethods(array('resend'))->getMock();
@@ -228,8 +196,13 @@ class AdminTest extends \PHPUnit_Framework_TestCase
             ->method('findOne')
             ->will($this->returnValue(null));
 
-        $di           = new \Box_Di();
-        $di['db']     = $db;
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray');
+
+        $di              = new \Box_Di();
+        $di['db']        = $db;
+        $di['validator'] = $validatorMock;
         $adminApi->setDi($di);
 
         $this->setExpectedException('\Box_Exception', 'Email not found');
@@ -250,8 +223,14 @@ class AdminTest extends \PHPUnit_Framework_TestCase
             ->method('findOne')
             ->will($this->returnValue(null));
 
-        $di           = new \Box_Di();
-        $di['db']     = $db;
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray');
+
+
+        $di              = new \Box_Di();
+        $di['db']        = $db;
+        $di['validator'] = $validatorMock;
         $adminApi->setDi($di);
 
         $this->setExpectedException('\Box_Exception', 'Email not found');
@@ -268,7 +247,7 @@ class AdminTest extends \PHPUnit_Framework_TestCase
             'id' => 1
         );
 
-        $model     = new \Model_ActivityClientEmail();
+        $model = new \Model_ActivityClientEmail();
         $model->loadBean(new \RedBeanPHP\OODBBean());
         $model->id = 1;
 
@@ -280,11 +259,17 @@ class AdminTest extends \PHPUnit_Framework_TestCase
             ->method('trash')
             ->will($this->returnValue(true));
 
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray');
+
+
         $loggerMock = $this->getMockBuilder('Box_Log')->getMock();
 
-        $di           = new \Box_Di();
-        $di['db']     = $db;
-        $di['logger'] = $loggerMock;
+        $di              = new \Box_Di();
+        $di['db']        = $db;
+        $di['logger']    = $loggerMock;
+        $di['validator'] = $validatorMock;
         $adminApi->setDi($di);
 
         $adminApi->setService($emailService);
@@ -301,8 +286,10 @@ class AdminTest extends \PHPUnit_Framework_TestCase
         $emailService = new \Box\Mod\Email\Service();
 
         $willReturn = array(
-            "list"     => array(
-                'id' => 1
+            "list" => array(
+                array(
+                'id' => 1,
+                )
             ),
         );
 
@@ -311,10 +298,14 @@ class AdminTest extends \PHPUnit_Framework_TestCase
             ->method('getSimpleResultSet')
             ->will($this->returnValue($willReturn));
 
-        $di = new \Box_Di();
-        $di['pager'] = $pager;
+        $di              = new \Box_Di();
+        $di['pager']     = $pager;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
 
         $adminApi->setDi($di);
+        $emailService->setDi($di);
 
         $service = $emailService;
         $adminApi->setService($service);
@@ -342,8 +333,13 @@ class AdminTest extends \PHPUnit_Framework_TestCase
             ->method('getExistingModelById')
             ->will($this->returnValue($model));
 
-        $di       = new \Box_Di();
-        $di['db'] = $db;
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray');
+
+        $di              = new \Box_Di();
+        $di['db']        = $db;
+        $di['validator'] = $validatorMock;
         $adminApi->setDi($di);
 
         $emailService = $this->getMockBuilder('Box\Mod\Email\Service')->setMethods(array('templateToApiArray'))->getMock();
@@ -364,7 +360,7 @@ class AdminTest extends \PHPUnit_Framework_TestCase
             'id' => 1
         );
 
-        $model     = new \Model_EmailTemplate();
+        $model = new \Model_EmailTemplate();
         $model->loadBean(new \RedBeanPHP\OODBBean());
         $model->id = 1;
 
@@ -375,9 +371,14 @@ class AdminTest extends \PHPUnit_Framework_TestCase
 
         $loggerMock = $this->getMockBuilder('Box_Log')->getMock();
 
-        $di           = new \Box_Di();
-        $di['db']     = $db;
-        $di['logger'] = $loggerMock;
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray');
+
+        $di              = new \Box_Di();
+        $di['db']        = $db;
+        $di['validator'] = $validatorMock;
+        $di['logger']    = $loggerMock;
         $adminApi->setDi($di);
 
         $result = $adminApi->template_delete($data);
@@ -397,8 +398,13 @@ class AdminTest extends \PHPUnit_Framework_TestCase
             ->method('findOne')
             ->will($this->returnValue(null));
 
-        $di           = new \Box_Di();
-        $di['db']     = $db;
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray');
+
+        $di              = new \Box_Di();
+        $di['db']        = $db;
+        $di['validator'] = $validatorMock;
         $adminApi->setDi($di);
 
         $this->setExpectedException('\Box_Exception', 'Email template not found');
@@ -411,7 +417,12 @@ class AdminTest extends \PHPUnit_Framework_TestCase
         $adminApi = new \Box\Mod\Email\Api\Admin();
 
         $modelId = rand(1, 100);
-        $data    = array(
+
+        $templateModel = new \Model_EmailTemplate();
+        $templateModel->loadBean(new \RedBeanPHP\OODBBean());
+        $templateModel->id = $modelId;
+
+        $data = array(
             'action_code' => 'Action_code',
             'subject'     => 'Subject',
             'content'     => 'Content'
@@ -420,141 +431,23 @@ class AdminTest extends \PHPUnit_Framework_TestCase
         $emailService = $this->getMockBuilder('Box\Mod\Email\Service')->setMethods(array('templateCreate'))->getMock();
         $emailService->expects($this->atLeastOnce())
             ->method('templateCreate')
-            ->will($this->returnValue($modelId));
+            ->will($this->returnValue($templateModel));
+
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray');
+
+        $di              = new \Box_Di();
+        $di['validator'] = $validatorMock;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+
+        $adminApi->setDi($di);
         $adminApi->setService($emailService);
 
         $result = $adminApi->template_create($data);
         $this->assertEquals($result, $modelId);
-    }
-
-    public function testTemplate_createExceptionsProvider()
-    {
-        return array(
-            array(
-                array()
-            ),
-            array(
-                array(
-                    'action_code' => 'action_code',
-                )
-            ),
-            array(
-                array(
-                    'action_code' => 'action_code',
-                    'subject'     => 'Subject',
-                )
-            ),
-        );
-    }
-
-    /**
-     * @dataProvider testTemplate_createExceptionsProvider
-     * @expectedException \Box_Exception
-     */
-    public function testTemplate_createExceptions($data)
-    {
-        $adminApi = new \Box\Mod\Email\Api\Admin();
-
-        $emailService = new \Box\Mod\Email\Service();
-        $adminApi->setService($emailService);
-
-        $adminApi->template_create($data);
-    }
-
-    public function testIdNotSetExceptionsProvider()
-    {
-        return array(
-            array(
-                array() // "id" is not set
-            ),
-            array(
-                array(
-                    'id' => '' // "id" is set, but it is empty
-                )
-            )
-        );
-    }
-
-    /**
-     * @expectedException \Box_Exception
-     * @dataProvider testIdNotSetExceptionsProvider
-     */
-    public function testTemplate_updateIdNotSetException($data)
-    {
-        $adminApi = new \Box\Mod\Email\Api\Admin();
-        $adminApi->template_update($data);
-
-    }
-
-    /**
-     * @expectedException \Box_Exception
-     * @dataProvider testIdNotSetExceptionsProvider
-     */
-    public function testTemplate_deleteIdNotSetExceptions($data)
-    {
-        $adminApi = new \Box\Mod\Email\Api\Admin();
-        $adminApi->template_delete($data);
-
-    }
-
-    /**
-     * @expectedException \Box_Exception
-     * @dataProvider testIdNotSetExceptionsProvider
-     */
-    public function testTemplate_getIdNotSetException($data)
-    {
-        $adminApi = new \Box\Mod\Email\Api\Admin();
-
-        $adminApi->template_get($data);
-
-    }
-
-    /**
-     * @expectedException \Box_Exception
-     * @dataProvider testIdNotSetExceptionsProvider
-     */
-    public function testEmail_deleteIdNotSetException($data)
-    {
-        $adminApi = new \Box\Mod\Email\Api\Admin();
-        $adminApi->email_delete($data);
-    }
-
-    /**
-     * @expectedException \Box_Exception
-     * @dataProvider testIdNotSetExceptionsProvider
-     */
-    public function testEmail_resendIdNotSetException($data)
-    {
-        $adminApi = new \Box\Mod\Email\Api\Admin();
-        $adminApi->email_resend($data);
-    }
-
-    /**
-     * @expectedException \Box_Exception
-     * @dataProvider testIdNotSetExceptionsProvider
-     */
-    public function testEmail_getIdNotSetException($data)
-    {
-        $adminApi = new \Box\Mod\Email\Api\Admin();
-        $adminApi->email_get($data);
-    }
-
- /**
-     * @expectedException \Box_Exception
-     */
-    public function testTemplate_resetCodeNotSetException()
-    {
-        $adminApi = new \Box\Mod\Email\Api\Admin();
-        $adminApi->template_reset(array());
-    }
-
-    /**
-     * @expectedException \Box_Exception
-     */
-    public function testTemplate_sendCodeNotSetException()
-    {
-        $adminApi = new \Box\Mod\Email\Api\Admin();
-        $adminApi->template_send(array());
     }
 
     /**
@@ -563,6 +456,12 @@ class AdminTest extends \PHPUnit_Framework_TestCase
     public function testTemplate_sendToNotSetException()
     {
         $adminApi = new \Box\Mod\Email\Api\Admin();
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->disableOriginalConstructor()->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')
+            ->will($this->returnValue(null));
+        $di['validator'] = $validatorMock;
+        $adminApi->setDi($di);
         $adminApi->template_send(array('code' => 'code'));
     }
 
@@ -570,10 +469,13 @@ class AdminTest extends \PHPUnit_Framework_TestCase
     {
         $adminApi = new \Box\Mod\Email\Api\Admin();
 
-        $id = rand(1, 100);
+        $id   = rand(1, 100);
         $data = array(
             'id'          => $id,
+            'enabled'     => '1',
+            'category'    => 'Category',
             'action_code' => 'Action_code',
+            'category'    => '',
             'subject'     => 'Subject',
             'content'     => 'Content'
         );
@@ -585,25 +487,35 @@ class AdminTest extends \PHPUnit_Framework_TestCase
             ->method('getExistingModelById')
             ->will($this->returnValue($emailTemplateModel));
 
-        $di = new \Box_Di();
-        $di['db'] = $dbMock;
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray');
+
+        $di              = new \Box_Di();
+        $di['db']        = $dbMock;
+        $di['validator'] = $validatorMock;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+
 
         $emailService = $this->getMockBuilder('Box\Mod\Email\Service')->setMethods(array('updateTemplate'))->getMock();
         $emailService->expects($this->atLeastOnce())
             ->method('updateTemplate')
-            ->will($this->returnValue($id));
+            ->with($emailTemplateModel, $data['enabled'], $data['category'], $data['subject'], $data['content'])
+            ->will($this->returnValue(true));
         $adminApi->setService($emailService);
         $adminApi->setDi($di);
 
         $result = $adminApi->template_update($data);
-        $this->assertEquals($result, $id);
+        $this->assertEquals($result, true);
     }
 
     public function testTemplate_reset()
     {
         $adminApi = new \Box\Mod\Email\Api\Admin();
 
-        $id = rand(1, 100);
+        $id   = rand(1, 100);
         $data = array(
             'code' => 'CODE'
         );
@@ -612,7 +524,14 @@ class AdminTest extends \PHPUnit_Framework_TestCase
         $emailService->expects($this->atLeastOnce())
             ->method('resetTemplateByCode')
             ->will($this->returnValue(true));
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray');
 
+        $di              = new \Box_Di();
+        $di['validator'] = $validatorMock;
+
+        $adminApi->setDi($di);
         $adminApi->setService($emailService);
 
         $result = $adminApi->template_reset($data);
@@ -675,7 +594,8 @@ class AdminTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($result);
     }
 
-    public function testBatch_sendmail(){
+    public function testBatch_sendmail()
+    {
         $adminApi     = new \Box\Mod\Email\Api\Admin();
         $emailService = $this->getMockBuilder('Box\Mod\Email\Service')->setMethods(array('batchSend'))->getMock();
         $emailService->expects($this->atLeastOnce())
@@ -688,16 +608,24 @@ class AdminTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($result);
     }
 
-    public function testTemplate_send(){
+    public function testTemplate_send()
+    {
         $adminApi     = new \Box\Mod\Email\Api\Admin();
         $emailService = $this->getMockBuilder('Box\Mod\Email\Service')->setMethods(array('sendTemplate'))->getMock();
         $emailService->expects($this->atLeastOnce())
             ->method('sendTemplate')
             ->will($this->returnValue(true));
 
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->disableOriginalConstructor()->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')
+            ->will($this->returnValue(null));
+        $di['validator'] = $validatorMock;
+        $adminApi->setDi($di);
+
         $adminApi->setService($emailService);
 
-        $data    = array(
+        $data = array(
             'code'                => 'mod_email_test',
             'to'                  => 'example@example.com',
             'default_subject'     => 'SUBJECT',
@@ -724,6 +652,9 @@ class AdminTest extends \PHPUnit_Framework_TestCase
 
         $di         = new \Box_Di();
         $di['twig'] = $twig;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $adminApi->setDi($di);
 
         $result = $adminApi->template_render(array('id' => 5));

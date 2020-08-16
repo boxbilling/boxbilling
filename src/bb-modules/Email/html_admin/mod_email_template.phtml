@@ -102,14 +102,29 @@
                 
                 <tbody>
                 {% for k,var in template.vars %}
-                    {% if var|keys|length > 0 %}
-                    {% for subkey,subvalue in var %}
-
-                        <tr>
-                            <td>{{ '{{' }} {{ k }}.{{subkey}} {{ '}}' }}</td>
-                            <td>{{ subvalue }}</td>
-                        </tr>
-                    {% endfor %}
+                    {% if var is iterable %}
+                        {% for subkey,subvalue in var %}
+                            {% if subvalue is iterable %}
+                                {% for subsubkey,subsubvalue in var %}
+                                    {% if subsubvalue is not iterable %}
+                                        <tr>
+                                            <td>{{ '{{' }} {{ k }}.{{subkey}}.{{subsubkey}}{{ '}}' }}</td>
+                                            <td>{{ subsubvalue }}</td>
+                                        </tr>
+                                    {% else %}
+                                        <tr>
+                                            <td>{{ '{{' }} {{ k }}.{{subkey}}.{{subsubkey}}{{ '}}' }}</td>
+                                            <td>Array [ ]</td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td>{{ '{{' }} {{ k }}.{{subkey}} {{ '}}' }}</td>
+                                    <td>{{ subvalue }}</td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
                     {% else %}
                         <tr>
                             <td>{{ '{{' }} {{ k }} {{ '}}' }}</td>
@@ -117,7 +132,7 @@
                         </tr>
                     {% endif %}
 
-                    {% else %}
+                {% else %}
                     <tr>
                         <td colspan="2">{% trans 'This template does not receive any parameters' %}</td>
                     </tr>
@@ -147,7 +162,7 @@
             
             <div class="body mainForm">
                 <div class="formBottom">
-                    <textarea cols="5" rows="20" class="example">{% raw %} {% filter markdown %}
+                    <textarea cols="5" rows="20" class="example">{% autoescape false %} {% apply markdown %}
 
 This is an example of markdown syntax in email template
 
@@ -180,7 +195,7 @@ Accessing Admin API can get information about your BoxBilling, for example how m
 {#<pre>{% debug stats %}</pre>#}
 
 
-{% endfilter %}{% endraw %}</textarea>
+{% endapply %}{% endautoescape %}</textarea>
                     <input type="button" value="{% trans 'Preview' %}" class="blueBtn mt10 epb"/>
                     <div class="mt20 example-preview" style="padding: 5px; background: white; border: 1px dashed grey; overflow: auto; display: none;"></div>
                 </div>

@@ -2,7 +2,7 @@
 namespace Box\Tests\Mod\Cart;
 
 
-class ServiceTest extends \PHPUnit_Framework_TestCase
+class ServiceTest extends \BBTestCase
 {
     /**
      * @var \Box\Mod\Cart\Service
@@ -239,10 +239,16 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
 
     public function testRemoveProduct()
     {
+        $cartProduct = new \Model_CartProduct();
+        $cartProduct->loadBean(new \RedBeanPHP\OODBBean());
+
         $dbMock = $this->getMockBuilder('\Box_Database')->disableOriginalConstructor()->getMock();
         $dbMock->expects($this->atLeastOnce())
             ->method('findOne')
-            ->will($this->returnValue(new \Model_CartProduct()));
+            ->will($this->returnValue($cartProduct));
+        $dbMock->expects($this->atLeastOnce())
+            ->method('find')
+            ->will($this->returnValue(array($cartProduct)));
         $dbMock->expects($this->atLeastOnce())
             ->method('trash')
             ->will($this->returnValue(null));
@@ -680,9 +686,6 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $dbMock = $this->getMockBuilder('Box_Database')->getMock();
         $dbMock->expects($this->atLeastOnce())
             ->method('getExistingModelById')
-            ->will($this->returnValue($invoice));
-        $dbMock->expects($this->atLeastOnce())
-            ->method('load')
             ->will($this->returnValue($promo));
 
         $client = new \Model_Client();
@@ -696,41 +699,6 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $serviceMock->setDi($di);
 
         $result = $serviceMock->checkoutCart($cart, $client);
-
-        $this->assertInternalType('array', $result);
-        $this->assertArrayHasKey('gateway_id', $result);
-        $this->assertArrayHasKey('invoice_hash', $result);
-        $this->assertArrayHasKey('order_id', $result);
-        $this->assertArrayHasKey('orders', $result);
-    }
-
-    /**
-     * @expectedException \Box_Exception
-     */
-    public function testCheckoutCartPromoNotFoundException()
-    {
-        $cart = new \Model_Cart();
-        $cart->loadBean(new \RedBeanPHP\OODBBean());
-        $cart->promo_id = rand(1, 100);
-
-        $order = new \Model_ClientOrder();
-        $order->loadBean(new \RedBeanPHP\OODBBean());
-
-        $dbMock = $this->getMockBuilder('Box_Database')->getMock();
-
-        $dbMock->expects($this->atLeastOnce())
-            ->method('load')
-            ->will($this->returnValue(null));
-
-        $client = new \Model_Client();
-        $client->loadBean(new \RedBeanPHP\OODBBean());
-
-        $di           = new \Box_Di();
-        $di['db']     = $dbMock;
-        $di['logger'] = $this->getMockBuilder('Box_Log')->getMock();
-        $this->service->setDi($di);
-
-        $result = $this->service->checkoutCart($cart, $client);
 
         $this->assertInternalType('array', $result);
         $this->assertArrayHasKey('gateway_id', $result);
@@ -759,7 +727,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $dbMock = $this->getMockBuilder('Box_Database')->getMock();
 
         $dbMock->expects($this->atLeastOnce())
-            ->method('load')
+            ->method('getExistingModelById')
             ->will($this->returnValue(new \Model_Promo()));
 
         $client = new \Model_Client();
@@ -843,6 +811,11 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $di = new \Box_Di();
         $di['events_manager'] = $eventMock;
         $di['mod_service'] = $di->protect(function($name) use($serviceHostingServiceMock) {return $serviceHostingServiceMock;} );
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->disableOriginalConstructor()->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')
+            ->willThrowException(new \Box_Exception('Period parameter not passed'));
+        $di['validator'] = $validatorMock;
         $serviceMock->setDi($di);
         $productModel->setDi($di);
 
@@ -880,6 +853,11 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $di = new \Box_Di();
         $di['events_manager'] = $eventMock;
         $di['mod_service'] = $di->protect(function($name) use($serviceHostingServiceMock) {return $serviceHostingServiceMock;} );
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->disableOriginalConstructor()->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')
+            ->willReturn(null);
+        $di['validator'] = $validatorMock;
         $serviceMock->setDi($di);
         $productModel->setDi($di);
 
@@ -917,6 +895,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $di = new \Box_Di();
         $di['events_manager'] = $eventMock;
         $di['mod_service'] = $di->protect(function($name) use($serviceHostingServiceMock) {return $serviceHostingServiceMock;} );
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $serviceMock->setDi($di);
         $productModel->setDi($di);
 
@@ -967,6 +948,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $di['events_manager'] = $eventMock;
         $di['mod_service'] = $di->protect(function($name) use($serviceHostingServiceMock) {return $serviceHostingServiceMock;} );
         $di['logger'] = new \Box_Log();
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $serviceMock->setDi($di);
         $productModel->setDi($di);
         $productDomainModel->setDi($di);
@@ -1021,6 +1005,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $di['mod_service'] = $di->protect(function($name) use($serviceLicenseServiceMock) {return $serviceLicenseServiceMock;} );
         $di['logger'] = new \Box_Log();
         $di['db'] = $dbMock;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $serviceMock->setDi($di);
         $productModel->setDi($di);
 
@@ -1075,6 +1062,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $di['mod_service'] = $di->protect(function($name) use($serviceCustomServiceMock) {return $serviceCustomServiceMock;} );
         $di['logger'] = new \Box_Log();
         $di['db'] = $dbMock;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $serviceMock->setDi($di);
         $productModel->setDi($di);
 
@@ -1159,7 +1149,6 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
 
         $discountPrice = 25;
 
-        $config = array();
 
         $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
         $dbMock->expects($this->atLeastOnce())
@@ -1183,9 +1172,6 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $serviceMock->expects($this->atLeastOnce())
             ->method('getItemPromoDiscount')
             ->willReturn($discountPrice);
-        $serviceMock->expects($this->atLeastOnce())
-            ->method('getItemConfig')
-            ->willReturn($config);
 
         $serviceMock->setDi($di);
         $setupPrice = 0;
@@ -1208,7 +1194,6 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $promoModel = new \Model_Promo();
         $promoModel->loadBean(new \RedBeanPHP\OODBBean());
 
-        $config = array();
 
         $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
         $dbMock->expects($this->atLeastOnce())
@@ -1225,9 +1210,6 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $serviceMock->expects($this->atLeastOnce())
             ->method('getRelatedItemsDiscount')
             ->willReturn(0);
-        $serviceMock->expects($this->atLeastOnce())
-            ->method('getItemConfig')
-            ->willReturn($config);
 
         $serviceMock->setDi($di);
         $setupPrice = 0;
@@ -1251,7 +1233,6 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $promoModel->loadBean(new \RedBeanPHP\OODBBean());
         $promoModel->freesetup = 1;
 
-        $config = array('quantity' => 2);
         $discountPrice = 25;
 
         $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
@@ -1276,9 +1257,6 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $serviceMock->expects($this->atLeastOnce())
             ->method('getItemPromoDiscount')
             ->willReturn($discountPrice);
-        $serviceMock->expects($this->atLeastOnce())
-            ->method('getItemConfig')
-            ->willReturn($config);
 
         $serviceMock->setDi($di);
         $setupPrice = 25;

@@ -6,7 +6,7 @@ namespace Box\Tests\Mod\Client;
 
 use RedBeanPHP\OODBBean;
 
-class ServiceTest extends \PHPUnit_Framework_TestCase {
+class ServiceTest extends \BBTestCase {
 
     public function testgetDi()
     {
@@ -292,6 +292,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
         $di = new \Box_Di();
         $di['db'] = $database;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
 
 
         $clientService = new \Box\Mod\Client\Service();
@@ -490,7 +493,13 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
      */
     public function testgetBalanceSearchQuery($data, $expectedStr, $expectedParams)
     {
+
+        $di = new \Box_Di();
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $clientBalanceService = new \Box\Mod\Client\ServiceBalance();
+        $clientBalanceService->setDi($di);
         list ($sql, $params) = $clientBalanceService->getSearchQuery($data);
         $this->assertNotEmpty($sql);
         $this->assertInternalType('string', $sql);
@@ -519,6 +528,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
 
         $di = new \Box_Di();
         $di['db'] = $database;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
 
         $clientService = new \Box\Mod\Client\Service();
         $clientService->setDi($di);
@@ -619,6 +631,11 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
     public function testgetHistorySearchQuery($data, $expectedStr, $expectedParams)
     {
         $clientService = new \Box\Mod\Client\Service();
+        $di = new \Box_Di();
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+        $clientService->setDi($di);
         list ($sql, $params) = $clientService->getHistorySearchQuery($data);
         $this->assertNotEmpty($sql);
         $this->assertInternalType('string', $sql);
@@ -733,15 +750,6 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $data = array($fieldName => $fieldValue);
         $result = $service->get($data);
         $this->assertInstanceOf('\Model_Client', $result);
-    }
-
-    public function testgetIdOrEmailNotProvided()
-    {
-        $service = new \Box\Mod\Client\Service();
-
-        $data = array();
-        $this->setExpectedException('\Box_Exception', 'Client ID or email is required');
-        $service->get($data);
     }
 
     public function testgetClientNotFound()
@@ -895,7 +903,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $di['events_manager'] = $eventManagerMock;
         $di['logger'] = new \Box_Log();
         $di['password'] = $passwordMock;
-
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $service = new \Box\Mod\Client\Service();
         $service->setDi($di);
 
@@ -944,6 +954,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $di['logger'] = new \Box_Log();
         $di['request'] = $requestMock;
         $di['password'] = $passwordMock;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
 
         $service = new \Box\Mod\Client\Service();
         $service->setDi($di);
@@ -1039,7 +1052,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $di = new \Box_Di();
         $di['db'] = $dbMock;
         $di['auth'] = $authMock;
-
+        $di['mod_config'] = $di->protect(function ($name) use($di) {
+            return array ('require_email_confirmation' => false);
+        });
         $service = new \Box\Mod\Client\Service();
         $service->setDi($di);
 
@@ -1047,5 +1062,234 @@ class ServiceTest extends \PHPUnit_Framework_TestCase {
         $this->assertInstanceOf('\Model_Client', $result);
     }
 
+    /**
+     * @expectedException \Box_Exception
+     */
+    public function testauthorizeClientEmailRequiredNotConfirmed()
+    {
+        $email    = 'example@boxbilling.vm';
+        $password = '123456';
+
+        $clientModel = new \Model_Client();
+        $clientModel->loadBean(new \RedBeanPHP\OODBBean());
+
+        $extensionMetaModel = new \Model_ExtensionMeta();
+        $extensionMetaModel->loadBean(new \RedBeanPHP\OODBBean());
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->at(0))
+            ->method('findOne')
+            ->with('Client')
+            ->willReturn($clientModel);
+        $dbMock->expects($this->at(1))
+            ->method('findOne')
+            ->with('ExtensionMeta')
+            ->willReturn($extensionMetaModel);
+
+        $authMock = $this->getMockBuilder('\Box_Authorization')->disableOriginalConstructor()->getMock();
+        $authMock->expects($this->never())
+            ->method('authorizeUser')
+            ->with($clientModel, $password)
+            ->willReturn($clientModel);
+
+        $di               = new \Box_Di();
+        $di['db']         = $dbMock;
+        $di['auth']       = $authMock;
+        $di['mod_config'] = $di->protect(function ($name) use ($di) {
+            return array('require_email_confirmation' => true);
+        });
+        $service          = new \Box\Mod\Client\Service();
+        $service->setDi($di);
+
+        $result = $service->authorizeClient($email, $password);
+        $this->assertInstanceOf('\Model_Client', $result);
+    }
+
+
+    public function testauthorizeClientEmailRequiredConfirmed()
+    {
+        $email    = 'example@boxbilling.vm';
+        $password = '123456';
+
+        $clientModel = new \Model_Client();
+        $clientModel->loadBean(new \RedBeanPHP\OODBBean());
+        $clientModel->email_approved = 1;
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('findOne')
+            ->with('Client')
+            ->willReturn($clientModel);
+
+        $authMock = $this->getMockBuilder('\Box_Authorization')->disableOriginalConstructor()->getMock();
+        $authMock->expects($this->any())
+            ->method('authorizeUser')
+            ->with($clientModel, $password)
+            ->willReturn($clientModel);
+
+        $di               = new \Box_Di();
+        $di['db']         = $dbMock;
+        $di['auth']       = $authMock;
+        $di['mod_config'] = $di->protect(function ($name) use ($di) {
+            return array('require_email_confirmation' => true);
+        });
+        $service          = new \Box\Mod\Client\Service();
+        $service->setDi($di);
+
+        $result = $service->authorizeClient($email, $password);
+        $this->assertInstanceOf('\Model_Client', $result);
+    }
+
+    public function testcanChangeEmail()
+    {
+        $clientModel = new \Model_Client();
+        $clientModel->loadBean(new \RedBeanPHP\OODBBean());
+        $email = 'client@boxbilling.com';
+
+        $config = array(
+            'allow_change_email' => true,
+        );
+
+        $di = new \Box_Di();
+        $di['mod_config'] = $di->protect(function ($modName) use($config){
+            return $config;
+        });
+        $service = new \Box\Mod\Client\Service();
+        $service->setDi($di);
+
+        $result = $service->canChangeEmail($clientModel, $email);
+        $this->assertTrue($result);
+    }
+
+    public function testcanChangeEmail_EmailAreTheSame()
+    {
+        $clientModel = new \Model_Client();
+        $clientModel->loadBean(new \RedBeanPHP\OODBBean());
+        $email = 'client@boxbilling.com';
+
+        $clientModel->email = $email;
+
+        $config = array(
+            'allow_change_email' => true,
+        );
+
+        $di = new \Box_Di();
+        $di['mod_config'] = $di->protect(function ($modName) use($config){
+            return $config;
+        });
+        $service = new \Box\Mod\Client\Service();
+        $service->setDi($di);
+
+        $result = $service->canChangeEmail($clientModel, $email);
+        $this->assertTrue($result);
+    }
+
+    public function testcanChangeEmail_EmptyConfig()
+    {
+        $clientModel = new \Model_Client();
+        $clientModel->loadBean(new \RedBeanPHP\OODBBean());
+        $email = 'client@boxbilling.com';
+
+        $config = array();
+
+        $di = new \Box_Di();
+        $di['mod_config'] = $di->protect(function ($modName) use($config){
+            return $config;
+        });
+        $service = new \Box\Mod\Client\Service();
+        $service->setDi($di);
+
+        $result = $service->canChangeEmail($clientModel, $email);
+        $this->assertTrue($result);
+    }
+
+    public function testcanChangeEmail_CanntChangeEmail()
+    {
+        $clientModel = new \Model_Client();
+        $clientModel->loadBean(new \RedBeanPHP\OODBBean());
+        $email = 'client@boxbilling.com';
+
+        $config = array(
+            'allow_change_email' => false,
+        );
+
+        $di = new \Box_Di();
+        $di['mod_config'] = $di->protect(function ($modName) use($config){
+            return $config;
+        });
+        $service = new \Box\Mod\Client\Service();
+        $service->setDi($di);
+
+        $this->setExpectedException('Box_Exception', 'Email can not be changed');
+        $service->canChangeEmail($clientModel, $email);
+    }
+
+    public function testcheckExtraRequiredFields()
+    {
+        $required = array('id');
+        $data = array();
+
+        $config['required'] = $required;
+        $di = new \Box_Di();
+        $di['mod_config'] = $di->protect(function ($modName) use($config){
+            return $config;
+        });
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+        $service = new \Box\Mod\Client\Service();
+        $service->setDi($di);
+        $this->setExpectedException('Box_Exception', 'It is required that you provide details for field "Id"');
+        $service->checkExtraRequiredFields($data);
+    }
+
+    public function testcheckCustomFields()
+    {
+        $custom_field = array(
+            'custom_field_name' => array(
+                'active' => true,
+                'required' => true,
+                'title' => 'custom_field_title'
+            ),
+        );
+        $config['custom_fields'] = $custom_field;
+        $di = new \Box_Di();
+        $di['mod_config'] = $di->protect(function ($modName) use($config){
+            return $config;
+        });
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+        $data = array();
+        $service = new \Box\Mod\Client\Service();
+        $service->setDi($di);
+        $this->setExpectedException('Box_Exception', 'It is required that you provide details for field "custom_field_title"');
+        $service->checkCustomFields($data);
+
+    }
+
+    public function testcheckCustomFields_notRequired()
+    {
+        $custom_field = array(
+            'custom_field_name' => array(
+                'active' => true,
+                'required' => false,
+                'title' => 'custom_field_title'
+            ),
+        );
+        $config['custom_fields'] = $custom_field;
+        $di = new \Box_Di();
+        $di['mod_config'] = $di->protect(function ($modName) use($config){
+            return $config;
+        });
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+        $data = array();
+        $service = new \Box\Mod\Client\Service();
+        $service->setDi($di);
+        $result = $service->checkCustomFields($data);
+        $this->assertNull($result);
+    }
 }
  

@@ -30,6 +30,19 @@ class Server_Package
     private $maxpop                 = NULL;
     
     private $custom                 = array();
+
+    public function __call($name, $arguments)
+    {
+        if (version_compare(PHP_VERSION, '5.4.0') < 0) {
+            $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        }
+        else {
+            // Get only the stack frames we need (PHP 5.4 only).
+            $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+        }
+        error_log(sprintf("Calling %s inaccessible method %s from %s::%d", get_class($this), $name, $backtrace[1]['file'], $backtrace[1]['line']));
+        return '';
+    }
     
     public function setCustomValues(array $param)
     {
@@ -43,6 +56,9 @@ class Server_Package
         return $this;
     }
 
+    /**
+     * @param string $param
+     */
     public function getCustomValue($param)
     {
         return isset($this->custom[$param]) ? $this->custom[$param] : NULL;
@@ -145,5 +161,10 @@ class Server_Package
     public function getMaxPop()
     {
         return $this->maxpop;
+    }
+
+    public function getMaxQuota()
+    {
+        return $this->quota;
     }
 }

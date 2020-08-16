@@ -58,28 +58,28 @@ class Service implements \Box\InjectionAwareInterface
     }
 
     /**
-     * @param Model_ClientOrder $order
+     * @param \Model_ClientOrder $order
      * @return void
      */
     public function action_create(\Model_ClientOrder $order)
     {
-        $product = $this->di['db']->load('Product', $order->product_id);
+        $product = $this->di['db']->getExistingModelById('Product', $order->product_id, 'Product not found');
 
         $model                = $this->di['db']->dispense('ServiceCustom');
         $model->client_id     = $order->client_id;
         $model->plugin        = $product->plugin;
         $model->plugin_config = $product->plugin_config;
         $model->config        = $order->config;
-        $model->created_at    = date('c');
-        $model->updated_at    = date('c');
+        $model->created_at    = date('Y-m-d H:i:s');
+        $model->updated_at    = date('Y-m-d H:i:s');
         $this->di['db']->store($model);
 
         return $model;
     }
 
     /**
-     * @param Model_ClientOrder $order
-     * @return void
+     * @param \Model_ClientOrder $order
+     * @return boolean
      */
     public function action_activate(\Model_ClientOrder $order)
     {
@@ -95,8 +95,8 @@ class Service implements \Box\InjectionAwareInterface
     }
 
     /**
-     * @param Model_ClientOrder $order
-     * @return void
+     * @param \Model_ClientOrder $order
+     * @return boolean
      */
     public function action_renew(\Model_ClientOrder $order)
     {
@@ -104,7 +104,7 @@ class Service implements \Box\InjectionAwareInterface
         $model = $this->_getOrderService($order);
         $this->callOnAdapter($model, 'renew');
 
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
 
         $this->di['db']->store($model);
 
@@ -112,8 +112,8 @@ class Service implements \Box\InjectionAwareInterface
     }
 
     /**
-     * @param Model_ClientOrder $order
-     * @return void
+     * @param \Model_ClientOrder $order
+     * @return boolean
      */
     public function action_suspend(\Model_ClientOrder $order)
     {
@@ -122,7 +122,7 @@ class Service implements \Box\InjectionAwareInterface
 
         $this->callOnAdapter($model, 'suspend');
 
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
 
         $this->di['db']->store($model);
 
@@ -130,8 +130,8 @@ class Service implements \Box\InjectionAwareInterface
     }
 
     /**
-     * @param Model_ClientOrder $order
-     * @return void
+     * @param \Model_ClientOrder $order
+     * @return boolean
      */
     public function action_unsuspend(\Model_ClientOrder $order)
     {
@@ -140,7 +140,7 @@ class Service implements \Box\InjectionAwareInterface
 
         $this->callOnAdapter($model, 'unsuspend');
 
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
 
         $this->di['db']->store($model);
 
@@ -148,8 +148,8 @@ class Service implements \Box\InjectionAwareInterface
     }
 
     /**
-     * @param Model_ClientOrder $order
-     * @return void
+     * @param \Model_ClientOrder $order
+     * @return boolean
      */
     public function action_cancel(\Model_ClientOrder $order)
     {
@@ -158,7 +158,7 @@ class Service implements \Box\InjectionAwareInterface
 
         $this->callOnAdapter($model, 'cancel');
 
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
 
         $this->di['db']->store($model);
 
@@ -166,8 +166,8 @@ class Service implements \Box\InjectionAwareInterface
     }
 
     /**
-     * @param Model_ClientOrder $order
-     * @return void
+     * @param \Model_ClientOrder $order
+     * @return boolean
      */
     public function action_uncancel(\Model_ClientOrder $order)
     {
@@ -176,7 +176,7 @@ class Service implements \Box\InjectionAwareInterface
 
         $this->callOnAdapter($model, 'uncancel');
 
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
 
         $this->di['db']->store($model);
 
@@ -184,8 +184,8 @@ class Service implements \Box\InjectionAwareInterface
     }
 
     /**
-     * @param Model_ClientOrder $order
-     * @return void
+     * @param \Model_ClientOrder $order
+     * @return boolean
      */
     public function action_delete(\Model_ClientOrder $order)
     {
@@ -245,7 +245,7 @@ class Service implements \Box\InjectionAwareInterface
 
         $model             = $this->getServiceCustomByOrderId($orderId);
         $model->config     = json_encode($config);
-        $model->updated_at = date('c');
+        $model->updated_at = date('Y-m-d H:i:s');
 
         $this->di['db']->store($model);
 
@@ -254,11 +254,7 @@ class Service implements \Box\InjectionAwareInterface
 
     public function getServiceCustomByOrderId($orderId)
     {
-        $order = $this->di['db']->load('ClientOrder', $orderId);
-
-        if(!$order instanceof \Model_ClientOrder ) {
-            throw new \Box_Exception('Order not found');
-        }
+        $order = $this->di['db']->getExistingModelById('ClientOrder', $orderId, 'Order not found');
 
         $orderService = $this->di['mod_service']('order');
         $s = $orderService->getOrderService($order);

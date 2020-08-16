@@ -4,7 +4,7 @@
 namespace Box\Mod\Invoice;
 
 
-class ServicePayGatewayTest extends \PHPUnit_Framework_TestCase {
+class ServicePayGatewayTest extends \BBTestCase {
 
     /**
      * @var \Box\Mod\Invoice\ServicePayGateway
@@ -26,6 +26,11 @@ class ServicePayGatewayTest extends \PHPUnit_Framework_TestCase {
 
     public function testgetSearchQuery()
     {
+        $di = new \Box_Di();
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+        $this->service->setDi($di);
         $data = array();
         $result = $this->service->getSearchQuery($data);
         $this->assertInternalType('array', $result);
@@ -36,6 +41,11 @@ class ServicePayGatewayTest extends \PHPUnit_Framework_TestCase {
 
     public function testgetSearchQueryWithAdditionalParams()
     {
+        $di = new \Box_Di();
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
+        $this->service->setDi($di);
         $data = array('search' => 'keyword');
         $expectedParams = array('search' => "%$data[search]%");
 
@@ -176,6 +186,9 @@ class ServicePayGatewayTest extends \PHPUnit_Framework_TestCase {
 
         $di = new \Box_Di();
         $di['config'] = array('url' => $url);
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $serviceMock->setDi($di);
 
         $result = $serviceMock->toApiArray($payGatewayModel, false, new \Model_Admin());
@@ -218,6 +231,9 @@ class ServicePayGatewayTest extends \PHPUnit_Framework_TestCase {
 
         $di = new \Box_Di();
         $di['db'] = $dbMock;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $di['logger'] = new \Box_Log();
 
         $this->service->setDi($di);
@@ -266,6 +282,9 @@ class ServicePayGatewayTest extends \PHPUnit_Framework_TestCase {
 
         $di = new \Box_Di();
         $di['db'] = $dbMock;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $this->service->setDi($di);
 
         $data = array('format' => 'pairs');
@@ -303,15 +322,17 @@ class ServicePayGatewayTest extends \PHPUnit_Framework_TestCase {
 
         $toolsMock = $this->getMockBuilder('\Box_Tools')->getMock();
         $toolsMock->expects($this->atLeastOnce())
-            ->method('url');
-        $toolsMock->expects($this->atLeastOnce())
             ->method('decodeJ')
             ->willReturn(array());
 
+        $urlMock = $this->getMockBuilder('\Box_Url')->getMock();
+        $urlMock->expects($this->atLeastOnce())
+            ->method('link');
 
         $di = new \Box_Di();
         $di['config'] = array('url' => 'http://boxbilling.vm/', 'debug' => true);
         $di['tools'] = $toolsMock;
+        $di['url'] = $urlMock;
         $serviceMock->setDi($di);
 
         $optional = array(
@@ -337,14 +358,17 @@ class ServicePayGatewayTest extends \PHPUnit_Framework_TestCase {
 
         $toolsMock = $this->getMockBuilder('\Box_Tools')->getMock();
         $toolsMock->expects($this->atLeastOnce())
-            ->method('url');
-        $toolsMock->expects($this->atLeastOnce())
             ->method('decodeJ')
             ->willReturn(array());
+
+        $urlMock = $this->getMockBuilder('\Box_Url')->getMock();
+        $urlMock->expects($this->atLeastOnce())
+            ->method('link');
 
         $di = new \Box_Di();
         $di['config'] = array('url' => 'http://boxbilling.vm/', 'debug' => true);
         $di['tools'] = $toolsMock;
+        $di['url'] = $urlMock;
         $serviceMock->setDi($di);
 
         $this->setExpectedException('\Box_Exception', 'Payment gateway  was not found');

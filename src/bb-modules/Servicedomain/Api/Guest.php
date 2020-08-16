@@ -19,27 +19,20 @@ namespace Box\Mod\Servicedomain\Api;
 class Guest extends \Api_Abstract
 {
     /**
-     * Get configured TLDs which can be ordered. Shows only enabled TLDS
+     * Get configured TLDs which can be ordered. Shows only enabled TLDs
      *
-     * @optional bool $allow_register - shows only these tlds which can be registered
-     * @optional bool $allow_transfer - shows only these tlds which can be transferred
+     * @optional bool $allow_register - shows only these TLDs which can be registered
+     * @optional bool $allow_transfer - shows only these TLDs which can be transferred
      *
-     * @return array - list of tlds
+     * @return array - list of TLDs
      */
-    public function tlds($data)
+    public function tlds($data = array())
     {
-        $data['hide_inactive'] = true;
-
-
-        $hide_inactive  = isset($data['hide_inactive']) ? (bool)$data['hide_inactive'] : FALSE;
-        $allow_register = isset($data['allow_register']) ? $data['allow_register'] : NULL;
-        $allow_transfer = isset($data['allow_transfer']) ? $data['allow_transfer'] : NULL;
+        $allow_register = $this->di['array_get']($data, 'allow_register');
+        $allow_transfer = $this->di['array_get']($data, 'allow_transfer');
 
         $where = array();
-
-        if ($hide_inactive) {
-            $where[] = "active = 1";
-        }
+        $where[] = "active = 1";
 
         if (NULL !== $allow_register) {
             $where[] = "allow_register = 1";
@@ -71,9 +64,10 @@ class Guest extends \Api_Abstract
      */
     public function pricing($data)
     {
-        if (!isset($data['tld'])) {
-            throw new \Box_Exception('Tld is required');
-        }
+        $required = array(
+            'tld' => 'TLD is missing',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
         $model = $this->getService()->tldFindOneByTld($data['tld']);
         if (!$model instanceof \Model_Tld) {
@@ -94,15 +88,13 @@ class Guest extends \Api_Abstract
      */
     public function check($data)
     {
-        if (!isset($data['tld'])) {
-            throw new \Box_Exception('Tld is required');
-        }
+        $required = array(
+            'tld' => 'TLD is missing',
+            'sld' => 'SLD is missing',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
-        if (!isset($data['sld'])) {
-            throw new \Box_Exception('Sld is required');
-        }
-
-        $sld       = $data['sld'];
+        $sld       = htmlspecialchars($data['sld'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $validator = $this->di['validator'];
         if (!$validator->isSldValid($sld)) {
             throw new \Box_Exception('Domain :domain is not valid', array(':domain' => $sld));
@@ -131,13 +123,11 @@ class Guest extends \Api_Abstract
      */
     public function can_be_transferred($data)
     {
-        if (!isset($data['tld'])) {
-            throw new \Box_Exception('Tld is required');
-        }
-
-        if (!isset($data['sld'])) {
-            throw new \Box_Exception('Sld is required');
-        }
+        $required = array(
+            'tld' => 'TLD is missing',
+            'sld' => 'SLD is missing',
+        );
+        $this->di['validator']->checkRequiredParamsForArray($required, $data);
 
         $tld = $this->getService()->tldFindOneByTld($data['tld']);
         if (!$tld instanceof \Model_Tld) {

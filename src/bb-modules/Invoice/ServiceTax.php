@@ -57,8 +57,8 @@ class ServiceTax implements InjectionAwareInterface
             return $tax->taxrate;
         }
 
-        // find rate which matches clients country
-        $tax = $this->di['db']->findOne('Tax', 'state is NULL or state = "" and  country is null or country = ""');
+        // find global rate
+        $tax = $this->di['db']->findOne('Tax', '(state is NULL or state = "") and (country is null or country = "")');
         if($tax instanceof \Model_Tax)  {
             $title = $tax->name;
             return $tax->taxrate;
@@ -100,12 +100,26 @@ class ServiceTax implements InjectionAwareInterface
         $model->country = (!isset($data['country']) || empty($data['country'])) ? NULL : $data['country'];
         $model->state = (!isset($data['state']) || empty($data['state'])) ? NULL : $data['state'];
         $model->taxrate = $data['taxrate'];
-        $model->created_at = date('c');
-        $model->updated_at = date('c');
+        $model->created_at = date('Y-m-d H:i:s');
+        $model->updated_at = date('Y-m-d H:i:s');
         $newId = $this->di['db']->store($model);
 
         $this->di['logger']->info('Created new tax rule %s', $model->name);
         return $newId ;
+    }
+
+    public function update(\Model_Tax $model, array $data)
+    {
+        $model->name = $data['name'];
+        $model->country = (!isset($data['country']) || empty($data['country'])) ? NULL : $data['country'];
+        $model->state = (!isset($data['state']) || empty($data['state'])) ? NULL : $data['state'];
+        $model->taxrate = $data['taxrate'];
+        $model->created_at = date('Y-m-d H:i:s');
+        $model->updated_at = date('Y-m-d H:i:s');
+        $this->di['db']->store($model);
+
+        $this->di['logger']->info('Created new tax rule %s', $model->name);
+        return true ;
     }
 
     public function getSearchQuery($data)
@@ -119,13 +133,14 @@ class ServiceTax implements InjectionAwareInterface
 
     public function setupEUTaxes(array $data)
     {
-        $sql="TRUNCATE tax;";
+        $sql = "TRUNCATE tax;";
         $this->di['db']->exec($sql);
 
         $systemService = $this->di['mod_service']('System');
-        $eu_countries = $systemService->getEuCountries();
-        foreach($eu_countries as $code=>$title) {
-            $this->create(array('name'=>$data['name'], 'taxrate'=>$data['taxrate'], 'country'=>$code));
+        $eu_countries  = $systemService->getEuCountries();
+        $eu_vat        = $systemService->getEuVat();
+        foreach ($eu_vat as $code => $taxRate) {
+            $this->create(array('name' => $eu_countries[$code], 'taxrate' => $taxRate, 'country' => $code));
         }
 
         return true;

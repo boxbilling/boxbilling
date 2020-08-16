@@ -42,7 +42,7 @@ class Client implements \Box\InjectionAwareInterface
      * Always use your module prefix to avoid conflicts with other modules
      * in future
      *
-     * @param Box_App $app - returned by reference
+     * @param \Box_App $app - returned by reference
      */
     public function register(\Box_App &$app)
     {
@@ -52,14 +52,13 @@ class Client implements \Box\InjectionAwareInterface
 
     public function get_index(\Box_App $app)
     {
-        $api = $app->getApiGuest();
         return $app->render('mod_example_index');
     }
 
     public function get_protected(\Box_App $app)
     {
-        // call $app->getApiClient() method to validate if client is logged in
-        $api = $app->getApiClient();
+        // call $this->di['is_client_logged'] method to validate if client is logged in
+        $this->di['is_client_logged'];
         return $app->render('mod_example_index', array('show_protected'=>true));
     }
 }

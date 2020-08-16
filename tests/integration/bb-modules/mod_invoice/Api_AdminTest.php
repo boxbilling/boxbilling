@@ -257,7 +257,7 @@ class Api_Admin_InvoiceTest extends BBDbApiTestCase
             'notes'  => 'note',
             'serie'  => 'NEW',
             'nr'     => 4,
-            'due_at' => date('c'),
+            'due_at' => date('Y-m-d H:i:s'),
         );
         $bool = $this->api_admin->invoice_update($data);
         $this->assertTrue($bool);
@@ -447,6 +447,53 @@ class Api_Admin_InvoiceTest extends BBDbApiTestCase
     }
 
     /**
+     * Deposit invoice should be marked as paid and do not charge for it.
+     */
+    public function testDepositInvoice()
+    {
+        $id = 5;
+        $invoiceModel = $this->di['db']->load('Invoice', 5);
+        $this->assertEquals(\Model_Invoice::STATUS_UNPAID, $invoiceModel->status);
+        $invoiceItemModel = $this->di['db']->findOne('InvoiceItem', 'invoice_id = ?', array($invoiceModel->id));
+        $this->assertEquals(Model_InvoiceItem::TYPE_DEPOSIT, $invoiceItemModel->type);
+
+        $balanceBefore = $this->api_client->client_balance_get_total();
+        $this->api_admin->invoice_pay_with_credits(array('id' => $id));
+        $balanceAfter = $this->api_client->client_balance_get_total();
+
+        $array = $this->api_admin->invoice_get(array('id' => $id));
+
+        $this->assertEquals(\Model_Invoice::STATUS_PAID, $array['status']);
+        $this->assertEquals($balanceBefore, $balanceAfter);
+    }
+
+
+    /**
+     * After admin marks as paid deposit invoice account balance should increase.
+     */
+    public function testDepositInvoiceMarkAsPaid()
+    {
+        $id = 5;
+        $invoiceModel = $this->di['db']->load('Invoice', 5);
+        $this->assertEquals(\Model_Invoice::STATUS_UNPAID, $invoiceModel->status);
+        $invoiceItemModel = $this->di['db']->findOne('InvoiceItem', 'invoice_id = ?', array($invoiceModel->id));
+        $this->assertEquals(Model_InvoiceItem::TYPE_DEPOSIT, $invoiceItemModel->type);
+
+        $balanceBefore = $this->api_client->client_balance_get_total();
+        $this->api_admin->invoice_mark_as_paid(array('id' => $id, 'execute' => 1));
+        $balanceAfter = $this->api_client->client_balance_get_total();
+
+        $array = $this->api_admin->invoice_get(array('id' => $id));
+
+        $this->assertEquals(\Model_Invoice::STATUS_PAID, $array['status']);
+        $this->assertEquals($balanceAfter, $balanceBefore+$invoiceItemModel->price);
+
+        $accountBalance = $this->di['db']->findOne('ClientBalance', 'order by id desc');
+        $this->assertEquals($invoiceItemModel->title, $accountBalance->description);
+        $this->assertEquals($invoiceItemModel->price, $accountBalance->amount);
+    }
+
+    /**
      * Invoice should be marked as paid after adding money to balance
      */
     public function testCredits()
@@ -564,9 +611,8 @@ class Api_Admin_InvoiceTest extends BBDbApiTestCase
         $list = $array['list'];
         $this->assertInternalType('array', $list);
 
-        //var_export($list);
         if (count($list)) {
-            $item = $list[0];
+            $item = $list[1];
             $this->assertArrayHasKey('id', $item);
             $this->assertArrayHasKey('serie', $item);
             $this->assertArrayHasKey('nr', $item);
@@ -811,5 +857,52 @@ class Api_Admin_InvoiceTest extends BBDbApiTestCase
 
         $this->assertEquals(0, count($array['list']));
         $this->assertTrue($result);
+    }
+
+    public function testPrepareInvoiceDueDateProvider()
+    {
+        return array(
+            array(100, 100),
+            array('', 1),
+            array(null, 1),
+        );
+    }
+
+    /**
+     * @dataProvider testPrepareInvoiceDueDateProvider
+     */
+    public function testPrepareInvoiceDueDate($invoice_due_days, $diff)
+    {
+        if (!is_null($invoice_due_days)) {
+            $this->api_admin->system_update_params(array('invoice_due_days' => $invoice_due_days));
+        }
+
+        $data  = array(
+            'client_id' => 1,
+        );
+        $id    = $this->api_admin->invoice_prepare($data);
+        $array = $this->api_admin->invoice_get(array('id' => $id));
+        $this->assertEquals(substr($array['due_at'], 0, 10), date('Y-m-d', strtotime("+ $diff day")));
+    }
+
+    public function testUpdateTaxRule()
+    {
+        $id = 2;
+
+        $data = array(
+            'id' => $id,
+            'name' => 'Updated Tax rule',
+            'taxrate' => 99,
+            'country' => 'NL'
+        );
+        $this->api_admin->invoice_tax_update($data);
+
+
+        $tax = $this->api_admin->invoice_tax_get(array('id' => $id));
+
+        $this->assertInternalType('array', $tax);
+        $this->assertEquals($data['name'], $tax['name']);
+        $this->assertEquals($data['taxrate'], $tax['taxrate']);
+        $this->assertEquals($data['country'], $tax['country']);
     }
 }

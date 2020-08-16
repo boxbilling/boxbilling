@@ -1,4 +1,4 @@
-{% filter markdown %}
+{% apply markdown %}
 
 Hello {{ c.first_name }} {{ c.last_name }},
 
@@ -11,7 +11,7 @@ Your website and email will not function until your domain has propagated.
 
 **{{ order.title }}**
 
-Activated: {{ order.activated_at|date }}
+Activated: {{ order.activated_at|bb_date }}
 {% if order.expires_at %}Expires: {{ order.expires_at | date }}   {% endif %}
 {% if order.total %}Amount: {{ order.total | money(order.currency) }}   {% endif %}
 {% if order.period %} Billing period: {{ order.period | period_title }}   {% endif %}
@@ -72,4 +72,4 @@ Manage order: {{ 'order/service/manage'|link }}/{{ order.id }}
 
 {{ guest.system_company.signature }}
 
-{% endfilter %}
+{% endapply %}

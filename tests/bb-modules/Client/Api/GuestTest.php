@@ -4,7 +4,7 @@
 namespace Box\Mod\Client\Api;
 
 
-class GuestTest extends \PHPUnit_Framework_TestCase {
+class GuestTest extends \BBTestCase {
 
     public function testgetDi()
     {
@@ -19,6 +19,7 @@ class GuestTest extends \PHPUnit_Framework_TestCase {
     {
         $configArr = array(
             'allow_signup' => true,
+            'required' => array(),
         );
         $data = array(
             'email' => 'test@email.com',
@@ -40,15 +41,25 @@ class GuestTest extends \PHPUnit_Framework_TestCase {
         $serviceMock->expects($this->atLeastOnce())
             ->method('guestCreateClient')
             ->will($this->returnValue($model));
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('checkExtraRequiredFields');
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('checkCustomFields');
+
 
         $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
         $validatorMock->expects($this->atLeastOnce())->method('isPasswordStrong');
         $validatorMock->expects($this->atLeastOnce())->method('isEmailValid');
+        $validatorMock->expects($this->atLeastOnce())->method('checkRequiredParamsForArray');
+
 
         $di = new \Box_Di();
         $di['mod_config'] = $di->protect(function ($name) use($configArr) { return $configArr;  });
         $di['validator'] = $validatorMock;
 
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
         $client = new \Box\Mod\Client\Api\Guest();
         $client->setDi($di);
         $client->setService($serviceMock);
@@ -76,6 +87,10 @@ class GuestTest extends \PHPUnit_Framework_TestCase {
         $serviceMock->expects($this->atLeastOnce())
             ->method('clientAlreadyExists')
             ->will($this->returnValue(true));
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('checkExtraRequiredFields');
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('checkCustomFields');
 
         $model = new \Model_Client();
         $model->loadBean(new \RedBeanPHP\OODBBean());
@@ -83,10 +98,14 @@ class GuestTest extends \PHPUnit_Framework_TestCase {
         $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
         $validatorMock->expects($this->atLeastOnce())->method('isPasswordStrong');
         $validatorMock->expects($this->atLeastOnce())->method('isEmailValid');
+        $validatorMock->expects($this->atLeastOnce())->method('checkRequiredParamsForArray');
 
         $di = new \Box_Di();
         $di['mod_config'] = $di->protect(function ($name) use($configArr) { return $configArr;  });
         $di['validator'] = $validatorMock;
+        $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
+            return isset ($array[$key]) ? $array[$key] : $default;
+        });
 
         $client = new \Box\Mod\Client\Api\Guest();
         $client->setDi($di);
@@ -118,21 +137,7 @@ class GuestTest extends \PHPUnit_Framework_TestCase {
         $client->create($data);
     }
 
-    public function requiredFieldsProvider()
-    {
-        return array(
-            array('email', 'Email required'),
-            array('first_name', 'First name required'),
-            array('password', 'Password required'),
-            array('password_confirm', 'Password confirmation required'),
-        );
-
-    }
-
-    /**
-     * @dataProvider requiredFieldsProvider
-     */
-    public function testCreateRequiredFields($field, $ExceptionMessage)
+    public function testCreatePasswordsDoNotMatchException()
     {
         $configArr = array(
             'allow_signup' => true,
@@ -141,40 +146,19 @@ class GuestTest extends \PHPUnit_Framework_TestCase {
             'email' => 'test@email.com',
             'first_name' => 'John',
             'password' => 'testpaswword',
-            'password_confirm' => 'testpaswword',
-
+            'password_confirm' => 'wrongpaswword',
         );
-        unset($data[ $field ]);
+
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->getMock();
+        $validatorMock->expects($this->atLeastOnce())->method('checkRequiredParamsForArray');
+
         $client = new \Box\Mod\Client\Api\Guest();
         $di = new \Box_Di();
         $di['mod_config'] = $di->protect(function ($name) use($configArr) { return $configArr;  });
+        $di['validator'] = $validatorMock;
         $client->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', $ExceptionMessage);
-        $client->create($data);
-    }
-
-    public function testCreateConfigRequiredFields()
-    {
-        $fieldName = 'city';
-        $configArr = array(
-            'allow_signup' => true,
-            'required' => array($fieldName),
-        );
-        $data = array(
-            'email' => 'test@email.com',
-            'first_name' => 'John',
-            'password' => 'testpaswword',
-            'password_confirm' => 'testpaswword',
-
-        );
-        $client = new \Box\Mod\Client\Api\Guest();
-        $di = new \Box_Di();
-        $di['mod_config'] = $di->protect(function ($name) use($configArr) { return $configArr;  });
-        $client->setDi($di);
-
-        $exceptionMessage = sprintf('It is required that you provide details for field "%s"', ucwords(str_replace('_', ' ', $fieldName)));
-        $this->setExpectedException('\Box_Exception', $exceptionMessage);
+        $this->setExpectedException('\Box_Exception', 'Passwords do not match.');
         $client->create($data);
     }
 
@@ -218,6 +202,11 @@ class GuestTest extends \PHPUnit_Framework_TestCase {
         $di['session'] = $sessionMock;
         $di['logger'] = new \Box_Log();
         $di['cookie'] = $cookieMock;
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->disableOriginalConstructor()->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')
+            ->will($this->returnValue(null));
+        $di['validator'] = $validatorMock;
 
         $client = new \Box\Mod\Client\Api\Guest();
         $client->setDi($di);
@@ -259,22 +248,17 @@ class GuestTest extends \PHPUnit_Framework_TestCase {
         $di['events_manager'] = $eventMock;
         $di['mod_service'] = $di->protect(function ($name) use($emailServiceMock) {return $emailServiceMock;});
         $di['logger'] = new \Box_Log();
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->disableOriginalConstructor()->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')
+            ->will($this->returnValue(null));
+        $di['validator'] = $validatorMock;
 
         $client = new \Box\Mod\Client\Api\Guest();
         $client->setDi($di);
 
         $result = $client->reset_password($data);
         $this->assertTrue($result);
-    }
-
-    public function testreset_passwordEmailMissing()
-    {
-        $data = array();
-
-        $client = new \Box\Mod\Client\Api\Guest();
-
-        $this->setExpectedException('\Box_Exception', 'Email required');
-        $client->reset_password($data);
     }
 
     public function testreset_passwordEmailNotFound()
@@ -292,6 +276,11 @@ class GuestTest extends \PHPUnit_Framework_TestCase {
         $di = new \Box_Di();
         $di['db'] = $dbMock;
         $di['events_manager'] = $eventMock;
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->disableOriginalConstructor()->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')
+            ->will($this->returnValue(null));
+        $di['validator'] = $validatorMock;
 
         $client = new \Box\Mod\Client\Api\Guest();
         $client->setDi($di);
@@ -317,7 +306,7 @@ class GuestTest extends \PHPUnit_Framework_TestCase {
             ->method('findOne')->will($this->returnValue($modelPasswordReset));
 
         $dbMock->expects($this->atLeastOnce())
-            ->method('load')->will($this->returnValue($modelClient));
+            ->method('getExistingModelById')->will($this->returnValue($modelClient));
 
         $dbMock->expects($this->atLeastOnce())
             ->method('store')->will($this->returnValue(1));
@@ -329,26 +318,26 @@ class GuestTest extends \PHPUnit_Framework_TestCase {
         $emailServiceMock->expects($this->atLeastOnce())->
             method('sendTemplate');
 
+        $passwordMock = $this->getMockBuilder('\Box_Password')->getMock();
+        $passwordMock->expects($this->atLeastOnce())
+            ->method('hashIt');
+        
         $di = new \Box_Di();
         $di['db'] = $dbMock;
         $di['logger'] = new \Box_Log();
         $di['mod_service'] =  $di->protect(function ($name) use($emailServiceMock) {return $emailServiceMock;});
+        $di['password'] = $passwordMock;
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->disableOriginalConstructor()->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')
+            ->will($this->returnValue(null));
+        $di['validator'] = $validatorMock;
 
         $client = new \Box\Mod\Client\Api\Guest();
         $client->setDi($di);
 
         $result = $client->confirm_reset($data);
         $this->assertTrue($result);
-    }
-
-    public function testconfirm_resetMissingHash()
-    {
-        $data = array();
-
-        $client = new \Box\Mod\Client\Api\Guest();
-
-        $this->setExpectedException('\Box_Exception', 'Hash required');
-        $client->confirm_reset($data);
     }
 
     public function testconfirm_resetResetNotFound()
@@ -363,6 +352,11 @@ class GuestTest extends \PHPUnit_Framework_TestCase {
 
         $di = new \Box_Di();
         $di['db'] = $dbMock;
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->disableOriginalConstructor()->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')
+            ->will($this->returnValue(null));
+        $di['validator'] = $validatorMock;
 
         $client = new \Box\Mod\Client\Api\Guest();
         $client->setDi($di);
@@ -383,6 +377,11 @@ class GuestTest extends \PHPUnit_Framework_TestCase {
 
         $di = new \Box_Di();
         $di['guzzle_client'] = $guzzleMock;
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->disableOriginalConstructor()->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')
+            ->will($this->returnValue(null));
+        $di['validator'] = $validatorMock;
 
         $client = new \Box\Mod\Client\Api\Guest();
         $client->setDi($di);
@@ -390,31 +389,6 @@ class GuestTest extends \PHPUnit_Framework_TestCase {
         $result = $client->is_vat($data);
         $this->assertInternalType('bool', $result);
         $this->assertTrue($result);
-    }
-
-    public function vatProvider()
-    {
-        return array(
-            array('country', 'Country code is required'),
-            array('vat', 'Country code is required'),
-        );
-    }
-
-    /**
-     * @dataProvider vatProvider
-     */
-    public function testis_vatExceptions($field, $exception)
-    {
-        $data = array(
-            'country' => 'DE',
-            'vat' => 'VATnumber',
-        );
-        unset($data[ $field ]);
-        $client = new \Box\Mod\Client\Api\Guest();
-
-        $this->setExpectedException('\Box_Exception', $exception);
-        $client->is_vat($data);
-
     }
 
     public function testrequired()

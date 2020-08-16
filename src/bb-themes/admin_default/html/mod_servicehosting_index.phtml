@@ -1,3 +1,4 @@
+{% import "macro_functions.phtml" as mf %}
 {% extends "layout_default.phtml" %}
 {% block meta_title %}{% trans 'Hosting plans and servers' %}{% endblock %}
 {% set active_menu = 'system' %}
@@ -202,7 +203,7 @@
                         <div class="fix"></div>
                     </div>
                     <div class="rowElem">
-                        <label>{% trans 'Access Hash (Insted of password for cPanel servers)' %}:</label>
+                        <label>{% trans 'Access Hash (Instead of password for cPanel servers)' %}:</label>
                         <div class="formRight">
                             <textarea name="accesshash" cols="5" rows="5"></textarea>
                         </div>

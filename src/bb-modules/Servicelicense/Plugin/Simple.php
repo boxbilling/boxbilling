@@ -15,16 +15,37 @@ namespace Box\Mod\Servicelicense\Plugin;
 
 class Simple
 {
+    protected $di;
+
+    /**
+     * @param \Box_Di $di
+     */
+    public function setDi($di)
+    {
+        $this->di = $di;
+    }
+
+    /**
+     * @return \Box_Di
+     */
+    public function getDi()
+    {
+        return $this->di;
+    }
+
     /**
      * License generation script
      *
-     * @param Model_ServiceLicense $service
-     * @param Model_ClientOrder $order
+     * @param \Model_ServiceLicense $service
+     * @param \Model_ClientOrder $order
      * @param array $config
      * @return string
      */
     public function generate(\Model_ServiceLicense $service, \Model_ClientOrder $order, array $config)
     {
+        // Optional: to get customer data
+        //$client = $this->di['db']->load('Client', $order->client_id);
+
         $length = isset($config['length']) ? $config['length'] : 25;
         $prefix = isset($config['prefix']) ? $config['prefix'] : NULL;
 
