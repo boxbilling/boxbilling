@@ -15,4 +15,3 @@ class Model_MeteredUsage extends RedBean_SimpleModel
 {
 
 }
- 
