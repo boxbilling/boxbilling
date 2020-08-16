@@ -86,6 +86,11 @@ class ServiceInvoiceItem implements InjectionAwareInterface
 
                 case \Model_InvoiceItem::TASK_RENEW:
                     try {
+							//Unsuspend order if suspended before renew
+							if($order->status == \Model_ClientOrder::STATUS_SUSPENDED) {
+								 $orderService->unsuspendFromOrder($order);
+							}
+							
                         $order = $this->di['db']->load('ClientOrder', $order_id);
                         $orderService->renewOrder($order);
                     } catch(\Exception $e) {
@@ -192,6 +197,13 @@ class ServiceInvoiceItem implements InjectionAwareInterface
     {
         $item->title = $this->di['array_get']($data, 'title', $item->title);
         $item->price = $this->di['array_get']($data, 'price', $item->price);
+		
+		$item_quantity =  $this->di['array_get']($data, 'quantity', 1);
+		
+		if($item_quantity != $item->quantity){
+        $item->quantity = $item_quantity > 0 ? $item_quantity : 1 ;
+		}
+		
         if(isset($data['taxed']) && !empty($data['taxed'])) {
             $item->taxed = (bool)$data['taxed'];
         } else {
