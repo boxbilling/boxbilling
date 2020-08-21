@@ -7,7 +7,7 @@ currently being supported with security updates.
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 4.20.x   | :white_check_mark: |
+| 4.20.x  | :white_check_mark: |
 
 ## Reporting Bugs
 
@@ -41,3 +41,13 @@ Which version of BoxBilling are you using? You can get the exact version by runn
 What's the name and version of the server OS you're BoxBilling installation is running?
 What's the PHP version your server is using?
 What's the MySQL version your server is using?
+=======
+
+
+## Reporting a Vulnerability
+
+Use this section to tell people how to report a vulnerability.
+
+Tell them where to go, how often they can expect to get an update on a
+reported vulnerability, what to expect if the vulnerability is accepted or
+declined, etc.

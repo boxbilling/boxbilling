@@ -1882,12 +1882,61 @@ class ServiceTest extends \BBTestCase
         $di['db']             = $dbMock;
 
         $serviceMock = $this->getMockBuilder('\Box\Mod\Order\Service')
-            ->setMethods(array('_callOnService', 'saveStatusChange'))
+            ->setMethods(array('_callOnService', 'saveStatusChange', 'haveMeteredBilling'))
             ->getMock();
         $serviceMock->expects($this->atLeastOnce())
             ->method('_callOnService');
         $serviceMock->expects($this->atLeastOnce())
             ->method('saveStatusChange');
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('haveMeteredBilling')
+            ->willReturn(false);
+
+        $serviceMock->setDi($di);
+        $result = $serviceMock->suspendFromOrder($clientOrderModel);
+        $this->assertTrue($result);
+    }
+
+    public function testsuspendFromOrder_meteredBilling()
+    {
+        $clientOrderModel = new \Model_ClientOrder();
+        $clientOrderModel->loadBean(new \RedBeanPHP\OODBBean());
+        $clientOrderModel->status = \Model_ClientOrder::STATUS_ACTIVE;
+        $clientOrderModel->service_type = 'hosting';
+
+        $eventMock = $this->getMockBuilder('\Box_EventManager')->getMock();
+        $eventMock->expects($this->atLeastOnce())
+            ->method('fire');
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('store')
+            ->with($clientOrderModel);
+
+        $hostingServiceMock = $this->getMockBuilder('\Box\Mod\Servicehosting\Service')->getMock();
+        $hostingServiceMock->expects($this->atLeastOnce())
+            ->method('stopUsage');
+
+        $di = new \Box_Di();
+        $di['events_manager'] = $eventMock;
+        $di['logger'] = new \Box_Log();
+        $di['db'] = $dbMock;
+        $di['mod_service'] = $di->protect(function ($serviceName) use ($hostingServiceMock) {
+            if ($serviceName == 'servicehosting'){
+                return $hostingServiceMock;
+            }
+        });
+
+        $serviceMock = $this->getMockBuilder('\Box\Mod\Order\Service')
+            ->setMethods(array('_callOnService', 'saveStatusChange', 'haveMeteredBilling'))
+            ->getMock();
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('_callOnService');
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('saveStatusChange');
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('haveMeteredBilling')
+            ->willReturn(true);
 
         $serviceMock->setDi($di);
         $result = $serviceMock->suspendFromOrder($clientOrderModel);
@@ -1913,7 +1962,153 @@ class ServiceTest extends \BBTestCase
         $di['pdo'] = $pdoMock;
         $this->service->setDi($di);
         $this->service->rmByClient($clientModel);
+    }
 
+    public function testchangeOrderProduct_CantBeChanged()
+    {
+        $modelOrder = new \Model_ClientOrder();
+        $modelOrder->loadBean(new \RedBeanPHP\OODBBean());
+
+        $modelProduct = new \Model_Product();
+        $modelProduct->loadBean(new \RedBeanPHP\OODBBean());
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('load')
+            ->with('Product')
+            ->willReturn($modelProduct);
+
+        $productServiceMock = $this->getMockBuilder('\Box\Mod\Product\Service')->getMock();
+        $productServiceMock->expects($this->atLeastOnce())
+            ->method('getChangeableProductPairs')
+            ->with($modelProduct)
+            ->willReturn(array());
+
+        $di = new \Box_Di();
+        $di['db'] = $dbMock;
+        $di['mod_service'] = $di->protect(function ($serviceName) use($productServiceMock){
+            if ($serviceName == 'Product'){
+                return $productServiceMock;
+            }
+            return null;
+        });
+
+        $this->service->setDi($di);
+        $this->setExpectedException('\Box_Exception', 'Order product can not be changed');
+        $this->service->changeOrderProduct($modelOrder, $modelProduct);
+    }
+
+    public function testchangeOrderProduct_MeteredBillingNotSuppotedException()
+    {
+        $modelOrder = new \Model_ClientOrder();
+        $modelOrder->loadBean(new \RedBeanPHP\OODBBean());
+
+        $modelProduct = new \Model_Product();
+        $modelProduct->loadBean(new \RedBeanPHP\OODBBean());
+        $modelProduct->type = 'domain';
+        $modelProduct->title = 'shared hosting';
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('load')
+            ->with('Product')
+            ->willReturn($modelProduct);
+
+        $changeableProductPairs = array(
+            '2' => 'shared hosting',
+        );
+        $productServiceMock = $this->getMockBuilder('\Box\Mod\Product\Service')->getMock();
+        $productServiceMock->expects($this->atLeastOnce())
+            ->method('getChangeableProductPairs')
+            ->with($modelProduct)
+            ->willReturn($changeableProductPairs);
+
+        $productTypeService = $this->getMockBuilder('\Box\Mod\Servicedomain\Service')->getMock();
+        $productTypeService->expects($this->never())
+            ->method('setUsage');
+
+        $di = new \Box_Di();
+        $di['db'] = $dbMock;
+        $di['mod_service'] = $di->protect(function ($serviceName) use($productServiceMock, $productTypeService){
+            if ($serviceName == 'Product'){
+                return $productServiceMock;
+            }
+            if ($serviceName == 'servicehosting'){
+                return $productTypeService;
+            }
+            return null;
+        });
+
+        $this->service->setDi($di);
+        $this->setExpectedException('\Box_Exception', 'Product service does not support metered billing');
+        $this->service->changeOrderProduct($modelOrder, $modelProduct);
+    }
+
+    public function testchangeOrderProduct()
+    {
+        $modelOrder = new \Model_ClientOrder();
+        $modelOrder->loadBean(new \RedBeanPHP\OODBBean());
+
+        $modelProduct = new \Model_Product();
+        $modelProduct->loadBean(new \RedBeanPHP\OODBBean());
+        $modelProduct->type = 'hosting';
+        $modelProduct->title = 'shared hosting';
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('load')
+            ->with('Product')
+            ->willReturn($modelProduct);
+        $dbMock->expects($this->atLeastOnce())
+            ->method('store');
+
+        $changeableProductPairs = array(
+            '2' => 'shared hosting',
+        );
+        $productServiceMock = $this->getMockBuilder('\Box\Mod\Product\Service')->getMock();
+        $productServiceMock->expects($this->atLeastOnce())
+            ->method('getChangeableProductPairs')
+            ->with($modelProduct)
+            ->willReturn($changeableProductPairs);
+
+        $productTypeService = $this->getMockBuilder('\Box\Mod\Servicehosting\Service')->getMock();
+        $productTypeService->expects($this->atLeastOnce())
+            ->method('stopUsage');
+        $productTypeService->expects($this->atLeastOnce())
+            ->method('setUsage');
+
+        $toolsMock = $this->getMockBuilder('\Box_Tools')->getMock();
+        $toolsMock->expects($this->atLeastOnce())
+            ->method('decodeJ')
+            ->willReturn(array());
+
+        $di = new \Box_Di();
+        $di['tools'] = $toolsMock;
+        $di['db'] = $dbMock;
+        $di['mod_service'] = $di->protect(function ($serviceName) use($productServiceMock, $productTypeService){
+            if ($serviceName == 'Product'){
+                return $productServiceMock;
+            }
+            if ($serviceName == 'servicehosting'){
+                return $productTypeService;
+            }
+            return null;
+        });
+
+        $hostingServiceModel = new \Model_ServiceHosting();
+        $hostingServiceModel->loadBean(new \RedBeanPHP\OODBBean());
+
+        $serviceMock = $this->getMockBuilder('\Box\Mod\Order\Service')
+            ->setMethods(array('getOrderService'))
+            ->getMock();
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('getOrderService')
+            ->with($modelOrder)
+            ->willReturn($hostingServiceModel);
+
+        $serviceMock->setDi($di);
+        $result = $serviceMock->changeOrderProduct($modelOrder, $modelProduct);
+        $this->assertTrue($result);
     }
 
     public function testupdatePeriod()

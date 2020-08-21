@@ -49,6 +49,7 @@ class Box_Mod
         'theme',
         'orderbutton',
         'formbuilder',
+        'meteredbilling'
     );
     
     /**

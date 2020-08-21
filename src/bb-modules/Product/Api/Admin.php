@@ -16,6 +16,8 @@
 
 namespace Box\Mod\Product\Api;
 
+use Box\MeteredInterface;
+
 class Admin extends \Api_Abstract
 {
     /**
@@ -546,7 +548,12 @@ class Admin extends \Api_Abstract
         $model = $this->di['db']->getExistingModelById('Promo', $data['id'], 'Promo not found');
         return $this->getService()->deletePromo($model);
     }
-    
+
+    /**
+     * @param $data
+     * @return \Model_Product
+     * @throws \Box_Exception
+     */
     private function _getProduct($data)
     {
         $required = array(
@@ -556,5 +563,33 @@ class Admin extends \Api_Abstract
 
         $model = $this->di['db']->getExistingModelById('Product', $data['id'], 'Product not found');
         return $model;
+    }
+
+    /**
+     * @param $data - id => product id
+     * @return bool
+     * @throws \Box_Exception
+     */
+    public function is_metered($data)
+    {
+        $product = $this->_getProduct($data);
+        $service = $product->getService();
+        if ($service instanceof MeteredInterface){
+            return true;
+        }
+        return false;
+
+    }
+
+    /**
+     * @param $data - id : product id
+     * @return mixed
+     * @throws \Box_Exception
+     */
+    public function get_changeable_products($data)
+    {
+        $product = $this->_getProduct($data);
+
+        return $this->getService()->getChangeableProductPairs($product);
     }
 }

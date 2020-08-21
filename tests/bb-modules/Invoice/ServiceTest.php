@@ -1168,17 +1168,16 @@ class ServiceTest extends \BBTestCase
         $orderModel->price           = 10;
         $orderModel->promo_recurring = true;
 
-        $clientModel = new \Model_Client();
-        $clientModel->loadBean(new \RedBeanPHP\OODBBean());
-
         $invoiceModel = new \Model_Invoice();
         $invoiceModel->loadBean(new \RedBeanPHP\OODBBean());
 
         $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
         $dbMock->expects($this->atLeastOnce())
+
             ->method('getExistingModelById')
             ->will($this->returnValue($clientModel));
         $dbMock->expects($this->atLeastOnce())
+
             ->method('dispense')
             ->will($this->returnValue($invoiceModel));
         $dbMock->expects($this->atLeastOnce())
@@ -1189,10 +1188,65 @@ class ServiceTest extends \BBTestCase
         $invoiceItemServiceMock->expects($this->atLeastOnce())
             ->method('generateFromOrder');
 
+
+        $orderServiceMock = $this->getMockBuilder('\Box\Mod\Order\Service')->getMock();
+        $orderServiceMock->expects($this->atLeastOnce())
+            ->method('haveMeteredBilling')
+            ->with($orderModel)
+            ->willReturn(false);
+
+        $di = new \Box_Di();
+        $di['db'] = $dbMock;
+        $di['mod_service'] = $di->protect(function ($serviceName, $sub = '') use ($invoiceItemServiceMock, $orderServiceMock) {
+            if ($serviceName == 'Invoice') {
+                return $invoiceItemServiceMock;
+            }
+            if ($serviceName == 'Order'){
+                return $orderServiceMock;
+            }
+        });
+
+        $serviceMock->setDi($di);
+        $result = $serviceMock->generateForOrder($orderModel);
+        $this->assertInstanceOf('\Model_Invoice', $result);
+    }
+
+    public function testgenerateForOrder_WithMeteredBilling()
+    {
+        $orderModel = new \Model_ClientOrder();
+        $orderModel->loadBean(new \RedBeanPHP\OODBBean());
+
+        $invoiceModel = new \Model_Invoice();
+        $invoiceModel->loadBean(new \RedBeanPHP\OODBBean());
+
+        $serviceMock = $this->getMockBuilder('\Box\Mod\Invoice\Service')
+            ->setMethods(array('generateForOrderWithMeteredBilling'))
+            ->getMock();
+        $serviceMock->expects($this->once())
+            ->method('generateForOrderWithMeteredBilling')
+            ->with($orderModel)
+            ->willReturn($invoiceModel);
+
+        $invoiceModel = new \Model_Invoice();
+        $invoiceModel->loadBean(new \RedBeanPHP\OODBBean());
+
+        $orderServiceMock = $this->getMockBuilder('\Box\Mod\Order\Service')->getMock();
+        $orderServiceMock->expects($this->atLeastOnce())
+            ->method('haveMeteredBilling')
+            ->with($orderModel)
+            ->willReturn(true);
+
+        $di = new \Box_Di();
+        $di['mod_service'] = $di->protect(function ($serviceName) use ($orderServiceMock) {
+            if ($serviceName == 'Order'){
+                return $orderServiceMock;
+            }
+
         $di                = new \Box_Di();
         $di['db']          = $dbMock;
         $di['mod_service'] = $di->protect(function () use ($invoiceItemServiceMock) {
             return $invoiceItemServiceMock;
+
         });
 
         $serviceMock->setDi($di);
@@ -1206,8 +1260,27 @@ class ServiceTest extends \BBTestCase
         $clientOrder->loadBean(new \RedBeanPHP\OODBBean());
         $clientOrder->price = 0;
 
+
         $this->expectException(\Box_Exception::class);
         $this->expectExceptionMessage('Invoices are not generated for 0 amount orders');
+
+
+        $orderServiceMock = $this->getMockBuilder('\Box\Mod\Order\Service')->getMock();
+        $orderServiceMock->expects($this->atLeastOnce())
+            ->method('haveMeteredBilling')
+            ->with($clientOrder)
+            ->willReturn(false);
+
+        $di = new \Box_Di();
+        $di['mod_service'] = $di->protect(function ($serviceName) use ($orderServiceMock) {
+            if ($serviceName == 'Order'){
+                return $orderServiceMock;
+            }
+        });
+        $this->service->setDi($di);
+
+        $this->setExpectedException('\Box_Exception', 'Invoices are not generated for 0 amount orders');
+
         $this->service->generateForOrder($clientOrder);
     }
 
@@ -1822,6 +1895,147 @@ class ServiceTest extends \BBTestCase
         $this->assertEquals($expected, $result);
     }
 
+
+    public function testgenerateForOrderWithMeteredBilling()
+    {
+        $clientModel = new \Model_ClientOrder();
+        $clientModel->loadBean(new \RedBeanPHP\OODBBean());
+        $clientModel->service_type = 'hosting';
+
+        $invoiceModel = new \Model_Invoice();
+        $invoiceModel->loadBean(new \RedBeanPHP\OODBBean());
+
+        $orderServiceTypeServiceMock = $this->getMockBuilder('\Box\Mod\Servicehosting\Service')->getMock();
+        $orderServiceTypeServiceMock->expects($this->atLeastOnce())
+            ->method('setUsage')
+            ->with($clientModel);
+        $orderServiceTypeServiceMock->expects($this->atLeastOnce())
+            ->method('stopUsage')
+            ->with($clientModel);
+
+        $meteredBillingServiceMock = $this->getMockBuilder('\Box\Mod\Meteredbilling\Service')
+            ->getMock();
+        $orderTotalPrice = '4.54678';
+        $meteredBillingServiceMock->expects($this->atLeastOnce())
+            ->method('getOrderUsageTotalCost')
+            ->with($clientModel)
+            ->willReturn($orderTotalPrice);
+        $meteredBillingServiceMock->expects($this->atLeastOnce())
+            ->method('setInvoiceForUsage')
+            ->with($clientModel);
+
+        $serviceMock = $this->getMockBuilder('\Box\Mod\Invoice\Service')
+            ->setMethods(array('create', 'setInvoiceDefaults'))
+            ->getMock();
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('create')
+            ->willReturn($invoiceModel)
+            ->with($clientModel);
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('setInvoiceDefaults');
+
+        $invoiceItemServiceMock= $this->getMockBuilder('\Box\Mod\Invoice\ServiceInvoiceItem')->getMock();
+        $invoiceItemServiceMock->expects($this->atLeastOnce())
+            ->method('generateFromOrder')
+            ->with($invoiceModel, $clientModel, \Model_InvoiceItem::TASK_RENEW, $orderTotalPrice);
+
+        $orderServiceMock = $this->getMockBuilder('\Box\Mod\Order\Service')->getMock();
+        $orderServiceMock->expects($this->atLeastOnce())
+            ->method('setUnpaidInvoice')
+            ->with($clientModel, $invoiceModel);
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('store')
+            ->with($invoiceModel);
+
+        $di = new \Box_Di();
+        $di['mod_service'] = $di->protect(function ($serviceName, $sub = '') use($orderServiceTypeServiceMock, $meteredBillingServiceMock, $invoiceItemServiceMock, $orderServiceMock){
+            if ($serviceName == 'servicehosting'){
+                return $orderServiceTypeServiceMock;
+            }
+            if ($serviceName == 'Meteredbilling'){
+                return $meteredBillingServiceMock;
+            }
+            if ($serviceName == 'Invoice'){
+                return $invoiceItemServiceMock;
+            }
+            if ($serviceName == 'Order'){
+                return $orderServiceMock;
+            }
+            return null;
+        });
+        $di['db'] = $dbMock;
+
+        $serviceMock->setDi($di);
+        $result = $serviceMock->generateForOrderWithMeteredBilling($clientModel);
+        $this->assertInstanceOf('\Model_Invoice', $result);
+    }
+
+    public function testgenerateForOrderWithMeteredBilling_UsageCostZero()
+    {
+        $clientModel = new \Model_ClientOrder();
+        $clientModel->loadBean(new \RedBeanPHP\OODBBean());
+        $clientModel->service_type = 'hosting';
+
+        $invoiceModel = new \Model_Invoice();
+        $invoiceModel->loadBean(new \RedBeanPHP\OODBBean());
+
+        $orderServiceTypeServiceMock = $this->getMockBuilder('\Box\Mod\Servicehosting\Service')->getMock();
+        $orderServiceTypeServiceMock->expects($this->atLeastOnce())
+            ->method('stopUsage')
+            ->with($clientModel);
+        $orderServiceTypeServiceMock->expects($this->atLeastOnce())
+            ->method('setUsage')
+            ->with($clientModel);
+
+        $meteredBillingServiceMock = $this->getMockBuilder('\Box\Mod\Meteredbilling\Service')
+            ->getMock();
+        $orderTotalPrice = '0.00001';
+        $meteredBillingServiceMock->expects($this->atLeastOnce())
+            ->method('getOrderUsageTotalCost')
+            ->with($clientModel)
+            ->willReturn($orderTotalPrice);
+
+        $di = new \Box_Di();
+        $di['mod_service'] = $di->protect(function ($serviceName) use($orderServiceTypeServiceMock, $meteredBillingServiceMock){
+            if ($serviceName == 'servicehosting'){
+                return $orderServiceTypeServiceMock;
+            }
+            if ($serviceName == 'Meteredbilling'){
+                return $meteredBillingServiceMock;
+            }
+            return null;
+        });
+
+        $this->service->setDi($di);
+        $this->setExpectedException('\Box_Exception', 'Invoices are not generated for 0 amount orders', 1157);
+        $this->service->generateForOrderWithMeteredBilling($clientModel);
+    }
+
+    public function testcreate()
+    {
+        $invoiceModel = new \Model_Invoice();
+        $invoiceModel->loadBean(new \RedBeanPHP\OODBBean());
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('dispense')
+            ->with('Invoice')
+            ->willReturn($invoiceModel);
+        $dbMock->expects($this->atLeastOnce())
+            ->method('store');
+
+        $di = new \Box_Di();
+        $di['db'] = $dbMock;
+
+        $this->service->setDi($di);
+
+        $orderModel = new \Model_ClientOrder();
+        $orderModel->loadBean(new \RedBeanPHP\OODBBean());
+        $result = $this->service->create($orderModel);
+        $this->assertInstanceOf('\Model_Invoice', $result);
+
     public function testisInvoiceTypeDeposit()
     {
         $di = new \Box_Di();
@@ -1894,5 +2108,6 @@ class ServiceTest extends \BBTestCase
 
         $result = $this->service->isInvoiceTypeDeposit($modelInvoice);
         $this->assertFalse($result);
+
     }
 }

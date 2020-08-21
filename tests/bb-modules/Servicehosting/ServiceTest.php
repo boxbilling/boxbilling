@@ -145,6 +145,7 @@ class ServiceTest extends \BBTestCase {
             ->method('_getAM')
             ->will($this->returnValue($AMresultArray));
 
+
         $di = new \Box_Di();
         $di['db'] = $dbMock;
         $di['tools'] = $toolsMock;
@@ -1267,6 +1268,137 @@ class ServiceTest extends \BBTestCase {
         $this->assertFalse($result[1]);
     }
 
+
+    public function testsetUsage_OrderIsNotActive()
+    {
+        $orderModel = new \Model_ClientOrder();
+        $orderModel->loadBean(new \RedBeanPHP\OODBBean());
+
+        $result = $this->service->setUsage($orderModel);
+        $this->assertFalse($result);
+    }
+
+    public function testsetUsage()
+    {
+        $orderModel = new \Model_ClientOrder();
+        $orderModel->loadBean(new \RedBeanPHP\OODBBean());
+        $orderModel->status = \Model_ClientOrder::STATUS_ACTIVE;
+
+
+
+        $meteredUsageModel = new \Model_MeteredUsage();
+        $meteredUsageModel->loadBean(new \RedBeanPHP\OODBBean());
+
+        $meteredBillingServiceMock = $this->getMockBuilder('\Box\Mod\Meteredbilling\Service')->getMock();
+        $meteredBillingServiceMock->expects($this->atLeastOnce())
+            ->method('create')
+            ->with($orderModel)
+            ->willReturn($meteredUsageModel);
+        $meteredBillingServiceMock->expects($this->atLeastOnce())
+            ->method('save')
+            ->with($meteredUsageModel)
+            ->willReturn(true);
+        $meteredBillingServiceMock->expects($this->atLeastOnce())
+            ->method('findActiveProductUsage')
+            ->willReturn(null);
+
+        $productModel = new \Model_Product();
+        $productModel->loadBean(new \RedBeanPHP\OODBBean());
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('load')
+            ->with('Product')
+            ->willReturn($productModel);
+
+        $di = new \Box_Di();
+        $di['mod_service'] = $di->protect(function ($serviceName) use($meteredBillingServiceMock){
+            if ($serviceName == 'MeteredBilling'){
+                return $meteredBillingServiceMock;
+            }
+        });
+        $di['db'] = $dbMock;
+
+        $this->service->setDi($di);
+
+        $result = $this->service->setUsage($orderModel);
+        $this->assertTrue($result);
+    }
+
+    public function testsetUsage_ActiveMeteredBillingExists()
+    {
+        $orderModel = new \Model_ClientOrder();
+        $orderModel->loadBean(new \RedBeanPHP\OODBBean());
+        $orderModel->status = \Model_ClientOrder::STATUS_ACTIVE;
+
+        $meteredUsageModel = new \Model_MeteredUsage();
+        $meteredUsageModel->loadBean(new \RedBeanPHP\OODBBean());
+
+        $meteredBillingServiceMock = $this->getMockBuilder('\Box\Mod\Meteredbilling\Service')->getMock();
+        $meteredBillingServiceMock->expects($this->atLeastOnce())
+            ->method('findActiveProductUsage')
+            ->willReturn($meteredUsageModel);
+
+        $productModel = new \Model_Product();
+        $productModel->loadBean(new \RedBeanPHP\OODBBean());
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('load')
+            ->with('Product')
+            ->willReturn($productModel);
+
+
+        $di = new \Box_Di();
+        $di['mod_service'] = $di->protect(function ($serviceName) use($meteredBillingServiceMock){
+            if ($serviceName == 'MeteredBilling'){
+                return $meteredBillingServiceMock;
+            }
+        });
+        $di['db'] = $dbMock;
+
+        $this->service->setDi($di);
+
+        $result = $this->service->setUsage($orderModel);
+        $this->assertFalse($result);
+    }
+
+    public function teststopUsage()
+    {
+        $orderModel = new \Model_ClientOrder();
+        $orderModel->loadBean(new \RedBeanPHP\OODBBean());
+
+        $meteredUsageModel = new \Model_MeteredUsage();
+        $meteredUsageModel->loadBean(new \RedBeanPHP\OODBBean());
+
+        $meteredBillingServiceMock = $this->getMockBuilder('\Box\Mod\Meteredbilling\Service')->getMock();
+        $meteredBillingServiceMock->expects($this->atLeastOnce())
+            ->method('findActiveProductUsage')
+            ->willReturn($meteredUsageModel);
+        $meteredBillingServiceMock->expects($this->atLeastOnce())
+            ->method('stopUsage')
+            ->willReturn(true);
+
+        $productModel = new \Model_Product();
+        $productModel->loadBean(new \RedBeanPHP\OODBBean());
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('load')
+            ->with('Product')
+            ->willReturn($productModel);
+
+
+        $di = new \Box_Di();
+        $di['mod_service'] = $di->protect(function ($serviceName) use($meteredBillingServiceMock){
+            if ($serviceName == 'MeteredBilling'){
+                return $meteredBillingServiceMock;
+            }
+        });
+        $di['db'] = $dbMock;
+
+        $this->service->setDi($di);
+=======
     public function testgetFreeTlds_FreeTldsAreNotSet()
     {
         $config  = array();
@@ -1329,6 +1461,44 @@ class ServiceTest extends \BBTestCase {
         $this->assertNotEmpty($result);
     }
 
+
+        $result = $this->service->stopUsage($orderModel);
+        $this->assertTrue($result);
+    }
+
+    public function teststopUsage_MeteredBillingDoesNotExists()
+    {
+        $orderModel = new \Model_ClientOrder();
+        $orderModel->loadBean(new \RedBeanPHP\OODBBean());
+
+        $meteredBillingServiceMock = $this->getMockBuilder('\Box\Mod\Meteredbilling\Service')->getMock();
+        $meteredBillingServiceMock->expects($this->atLeastOnce())
+            ->method('findActiveProductUsage')
+            ->willReturn(null);
+
+        $productModel = new \Model_Product();
+        $productModel->loadBean(new \RedBeanPHP\OODBBean());
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('load')
+            ->with('Product')
+            ->willReturn($productModel);
+
+
+        $di = new \Box_Di();
+        $di['mod_service'] = $di->protect(function ($serviceName) use($meteredBillingServiceMock){
+            if ($serviceName == 'MeteredBilling'){
+                return $meteredBillingServiceMock;
+            }
+        });
+        $di['db'] = $dbMock;
+
+        $this->service->setDi($di);
+
+        $result = $this->service->stopUsage($orderModel);
+        $this->assertFalse($result);
+    }
 
 
 }

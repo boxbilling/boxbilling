@@ -1,0 +1,31 @@
+<div class="row">
+    <article class="span12 data-block">
+        <div class="data-container">
+            <header>
+                <h2>{% trans 'Order usage' %}</h2>
+            </header>
+            <section class="tab-content">
+                <table class="table table-striped table-bordered table-condensed">
+                    <th>{% trans 'Product' %}</th>
+                    <th>{% trans 'Hours' %}</th>
+                    <th>{% trans 'Price / hour' %}</th>
+                    <th>{% trans 'Cost' %}</th>
+                    <th>{% trans 'Date From' %}</th>
+                    <th>{% trans 'Date To' %}</th>
+                    <th>{% trans 'Invoice' %}</th>
+                {% for usage in client.meteredbilling_get_order_usage_list({'order_id' : order.id}) %}
+                    <tr>
+                        <td>{{ usage.product_name }}</td>
+                        <td>{{ usage.duration / 3600 }}</td>
+                        <td>{{ usage.price * 3600 }}</td>
+                        <td>{{ (usage.duration * usage.price) | money_convert }}</td>
+                        <td>{{ usage.created_at  }}</td>
+                        <td>{{ usage.stopped_at }}</td>
+                        <td>{{ usage.serie}}{{ usage.nr}}</td>
+                    </tr>
+                {% endfor %}
+                </table>
+            </section>
+        </div>
+    </article>
+</div>

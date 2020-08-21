@@ -165,9 +165,16 @@ class Service implements InjectionAwareInterface
     public function getPaymentTypes()
     {
         return array(
+
+            \Model_ProductPayment::FREE      =>  'Free',
+            \Model_ProductPayment::ONCE      =>  'One time',
+            \Model_ProductPayment::RECURRENT =>  'Recurrent',
+            \Model_ProductPayment::METERED =>  'Metered',
+
             \Model_ProductPayment::FREE      => 'Free',
             \Model_ProductPayment::ONCE      => 'One time',
             \Model_ProductPayment::RECURRENT => 'Recurrent',
+
         );
     }
 
@@ -222,9 +229,20 @@ class Service implements InjectionAwareInterface
             $pricing              = $data['pricing'];
             $productPayment->type = $data['pricing']['type'];
 
+
+            if($data['pricing']['type'] == \Model_ProductPayment::METERED) {
+                $productPayment->metered_setup_price = $data['pricing']['metered']['setup'];
+                $productPayment->metered_price = $data['pricing']['metered']['price'];
+            }
+
+            if($data['pricing']['type'] == \Model_ProductPayment::ONCE) {
+                $productPayment->once_setup_price = $data['pricing']['once']['setup'];
+                $productPayment->once_price = $data['pricing']['once']['price'];
+
             if ($data['pricing']['type'] == \Model_ProductPayment::ONCE) {
                 $productPayment->once_setup_price = (float)$data['pricing']['once']['setup'];
                 $productPayment->once_price       = (float)$data['pricing']['once']['price'];
+
             }
 
             if ($data['pricing']['type'] == \Model_ProductPayment::RECURRENT) {
@@ -851,6 +869,7 @@ class Service implements InjectionAwareInterface
             \Model_ProductPayment::FREE      => array('price' => 0, 'setup' => 0),
             \Model_ProductPayment::ONCE      => array('price' => $model->once_price, 'setup' => $model->once_setup_price),
             \Model_ProductPayment::RECURRENT => $periods,
+            \Model_ProductPayment::METERED => array('price'=>$model->metered_price, 'setup'=>$model->metered_setup_price),
         );
     }
 
@@ -1069,4 +1088,73 @@ class Service implements InjectionAwareInterface
         );
     }
 
+
 }
+
+    public function getMeteredPrice($productId)
+    {
+        $product = $this->di['db']->load('Product', $productId);
+        $productPayment = $this->di['db']->load('ProductPayment', $product->product_payment_id);
+        if ($productPayment->type != 'metered'){
+            throw new \Box_Exception('Metered price is not set', 1124);
+        }
+        return $productPayment->metered_price;
+
+    }
+
+    /**
+     * Get list of changeable products (payment type must be metered)
+     * @param \Model_Product $product
+     * @return array
+     */
+    public function getChangeableProductPairs(\Model_Product $product)
+    {
+        $sql = 'SELECT product.id, product.title
+                FROM product
+                  LEFT JOIN product_payment on product.product_payment_id = product_payment.id
+                WHERE product.product_category_id = :product_category_id
+                  AND product.type = :type
+                  AND product_payment.type = :payment_type
+                  AND product.id != :id';
+
+        $bindings = array(
+            ':product_category_id' => $product->product_category_id,
+            ':type' => $product->type,
+            ':payment_type' => \Model_ProductPayment::METERED,
+            ':id' => $product->id,
+        );
+
+        $rows = $this->di['db']->getAll($sql, $bindings);
+        $result = array();
+        foreach ($rows as $record) {
+            $result[ $record['id'] ] = $record['title'];
+        }
+        return $result;
+    }
+
+    /**
+     * Get list of changeable products (payment type must be metered) for client view
+     * @param \Model_Product $product
+     * @return array
+     */
+    public function getChangeableProductPairsForClient(\Model_Product $product)
+    {
+        $sql = 'SELECT product.id, product.title, product_payment.metered_price
+                FROM product
+                  LEFT JOIN product_payment on product.product_payment_id = product_payment.id
+                WHERE product.product_category_id = :product_category_id
+                  AND product.type = :type
+                  AND product_payment.type = :payment_type';
+
+        $bindings = array(
+            ':product_category_id' => $product->product_category_id,
+            ':type' => $product->type,
+            ':payment_type' => \Model_ProductPayment::METERED,
+        );
+
+        $rows = $this->di['db']->getAll($sql, $bindings);
+        return $rows;
+    }
+
+}
+

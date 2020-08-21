@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.5.38, for debian-linux-gnu (x86_64)
+-- MySQL dump 10.13  Distrib 5.5.40, for debian-linux-gnu (x86_64)
 --
 -- Host: localhost    Database: boxbilling
 -- ------------------------------------------------------
--- Server version	5.5.38-0ubuntu0.14.04.1
+-- Server version	5.5.40-0ubuntu0.12.04.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -700,6 +700,28 @@ CREATE TABLE `kb_article_category` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `metered_usage`
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `metered_usage` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `client_id` bigint(20) NOT NULL,
+  `order_id` bigint(20) NOT NULL,
+  `plan_id` bigint(20) NOT NULL,
+  `product_id` bigint(20) NOT NULL,
+  `invoice_id` bigint(20) NOT NULL DEFAULT '0',
+  `duration` int NOT NULL COMMENT 'Duration in seconds',
+  `price` double(18,8) NOT NULL COMMENT 'Price for 1 duration item',
+  `created_at` datetime NOT NULL,
+  `stopped_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `order_id` (`order_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `mod_email_queue`
 --
 
@@ -882,6 +904,8 @@ CREATE TABLE `product_payment` (
   `a_enabled` tinyint(1) DEFAULT '1',
   `bia_enabled` tinyint(1) DEFAULT '1',
   `tria_enabled` tinyint(1) DEFAULT '1',
+  `metered_setup_price` decimal(18,2) DEFAULT '0.00',
+  `metered_price` decimal(18,2) DEFAULT '0.00',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1561,4 +1585,4 @@ CREATE TABLE `transaction` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-09-19 15:00:47
+-- Dump completed on 2014-12-04 13:40:11

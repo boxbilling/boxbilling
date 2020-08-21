@@ -1,0 +1,54 @@
+<a href="#change-metered-product" class="btn btn-info btn-small" type="button" id="open-metered-product" data-toggle="modal">{% trans 'Change product' %}</a>
+
+<div id="change-metered-product" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>
+            {% trans 'Change order product' %}
+        </h3>
+    </div>
+    <div class="modal-body">
+        <form action="" method="post" style="background: none" class="change-metered-product">
+            <fieldset>
+                <div class="control-group">
+                    <label>{% trans 'Products' %}: </label>
+                    <div class="controls">
+                        {% for product in client.product_get_changeable_products({"id" : order.product_id}) %}
+                        <label class="row">
+                            <span class="span1"><input type="radio" name="product_id" value="{{product.id}}" {% if order.product_id == product.id %}disabled="disabled"{% endif %} /></span>
+                            <span class="span2">{{ product.title|e }}</span>
+                            <span class="span1 label label-info">{{ product.metered_price | money_convert}} / {% trans 'hour' %}</span>
+                            <span class="span2">{% if order.product_id == product.id %}{% trans 'Current product' %}{% endif %}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                <input type="hidden" name="id" value="{{ order.id }}">
+            </fieldset>
+    </div>
+    <div class="modal-footer">
+        <input class="btn btn-primary btn-large" type="submit" value="{% trans 'Submit' %}">
+    </div>
+    </form>
+</div>
+
+{% autoescape true js %}
+<script type="text/javascript">
+    $(function() {
+
+        $('.change-metered-product').submit(function () {
+            $('.wait').show();
+            bb.post(
+                'client/order/change_order_product',
+                $(this).serialize(),
+                function (result) {
+                    $('#change-metered-product').modal('hide')
+                    bb.msg('Order product changed');
+                    $('.wait').hide();
+                }
+            );
+            return false;
+        });
+    });
+</script>
+{% endautoescape %}

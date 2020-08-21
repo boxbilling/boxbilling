@@ -348,5 +348,269 @@ class Api_ClientTest extends PHPUnit\Framework\TestCase
         $this->expectException(\Box_Exception::class);
         $this->api->get($data);
     }
+
+    public function testis_metered()
+    {
+        $data = array(
+            'id' => 1,
+        );
+
+        $model = new \Model_ClientOrder();
+        $model->loadBean(new \RedBeanPHP\OODBBean());
+
+
+        $serviceMock = $this->getMockBuilder('\Box\Mod\Order\Service')->getMock();
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('haveMeteredBilling')
+            ->with($model)
+            ->will($this->returnValue(true));
+
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('findForClientById')
+            ->willReturn($model);
+
+        $this->api->setService($serviceMock);
+
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->disableOriginalConstructor()->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray');
+
+        $di = new \Box_Di();
+        $di['validator'] = $validatorMock;
+
+        $this->api->setDi($di);
+
+        $identity = new \Model_Client();
+        $identity->loadBean(new \RedBeanPHP\OODBBean());
+        $this->api->setIdentity($identity);
+
+        $result = $this->api->is_metered($data);
+        $this->assertTrue($result);
+    }
+
+    public function testSuspend()
+    {
+        $client_id = 1;
+        $order = new Model_ClientOrder();
+        $order->loadBean(new \RedBeanPHP\OODBBean());
+        $order->client_id = $client_id;
+
+        $apiMock = $this->getMockBuilder('\\Box\Mod\Order\Api\Client')->setMethods(array('_getOrder'))->disableOriginalConstructor()->getMock();
+        $apiMock->expects($this->atLeastOnce())
+            ->method('_getOrder')
+            ->will($this->returnValue($order));
+
+        $serviceMock = $this->getMockBuilder('\Box\Mod\Order\Service')
+            ->setMethods(array('suspendFromOrder'))->getMock();
+        $serviceMock->expects($this->atLeastOnce())->method('suspendFromOrder')
+            ->will($this->returnValue(true));
+
+        $apiMock->setService($serviceMock);
+
+        $identity = new \Model_Client();
+        $identity->loadBean(new \RedBeanPHP\OODBBean());
+        $identity->id = $client_id;
+        $apiMock->setIdentity($identity);
+
+        $data   = array('id' => 1);
+        $result = $apiMock->suspend($data);
+
+        $this->assertTrue($result);
+    }
+
+    public function testSuspend_IdentityIdsMismatch()
+    {
+        $order = new Model_ClientOrder();
+        $order->loadBean(new \RedBeanPHP\OODBBean());
+        $order->client_id = 2;
+
+        $apiMock = $this->getMockBuilder('\\Box\Mod\Order\Api\Client')->setMethods(array('_getOrder'))->disableOriginalConstructor()->getMock();
+        $apiMock->expects($this->atLeastOnce())
+            ->method('_getOrder')
+            ->will($this->returnValue($order));
+
+        $identity = new \Model_Client();
+        $identity->loadBean(new \RedBeanPHP\OODBBean());
+        $identity->id = 1;
+        $apiMock->setIdentity($identity);
+
+        $data   = array('id' => 1);
+        $this->setExpectedException('\Box_Exception', 'Order was not found');
+        $apiMock->suspend($data);
+    }
+
+    public function testUnsuspend()
+    {
+        $client_id = 1;
+
+        $order = new Model_ClientOrder();
+        $order->loadBean(new \RedBeanPHP\OODBBean());
+        $order->status = Model_ClientOrder::STATUS_SUSPENDED;
+        $order->client_id = $client_id;
+
+        $apiMock = $this->getMockBuilder('\\Box\Mod\Order\Api\Client')->setMethods(array('_getOrder'))->disableOriginalConstructor()->getMock();
+        $apiMock->expects($this->atLeastOnce())
+            ->method('_getOrder')
+            ->will($this->returnValue($order));
+
+        $orderStatusModel = new \Model_ClientOrderStatus();
+        $orderStatusModel->loadBean(new \RedBeanPHP\OODBBean());
+        $orderStatusModel->notes = 'Order suspended for Client suspended order';
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('findOne')
+            ->with('ClientOrderStatus')
+            ->willReturn($orderStatusModel);
+
+        $di = new \Box_Di();
+        $di['db'] = $dbMock;
+        $apiMock->setDi($di);
+
+        $identity = new \Model_Client();
+        $identity->loadBean(new \RedBeanPHP\OODBBean());
+        $identity->id = $client_id;
+        $apiMock->setIdentity($identity);
+
+        $serviceMock = $this->getMockBuilder('\Box\Mod\Order\Service')
+            ->setMethods(array('unsuspendFromOrder'))->getMock();
+        $serviceMock->expects($this->atLeastOnce())->method('unsuspendFromOrder')
+            ->will($this->returnValue(true));
+
+        $apiMock->setService($serviceMock);
+
+        $data   = array('id' => 1);
+        $result = $apiMock->unsuspend($data);
+
+        $this->assertTrue($result);
+    }
+
+    public function testUnsuspend_AdministratorSuspended()
+    {
+        $client_id = 1;
+
+        $order = new Model_ClientOrder();
+        $order->loadBean(new \RedBeanPHP\OODBBean());
+        $order->status = Model_ClientOrder::STATUS_SUSPENDED;
+        $order->client_id = $client_id;
+
+        $apiMock = $this->getMockBuilder('\\Box\Mod\Order\Api\Client')->setMethods(array('_getOrder'))->disableOriginalConstructor()->getMock();
+        $apiMock->expects($this->atLeastOnce())
+            ->method('_getOrder')
+            ->will($this->returnValue($order));
+
+        $orderStatusModel = new \Model_ClientOrderStatus();
+        $orderStatusModel->loadBean(new \RedBeanPHP\OODBBean());
+        $orderStatusModel->notes = 'Order suspended for';
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('findOne')
+            ->with('ClientOrderStatus')
+            ->willReturn($orderStatusModel);
+
+        $di = new \Box_Di();
+        $di['db'] = $dbMock;
+        $apiMock->setDi($di);
+
+        $identity = new \Model_Client();
+        $identity->loadBean(new \RedBeanPHP\OODBBean());
+        $identity->id = $client_id;
+        $apiMock->setIdentity($identity);
+
+        $data   = array('id' => 1);
+        $this->setExpectedException('\Box_Exception', 'Order was suspended by administrator');
+        $apiMock->unsuspend($data);
+    }
+
+    public function testUnsuspendIdentityException()
+    {
+        $order = new Model_ClientOrder();
+        $order->loadBean(new \RedBeanPHP\OODBBean());
+        $order->status = Model_ClientOrder::STATUS_SUSPENDED;
+        $order->client_id = 2;
+
+        $apiMock = $this->getMockBuilder('\\Box\Mod\Order\Api\Client')->setMethods(array('_getOrder'))->disableOriginalConstructor()->getMock();
+        $apiMock->expects($this->atLeastOnce())
+            ->method('_getOrder')
+            ->will($this->returnValue($order));
+
+        $identity = new \Model_Client();
+        $identity->loadBean(new \RedBeanPHP\OODBBean());
+        $identity->id = 1;
+        $apiMock->setIdentity($identity);
+
+
+        $data   = array('id' => 1);
+        $this->setExpectedException('\Box_Exception', 'Order was not found');
+        $apiMock->unsuspend($data);
+    }
+
+    public function testUnsuspendNotSuspendedException()
+    {
+        $order = new Model_ClientOrder();
+        $order->loadBean(new \RedBeanPHP\OODBBean());
+        $order->status = Model_ClientOrder::STATUS_ACTIVE;
+
+        $apiMock = $this->getMockBuilder('\\Box\Mod\Order\Api\Client')->setMethods(array('_getOrder'))->disableOriginalConstructor()->getMock();
+        $apiMock->expects($this->atLeastOnce())
+            ->method('_getOrder')
+            ->will($this->returnValue($order));
+
+        $data   = array('id' => 1);
+        $this->setExpectedException('\Box_Exception', 'Only suspended orders can be unsuspended');
+        $apiMock->unsuspend($data);
+    }
+
+    public function testchange_order_product()
+    {
+        $data = array(
+            'id' => 1,
+            'product_id' => 2,
+        );
+
+        $modelOrder = new \Model_ClientOrder();
+        $modelOrder->loadBean(new \RedBeanPHP\OODBBean());
+
+        $modelProduct = new \Model_Product();
+        $modelProduct->loadBean(new \RedBeanPHP\OODBBean());
+
+        $validatorMock = $this->getMockBuilder('\Box_Validate')->disableOriginalConstructor()->getMock();
+        $validatorMock->expects($this->atLeastOnce())
+            ->method('checkRequiredParamsForArray')
+            ->will($this->returnValue(null));
+
+        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
+        $dbMock->expects($this->atLeastOnce())
+            ->method('getExistingModelById')
+            ->with('Product')
+            ->willReturn($modelProduct);
+
+        $di = new Box_Di();
+        $di['db'] = $dbMock;
+        $di['validator'] = $validatorMock;
+
+        $apiMock = $this->getMockBuilder('\Box\Mod\Order\Api\Client')
+            ->setMethods(array('_getOrder'))
+            ->disableOriginalConstructor()
+            ->getMock();
+        $apiMock->expects($this->atLeastOnce())
+            ->method('_getOrder')
+            ->will($this->returnValue($modelOrder));
+
+        $apiMock->setDi($di);
+
+        $serviceMock = $this->getMockBuilder('\Box\Mod\Order\Service')->getMock();
+        $serviceMock->expects($this->atLeastOnce())
+            ->method('changeOrderProduct')
+            ->will($this->returnValue(true));
+        $apiMock->setService($serviceMock);
+
+        $identity = new \Model_Client();
+        $apiMock->setIdentity($identity);
+
+        $result = $apiMock->change_order_product($data);
+        $this->assertTrue($result);
+    }
 }
  

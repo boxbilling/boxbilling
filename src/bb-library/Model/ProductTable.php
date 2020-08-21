@@ -115,6 +115,10 @@ class Model_ProductTable implements \Box\InjectionAwareInterface
             $price = (float)$pp->once_setup_price;
         }
 
+        if($pp->type == Model_ProductPayment::METERED) {
+            $price = (float)$pp->metered_setup_price;
+        }
+
         if($pp->type == Model_ProductPayment::RECURRENT) {
             $period = new Box_Period($config['period']);
             $key = $this->_getPeriodKey($period);
@@ -145,6 +149,10 @@ class Model_ProductTable implements \Box\InjectionAwareInterface
 
         if($pp->type == Model_ProductPayment::ONCE) {
             $price = $pp->once_price;
+        }
+
+        if($pp->type == Model_ProductPayment::METERED) {
+            $price = 0;
         }
 
         if($pp->type == Model_ProductPayment::RECURRENT) {

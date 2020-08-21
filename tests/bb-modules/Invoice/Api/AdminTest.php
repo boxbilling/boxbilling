@@ -351,9 +351,16 @@ class AdminTest extends \BBTestCase {
             ->method('getExistingModelById')
             ->will($this->returnValue($model));
 
+        $orderServiceMock = $this->getMockBuilder('\Box\Mod\Order\Service')->getMock();
+
         $di = new \Box_Di();
         $di['validator'] = $validatorMock;
         $di['db'] = $dbMock;
+        $di['mod_service'] = $di->protect(function ($serviceName) use ($orderServiceMock) {
+            if ($serviceName == 'Order'){
+                return $orderServiceMock;
+            }
+        });
 
         $this->api->setDi($di);
         $this->api->setService($serviceMock);
@@ -382,9 +389,20 @@ class AdminTest extends \BBTestCase {
             ->method('getExistingModelById')
             ->will($this->returnValue($model));
 
+        $orderServiceMock = $this->getMockBuilder('\Box\Mod\Order\Service')->getMock();
+        $orderServiceMock->expects($this->atLeastOnce())
+            ->method('haveMeteredBilling')
+            ->with($model)
+            ->willReturn(false);
+
         $di = new \Box_Di();
         $di['validator'] = $validatorMock;
         $di['db'] = $dbMock;
+        $di['mod_service'] = $di->protect(function ($serviceName) use ($orderServiceMock) {
+            if ($serviceName == 'Order'){
+                return $orderServiceMock;
+            }
+        });
 
         $this->api->setDi($di);
 

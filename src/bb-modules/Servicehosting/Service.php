@@ -12,7 +12,9 @@
 
 namespace Box\Mod\Servicehosting;
 use Box\InjectionAwareInterface;
-class Service implements InjectionAwareInterface
+use Box\MeteredInterface;
+
+class Service implements InjectionAwareInterface, MeteredInterface
 {
     /**
      * @var \Box_Di
@@ -33,6 +35,35 @@ class Service implements InjectionAwareInterface
     public function getDi()
     {
         return $this->di;
+    }
+
+    public function setUsage(\Model_ClientOrder $clientOrder)
+    {
+        if ($clientOrder->status != \Model_ClientOrder::STATUS_ACTIVE){
+            return false;
+        }
+        $meteredBillingService = $this->di['mod_service']('MeteredBilling');
+        $productModel = $this->di['db']->load('Product', $clientOrder->product_id);
+        $meteredUsageModel = $meteredBillingService->findActiveProductUsage($clientOrder->client_id, $clientOrder->id, $productModel->id);
+        if (isset($meteredUsageModel)){
+            error_log(sprintf("Order#%d has active metered billing #%d", $clientOrder->id, $meteredUsageModel->id));
+            return false;
+        }
+        $model = $meteredBillingService->create($clientOrder);
+        return $meteredBillingService->save($model);
+    }
+
+    public function stopUsage (\Model_ClientOrder $clientOrder)
+    {
+        $productModel = $this->di['db']->load('Product', $clientOrder->product_id);
+
+        $meteredBillingService = $this->di['mod_service']('MeteredBilling');
+        $meteredUsageModel = $meteredBillingService->findActiveProductUsage($clientOrder->client_id, $clientOrder->id, $productModel->id);
+        if (!isset($meteredUsageModel)){
+            error_log(sprintf("Order#%d has not active metered billing", $clientOrder->id));
+            return false;
+        }
+        return $meteredBillingService->stopUsage($meteredUsageModel);
     }
 
     public function getCartProductTitle($product, array $data)

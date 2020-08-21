@@ -63,7 +63,11 @@
 
                     <tr>
                         <td><label>{% trans 'Payment amount' %}</label></td>
+                        {% if (admin.order_is_metered({"id":order.id})) %}
+                            <td>-{{ mf.currency_format( admin.meteredbilling_get_total_cost({"order_id":order.id}), order.currency) }}</td>
+                        {% else %}
                         <td>{{ mf.currency_format( order.total, order.currency) }} {% if order.period %}{{mf.period_name(order.period)}}{% endif %} {% if order.quantity > 1 %}({{ order.quantity }} x {{ mf.currency_format( order.price, order.currency) }}){% endif %}</td>
+                        {% endif %}
                     </tr>
 
                     {% if order.discount and order.discount > 0%}
@@ -330,7 +334,28 @@
                 </fieldset>
             </form>
             {% endif #}
+
+            <div class="help">
+                <h2>{% trans 'Change product' %}</h2>
+            </div>
+
+            <form action="{{ 'api/admin/order/change_order_product'|link }}" method="post" class="mainForm api-form save" data-api-msg="{% trans 'Hosting plan changed' %}">
+                <fieldset>
+                    <div class="rowElem noborder">
+                        <label>{% trans 'Change product to' %}:</label>
+                        <div class="formRight">
+                            {{ mf.selectbox('product_id', admin.product_get_changeable_products({"id" : order.product_id}), order.product_id, 1) }}
+                        </div>
+                        <div class="fix"></div>
+                    </div>
+
+                    <input type="hidden" name="id" value="{{ order.id }}">
+                    <input type="submit" value="{% trans 'Change' %}" class="greyishBtn submitForm" />
+                </fieldset>
+            </form>
         </div>
+
+
 
         <div class="tab_content nopadding" id="tab-config">
             <div class="help">

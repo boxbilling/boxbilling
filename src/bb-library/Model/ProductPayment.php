@@ -16,4 +16,5 @@ class Model_ProductPayment extends RedBean_SimpleModel
     const FREE      = 'free';
     const ONCE      = 'once';
     const RECURRENT = 'recurrent';
+    const METERED   = 'metered';
 }

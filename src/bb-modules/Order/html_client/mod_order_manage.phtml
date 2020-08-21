@@ -4,7 +4,7 @@
 {% set addons = client.order_addons({"id":order.id}) %}
 
 {% block breadcrumb %}
-<li><a href="{{ 'service' | link}}">{% trans 'Orders' %}</a><span class="divider">/</span></li>
+<li><a href="{{ 'order/service' | link}}">{% trans 'Orders' %}</a><span class="divider">/</span></li>
 {{ order.title }}
 {% endblock %}
 
@@ -35,7 +35,11 @@
 
                     <tr>
                         <td><label>{% trans 'Payment amount' %}</label></td>
-                        <td>{{ order.total | money(order.currency) }}</td>
+                        {% if (client.order_is_metered({"id":order.id})) %}
+                            <td>-{{ mf.currency_format( client.meteredbilling_get_total_cost({"order_id":order.id}), order.currency) }}</td>
+                        {% else %}
+                            <td>{{ order.total | money(order.currency) }}</td>
+                        {% endif %}
                     </tr>
 
                     {% if order.period %}
@@ -102,6 +106,16 @@
                             
                             {% if order.status == 'active' %}
                             <a href="#submit-cancellation-ticket" class="btn btn-primary btn-warning btn-small" type="button" data-toggle="modal">{% trans 'Request Cancellation' %}</a>
+                            {% endif %}
+
+                            {% if (client.order_is_metered({"id":order.id})) %}
+                                {% if (order.status == 'active') %}
+                                    <a href="#submit-suspend-order" id="suspend-order" data-order="{{ order.id }}" class="btn btn-primary btn-info btn-small" type="button" >{% trans 'Suspend order' %}</a>
+                                {% endif %}
+                                {% if (order.status == 'suspended') %}
+                                    <a href="#submit-unsuspend-order" id="unsuspend-order" data-order="{{ order.id }}" class="btn btn-primary btn-info btn-small" type="button" >{% trans 'Unsuspend order' %}</a>
+                                {% endif %}
+                                {% include 'mod_meteredbilling_changeproduct.phtml' with {'order': order} %}
                             {% endif %}
 
                         </td>
@@ -295,6 +309,10 @@
     {# trans 'Service does not have configuration page' #}
 {% endif %}
 
+{% if guest.system_template_exists({"file":"mod_meteredbilling_orderusage.phtml"}) and client.order_is_metered({"id" : order.id}) %}
+    {% include 'mod_meteredbilling_orderusage.phtml' with {'order': order, 'service': service} %}
+{% endif %}
+
 {% endblock %}
 
 {% block js %}
@@ -351,6 +369,30 @@ $(function() {
                 $('#submit-upgrade-ticket').modal('hide')
                 bb.msg('Service upgrade request received');
                 $('.wait').hide();
+            }
+        );
+        return false;
+    });
+
+    $('#suspend-order').on('click', function(){
+        var order_id = $(this).data('order');
+        bb.post(
+            'client/order/suspend',
+            {'id' : order_id},
+            function(result) {
+                bb.msg('Order suspended');
+            }
+        );
+        return false;
+    });
+
+    $('#unsuspend-order').on('click', function(){
+        var order_id = $(this).data('order');
+        bb.post(
+            'client/order/unsuspend',
+            {'id' : order_id},
+            function(result) {
+                bb.msg('Order unsuspended');
             }
         );
         return false;

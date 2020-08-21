@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<dataset>
+    <metered_usage />
+    <metered_usage id="1" client_id="1" order_id="1" plan_id="1" product_id="1" invoice_id="0" duration="75114" price="0.00001388" created_at="2014-12-08 12:23:24" stopped_at="2014-12-09 09:15:18"/>
+    <metered_usage id="2" client_id="1" order_id="1" plan_id="2" product_id="2" invoice_id="0" duration="707" price="0.00027777" created_at="2014-12-09 09:15:18" stopped_at="2014-12-09 09:15:18"/>
+    <metered_usage id="3" client_id="1" order_id="1" plan_id="1" product_id="1" invoice_id="0" duration="0" price="0.00001388" created_at="2014-12-09 09:27:05" stopped_at="null"/>
+
+    <product />
+    <product id="1" product_category_id="1" product_payment_id="13" type="hosting" title="Metered hosting" description="shared hosting with metered billing" unit="product" active="1" is_addon="0" addons="" config='{"server_id":"1", "hosting_plan_id":"1"}' setup="after_payment" plugin="" created_at="2011-01-01T12:00:00+00:00" updated_at="2011-01-01T12:00:00+00:00"/>
+    <product id="2" product_category_id="1" product_payment_id="14" type="hosting" title="Metered hosting v2" description="shared hosting with metered billing" unit="product" active="1" is_addon="0" addons="" config='{"server_id":"1", "hosting_plan_id":"2"}' setup="after_payment" plugin="" created_at="2011-01-01T12:00:00+00:00" updated_at="2011-01-01T12:00:00+00:00"/>
+
+    <product_payment />
+    <product_payment id="13" type="metered" metered_price="0.05" metered_setup_price="9.99" />
+    <product_payment id="14" type="metered" metered_price="1.00" metered_setup_price="9.99" />
+
+    <client_order />
+</dataset>
