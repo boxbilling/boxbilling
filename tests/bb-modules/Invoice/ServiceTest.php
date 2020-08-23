@@ -14,7 +14,7 @@ class ServiceTest extends \BBTestCase
      */
     protected $service = null;
 
-    public function setup()
+    public function setup(): void
     {
         $this->service = new \Box\Mod\Invoice\Service();
     }
@@ -147,8 +147,8 @@ class ServiceTest extends \BBTestCase
         });
         $this->service->setDi($di);
         $result = $this->service->getSearchQuery($data);
-        $this->assertInternalType('string', $result[0]);
-        $this->assertInternalType('array', $result[1]);
+        $this->assertIsString($result[0]);
+        $this->assertIsArray($result[1]);
 
         $this->assertTrue(strpos($result[0], $expectedStr) !== false, $result[0]);
         $this->assertTrue(array_diff_key($result[1], $expectedParams) == array());
@@ -249,7 +249,7 @@ class ServiceTest extends \BBTestCase
         $this->service->setDi($di);
 
         $result = $this->service->toApiArray($invoiceModel);
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
     }
 
     public function testonAfterAdminInvoicePaymentReceived()
@@ -301,7 +301,7 @@ class ServiceTest extends \BBTestCase
             ->will($this->returnValue($di));
 
         $result = $this->service->onAfterAdminInvoicePaymentReceived($eventMock);
-        $this->assertInternalType('bool', $result);
+        $this->assertIsBool($result);
         $this->assertTrue($result);
     }
 
@@ -356,7 +356,7 @@ class ServiceTest extends \BBTestCase
 
 
         $result = $this->service->onAfterAdminInvoicePaymentReceived($eventMock);
-        $this->assertInternalType('bool', $result);
+        $this->assertIsBool($result);
         $this->assertTrue($result);
     }
 
@@ -504,7 +504,7 @@ class ServiceTest extends \BBTestCase
 
         $serviceMock->setDi($di);
         $result = $serviceMock->markAsPaid($invoiceModel, true, true);
-        $this->assertInternalType('bool', $result);
+        $this->assertIsBool($result);
         $this->assertTrue($result);
     }
 
@@ -537,7 +537,7 @@ class ServiceTest extends \BBTestCase
         $this->service->setDi($di);
 
         $result = $this->service->getNextInvoiceNumber($invoiceModel);
-        $this->assertInternalType('int', $result);
+        $this->assertIsInt($result);
         $this->assertEquals($expected, $result);
     }
 
@@ -767,7 +767,7 @@ class ServiceTest extends \BBTestCase
         $invoiceModel->loadBean(new \RedBeanPHP\OODBBean());
 
         $result = $serviceMock->getTotalWithTax($invoiceModel);
-        $this->assertInternalType('float', $result);
+        $this->assertIsFloat($result);
         $this->assertEquals($expected, $result);
     }
 
@@ -797,7 +797,7 @@ class ServiceTest extends \BBTestCase
 
         $this->service->setDi($di);
         $result = $this->service->getTotal($invoiceModel);
-        $this->assertInternalType('float', $result);
+        $this->assertIsFloat($result);
         $this->assertEquals($itemTotal, $result);
     }
 
@@ -858,7 +858,7 @@ class ServiceTest extends \BBTestCase
 
         $serviceMock->setDi($di);
         $result = $serviceMock->refundInvoice($invoiceModel, 'custonNote');
-        $this->assertInternalType('int', $result);
+        $this->assertIsInt($result);
         $this->assertEquals($newId, $result);
     }
 
@@ -1046,7 +1046,8 @@ class ServiceTest extends \BBTestCase
 
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', sprintf("Invoice is related to order #%d. Please cancel order first.", $rel_id));
+        $this->expectException(\Box_Exception::class);
+        $this->expectExceptionMessage(sprintf("Invoice is related to order #%d. Please cancel order first.", $rel_id));
         $this->service->deleteInvoiceByClient($invoiceModel);
     }
 
@@ -1079,7 +1080,7 @@ class ServiceTest extends \BBTestCase
 
         $serviceMock->setDi($di);
         $result = $serviceMock->renewInvoice($clientOrder, array());
-        $this->assertInternalType('int', $result);
+        $this->assertIsInt($result);
         $this->assertEquals($newId, $result);
     }
 
@@ -1108,7 +1109,7 @@ class ServiceTest extends \BBTestCase
 
         $serviceMock->setDi($di);
         $result = $serviceMock->doBatchPayWithCredits(array());
-        $this->assertInternalType('bool', $result);
+        $this->assertIsBool($result);
         $this->assertTrue($result);
     }
 
@@ -1128,7 +1129,7 @@ class ServiceTest extends \BBTestCase
 
         $serviceMock->setDi($di);
         $result = $serviceMock->payInvoiceWithCredits($invoiceModel);
-        $this->assertInternalType('bool', $result);
+        $this->assertIsBool($result);
         $this->assertTrue($result);
     }
 
@@ -1260,6 +1261,10 @@ class ServiceTest extends \BBTestCase
         $clientOrder->price = 0;
 
 
+        $this->expectException(\Box_Exception::class);
+        $this->expectExceptionMessage('Invoices are not generated for 0 amount orders');
+
+
         $orderServiceMock = $this->getMockBuilder('\Box\Mod\Order\Service')->getMock();
         $orderServiceMock->expects($this->atLeastOnce())
             ->method('haveMeteredBilling')
@@ -1275,6 +1280,7 @@ class ServiceTest extends \BBTestCase
         $this->service->setDi($di);
 
         $this->setExpectedException('\Box_Exception', 'Invoices are not generated for 0 amount orders');
+
         $this->service->generateForOrder($clientOrder);
     }
 
@@ -1290,7 +1296,7 @@ class ServiceTest extends \BBTestCase
 
         $this->service->setDi($di);
         $result = $this->service->generateInvoicesForExpiringOrders();
-        $this->assertInternalType('bool', $result);
+        $this->assertIsBool($result);
         $this->assertTrue($result);
     }
 
@@ -1331,7 +1337,7 @@ class ServiceTest extends \BBTestCase
 
         $serviceMock->setDi($di);
         $result = $serviceMock->generateInvoicesForExpiringOrders();
-        $this->assertInternalType('bool', $result);
+        $this->assertIsBool($result);
         $this->assertTrue($result);
     }
 
@@ -1360,7 +1366,7 @@ class ServiceTest extends \BBTestCase
 
         $this->service->setDi($di);
         $result = $this->service->doBatchPaidInvoiceActivation();
-        $this->assertInternalType('bool', $result);
+        $this->assertIsBool($result);
         $this->assertTrue($result);
     }
 
@@ -1390,7 +1396,7 @@ class ServiceTest extends \BBTestCase
 
         $this->service->setDi($di);
         $result = $this->service->doBatchPaidInvoiceActivation();
-        $this->assertInternalType('bool', $result);
+        $this->assertIsBool($result);
         $this->assertTrue($result);
     }
 
@@ -1418,7 +1424,7 @@ class ServiceTest extends \BBTestCase
 
         $serviceMock->setDi($di);
         $result = $serviceMock->doBatchRemindersSend();
-        $this->assertInternalType('bool', $result);
+        $this->assertIsBool($result);
         $this->assertTrue($result);
     }
 
@@ -1449,7 +1455,7 @@ class ServiceTest extends \BBTestCase
         $this->service->setDi($di);
 
         $result = $this->service->doBatchInvokeDueEvent(array());
-        $this->assertInternalType('bool', $result);
+        $this->assertIsBool($result);
         $this->assertTrue($result);
     }
 
@@ -1460,7 +1466,7 @@ class ServiceTest extends \BBTestCase
         $invoiceModel->status = \Model_Invoice::STATUS_PAID;
 
         $result = $this->service->sendInvoiceReminder($invoiceModel);
-        $this->assertInternalType('bool', $result);
+        $this->assertIsBool($result);
         $this->assertTrue($result);
     }
 
@@ -1485,7 +1491,7 @@ class ServiceTest extends \BBTestCase
         $this->service->setDi($di);
 
         $result = $this->service->sendInvoiceReminder($invoiceModel);
-        $this->assertInternalType('bool', $result);
+        $this->assertIsBool($result);
         $this->assertTrue($result);
     }
 
@@ -1505,7 +1511,7 @@ class ServiceTest extends \BBTestCase
 
         $this->service->setDi($di);
         $result = $this->service->counter();
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
     }
 
     public function testgenerateFundsInvoiceNoActiveOrder()
@@ -1513,7 +1519,8 @@ class ServiceTest extends \BBTestCase
         $clientModel = new \Model_Client();
         $clientModel->loadBean(new \RedBeanPHP\OODBBean());
 
-        $this->setExpectedException('\Box_Exception', 'You must have at least one active order before you can add funds so you cannot proceed at the current time!');
+        $this->expectException(\Box_Exception::class);
+        $this->expectExceptionMessage('You must have at least one active order before you can add funds so you cannot proceed at the current time!');
         $this->service->generateFundsInvoice($clientModel, 10);
     }
 
@@ -1536,7 +1543,9 @@ class ServiceTest extends \BBTestCase
 
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Amount is not valid', 981);
+        $this->expectException(\Box_Exception::class);
+        $this->expectExceptionCode(981);
+        $this->expectExceptionMessage('Amount is not valid');
         $this->service->generateFundsInvoice($clientModel, $fundsAmount);
     }
 
@@ -1559,7 +1568,9 @@ class ServiceTest extends \BBTestCase
 
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Amount is not valid', 982);
+        $this->expectException(\Box_Exception::class);
+        $this->expectExceptionCode(982);
+        $this->expectExceptionMessage('Amount is not valid');
         $this->service->generateFundsInvoice($clientModel, $fundsAmount);
     }
 
@@ -1632,7 +1643,9 @@ class ServiceTest extends \BBTestCase
 
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Invoice not found', 812);
+        $this->expectException(\Box_Exception::class);
+        $this->expectExceptionCode(812);
+        $this->expectExceptionMessage('Invoice not found');
         $this->service->processInvoice($data);
     }
 
@@ -1659,7 +1672,9 @@ class ServiceTest extends \BBTestCase
 
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Payment method not found', 813);
+        $this->expectException(\Box_Exception::class);
+        $this->expectExceptionCode(813);
+        $this->expectExceptionMessage('Payment method not found');
         $this->service->processInvoice($data);
     }
 
@@ -1689,7 +1704,9 @@ class ServiceTest extends \BBTestCase
 
         $this->service->setDi($di);
 
-        $this->setExpectedException('\Box_Exception', 'Payment method not enabled', 814);
+        $this->expectException(\Box_Exception::class);
+        $this->expectExceptionCode(814);
+        $this->expectExceptionMessage('Payment method not enabled');
         $this->service->processInvoice($data);
     }
 
@@ -1763,7 +1780,7 @@ class ServiceTest extends \BBTestCase
         $serviceMock->setDi($di);
         $result = $serviceMock->processInvoice($data);
 
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertArrayHasKey('type', $result);
         $this->assertArrayHasKey('service_url', $result);
         $this->assertArrayHasKey('subscription', $result);
@@ -1812,7 +1829,7 @@ class ServiceTest extends \BBTestCase
         $this->service->setDi($di);
 
         $result = $this->service->findAllUnpaid();
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
     }
 
     public function testfindAllPaid()
@@ -1830,7 +1847,7 @@ class ServiceTest extends \BBTestCase
         $this->service->setDi($di);
 
         $result = $this->service->findAllPaid();
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertInstanceOf('\Model_Invoice', $result[0]);
     }
 
@@ -1850,7 +1867,7 @@ class ServiceTest extends \BBTestCase
         $this->service->setDi($di);
 
         $result = $this->service->getUnpaidInvoicesLateFor();
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertInstanceOf('\Model_Invoice', $result[0]);
     }
 
@@ -1874,7 +1891,7 @@ class ServiceTest extends \BBTestCase
         );
 
         $result = $this->service->getBuyer($invoiceModel);
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertEquals($expected, $result);
     }
 

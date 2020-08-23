@@ -981,6 +981,7 @@ class Service implements InjectionAwareInterface
         }
 
         $discount = 0;
+        $quantity = 1;
 
         switch ($promo->type) {
             case \Model_Promo::ABSOLUTE:
@@ -988,7 +989,12 @@ class Service implements InjectionAwareInterface
                 break;
 
             case \Model_Promo::PERCENTAGE:
-                $discount += round(($price * $promo->value / 100), 2);
+
+                if(isset($config['quantity']) && is_numeric($config['quantity'])){
+                    $quantity = $config['quantity'];
+                }
+                
+                $discount += round(($price * $quantity * $promo->value / 100), 2);
                 break;
 
             default:
@@ -1082,6 +1088,9 @@ class Service implements InjectionAwareInterface
         );
     }
 
+
+}
+
     public function getMeteredPrice($productId)
     {
         $product = $this->di['db']->load('Product', $productId);
@@ -1148,3 +1157,4 @@ class Service implements InjectionAwareInterface
     }
 
 }
+
