@@ -159,6 +159,51 @@ UNLOCK TABLES;
 # Dump of table extension_meta
 # ------------------------------------------------------------
 
+LOCK TABLES `extension_meta` WRITE;
+/*!40000 ALTER TABLE `extension_meta` DISABLE KEYS */;
+
+INSERT INTO `extension_meta` (`id`, `client_id`, `extension`, `rel_type`, `rel_id`, `meta_key`, `meta_value`, `created_at`, `updated_at`)
+VALUES
+	(1,NULL,'mod_hook','mod','activity','listener','onAfterClientLogin','2014-09-16T06:33:40-04:00','2014-09-16T06:33:40-04:00'),
+	(2,NULL,'mod_hook','mod','activity','listener','onAfterAdminLogin','2014-09-16T06:33:40-04:00','2014-09-16T06:33:40-04:00'),
+	(3,NULL,'mod_hook','mod','client','listener','onAfterClientSignUp','2014-09-16T06:33:40-04:00','2014-09-16T06:33:40-04:00'),
+	(4,NULL,'mod_hook','mod','extension','listener','onBeforeAdminCronRun','2014-09-16T06:33:40-04:00','2014-09-16T06:33:40-04:00'),
+	(5,NULL,'mod_hook','mod','forum','listener','onAfterClientCreateForumTopic','2014-09-16T06:33:40-04:00','2014-09-16T06:33:40-04:00'),
+	(6,NULL,'mod_hook','mod','forum','listener','onAfterAdminRepliedInForum','2014-09-16T06:33:40-04:00','2014-09-16T06:33:40-04:00'),
+	(7,NULL,'mod_hook','mod','forum','listener','onAfterClientRepliedInForum','2014-09-16T06:33:40-04:00','2014-09-16T06:33:40-04:00'),
+	(8,NULL,'mod_hook','mod','hook','listener','onAfterAdminActivateExtension','2014-09-16T06:33:40-04:00','2014-09-16T06:33:40-04:00'),
+	(9,NULL,'mod_hook','mod','hook','listener','onAfterAdminDeactivateExtension','2014-09-16T06:33:40-04:00','2014-09-16T06:33:40-04:00'),
+	(10,NULL,'mod_hook','mod','invoice','listener','onAfterAdminInvoicePaymentReceived','2014-09-16T06:33:40-04:00','2014-09-16T06:33:40-04:00'),
+	(11,NULL,'mod_hook','mod','invoice','listener','onAfterAdminInvoiceApprove','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(12,NULL,'mod_hook','mod','invoice','listener','onAfterAdminInvoiceReminderSent','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(13,NULL,'mod_hook','mod','invoice','listener','onAfterAdminCronRun','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(14,NULL,'mod_hook','mod','invoice','listener','onEventAfterInvoiceIsDue','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(15,NULL,'mod_hook','mod','order','listener','onAfterAdminOrderActivate','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(16,NULL,'mod_hook','mod','order','listener','onAfterAdminOrderRenew','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(17,NULL,'mod_hook','mod','order','listener','onAfterAdminOrderSuspend','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(18,NULL,'mod_hook','mod','order','listener','onAfterAdminOrderUnsuspend','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(19,NULL,'mod_hook','mod','order','listener','onAfterAdminOrderCancel','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(20,NULL,'mod_hook','mod','order','listener','onAfterAdminOrderUncancel','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(21,NULL,'mod_hook','mod','servicedomain','listener','onBeforeAdminCronRun','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(22,NULL,'mod_hook','mod','staff','listener','onAfterClientOrderCreate','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(23,NULL,'mod_hook','mod','staff','listener','onAfterClientOpenTicket','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(24,NULL,'mod_hook','mod','staff','listener','onAfterClientReplyTicket','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(25,NULL,'mod_hook','mod','staff','listener','onAfterClientCloseTicket','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(26,NULL,'mod_hook','mod','staff','listener','onAfterGuestPublicTicketOpen','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(27,NULL,'mod_hook','mod','staff','listener','onAfterClientSignUp','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(28,NULL,'mod_hook','mod','staff','listener','onAfterGuestPublicTicketReply','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(29,NULL,'mod_hook','mod','staff','listener','onAfterGuestPublicTicketClose','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(30,NULL,'mod_hook','mod','support','listener','onAfterClientOpenTicket','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(31,NULL,'mod_hook','mod','support','listener','onAfterAdminOpenTicket','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(32,NULL,'mod_hook','mod','support','listener','onAfterAdminCloseTicket','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(33,NULL,'mod_hook','mod','support','listener','onAfterAdminReplyTicket','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(34,NULL,'mod_hook','mod','support','listener','onAfterGuestPublicTicketOpen','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(35,NULL,'mod_hook','mod','support','listener','onAfterAdminPublicTicketOpen','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(36,NULL,'mod_hook','mod','support','listener','onAfterAdminPublicTicketReply','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00'),
+	(37,NULL,'mod_hook','mod','support','listener','onAfterAdminPublicTicketClose','2014-09-16T06:33:41-04:00','2014-09-16T06:33:41-04:00');
+
+/*!40000 ALTER TABLE `extension_meta` ENABLE KEYS */;
+UNLOCK TABLES;
 
 
 # Dump of table form
