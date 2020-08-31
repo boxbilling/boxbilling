@@ -36,25 +36,6 @@ class ServiceTest extends \BBTestCase {
             ->setMethods(array('_exec'))
             ->getMock();
 
-
-        $serviceMock->expects($this->exactly(14))
-            ->method('_exec')
-            ->withConsecutive(
-                array($this->equalTo($apiAdmin), $this->equalTo('hook_batch_connect')),
-                array($this->equalTo($apiAdmin), $this->equalTo('invoice_batch_pay_with_credits')),
-                array($this->equalTo($apiAdmin), $this->equalTo('invoice_batch_activate_paid')),
-                array($this->equalTo($apiAdmin), $this->equalTo('invoice_batch_send_reminders')),
-                array($this->equalTo($apiAdmin), $this->equalTo('invoice_batch_generate')),
-                array($this->equalTo($apiAdmin), $this->equalTo('invoice_batch_invoke_due_event')),
-                array($this->equalTo($apiAdmin), $this->equalTo('order_batch_suspend_expired')),
-                array($this->equalTo($apiAdmin), $this->equalTo('order_batch_cancel_suspended')),
-                array($this->equalTo($apiAdmin), $this->equalTo('support_batch_ticket_auto_close')),
-                array($this->equalTo($apiAdmin), $this->equalTo('support_batch_public_ticket_auto_close')),
-                array($this->equalTo($apiAdmin), $this->equalTo('client_batch_expire_password_reminders')),
-                array($this->equalTo($apiAdmin), $this->equalTo('cart_batch_expire')),
-                array($this->equalTo($apiAdmin), $this->equalTo('meteredbilling_cron_generate_invoices')),
-                array($this->equalTo($apiAdmin), $this->equalTo('meteredbilling_cron_suspend_orders'))
-
         $serviceMock->expects($this->exactly(13))
             ->method('_exec')
             ->withConsecutive(
@@ -71,7 +52,6 @@ class ServiceTest extends \BBTestCase {
                 array($this->equalTo($apiSystem), $this->equalTo('client_batch_expire_password_reminders')),
                 array($this->equalTo($apiSystem), $this->equalTo('cart_batch_expire')),
                 array($this->equalTo($apiSystem), $this->equalTo('email_batch_sendmail'))
-
             );
 
         $systemServiceMock = $this->getMockBuilder('\Box\Mod\System\Service')->getMock();

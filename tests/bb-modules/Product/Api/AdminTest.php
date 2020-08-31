@@ -754,91 +754,38 @@ class AdminTest extends \BBTestCase {
         $this->assertTrue($result);
     }
 
-    public function testget_is_metered_ProductServiceHasMeteredInterface()
-    {
-        $data = array('id' => 1);
-        $model = new \Model_Product();
-        $model->loadBean(new \RedBeanPHP\OODBBean());
-        $model->type = 'hosting';
-
-        $hostingServiceMock = $this->getMockBuilder('\Box\Mod\Servicehosting\Service')->getMock();
-        $di = new \Box_Di();
-
-        $di['mod_service'] = $di->protect(function ($service) use ($hostingServiceMock){
-            if ($service == 'servicehosting'){
-                return $hostingServiceMock;
-            }
-            return null;
-        });
-        $model->setDi($di);
-        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
-        $dbMock->expects($this->atLeastOnce())
-            ->method('load')
-            ->will($this->returnValue($model));
-
-        $di['db'] = $dbMock;
-        $this->api->setDi($di);
-
-        $result = $this->api->is_metered($data);
-        $this->assertInternalType('bool', $result);
-        $this->assertTrue($result);
-    }
-
-    public function testget_is_metered_NoMeteredInterface()
-    {
-        $data = array('id' => 1);
-        $model = new \Model_Product();
-        $model->loadBean(new \RedBeanPHP\OODBBean());
-        $model->type = 'domain';
-
-        $productDomainService = $this->getMockBuilder('\Box\Mod\Servicedomain\Service')->getMock();
-        $di = new \Box_Di();
-        $di['mod_service'] = $di->protect(function ($service) use ($productDomainService){
-            if ($service == 'servicedomain'){
-                return $productDomainService;
-            }
-            return null;
-        });
-        $model->setDi($di);
-
-        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
-        $dbMock->expects($this->atLeastOnce())
-            ->method('load')
-            ->will($this->returnValue($model));
-
-        $di['db'] = $dbMock;
-        $this->api->setDi($di);
 
 
-        $result = $this->api->is_metered($data);
-        $this->assertInternalType('bool', $result);
-        $this->assertFalse($result);
-    }
 
-    public function testget_changeable_products()
-    {
-        $data = array('id' => 1);
-        $model = new \Model_Product();
-        $model->loadBean(new \RedBeanPHP\OODBBean());
 
-        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
-        $dbMock->expects($this->atLeastOnce())
-            ->method('load')
-            ->will($this->returnValue($model));
 
-        $serviceMock = $this->getMockBuilder('\Box\Mod\Product\Service')->getMock();
-        $serviceMock->expects($this->atLeastOnce())
-            ->method('getChangeableProductPairs')
-            ->will($this->returnValue(array()));
 
-        $di = new \Box_Di();
-        $di['db'] = $dbMock;
-        $this->api->setDi($di);
-        $this->api->setService($serviceMock);
 
-        $result = $this->api->get_changeable_products($data);
-        $this->assertInternalType('array', $result);
-    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
  

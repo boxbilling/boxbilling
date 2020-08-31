@@ -174,16 +174,9 @@ class ServiceTest extends \BBTestCase
     public function testgetPaymentTypes()
     {
         $expected = array(
-
-            'free' =>  'Free',
-            'once' =>  'One time',
-            'recurrent' =>  'Recurrent',
-            'metered' => 'Metered',
-
             'free'      => 'Free',
             'once'      => 'One time',
             'recurrent' => 'Recurrent',
-
         );
 
         $result = $this->service->getPaymentTypes();
@@ -1200,38 +1193,6 @@ class ServiceTest extends \BBTestCase
         $this->assertFalse($result);
     }
 
-
-    public function testgetChangeableProductPairs()
-    {
-        $model = new \Model_Product();
-        $model->loadBean(new \RedBeanPHP\OODBBean());
-
-        $key = 1;
-        $value = 'shared hosting';
-        $sqlResult = array(
-            array(
-                'id' => $key,
-                'title' => $value,
-            ),
-        );
-
-        $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
-        $dbMock->expects($this->atLeastOnce())
-            ->method('getAll')
-            ->willReturn($sqlResult);
-
-        $di = new \Box_Di();
-        $di['db'] = $dbMock;
-        $this->service->setDi($di);
-
-        $result = $this->service->getChangeableProductPairs($model);
-        $this->assertInternalType('array', $result);
-
-        $expected = array(
-            $key => $value,
-        );
-        $this->assertEquals($expected, $result);
-
     public function testgetStartingDomainPrice()
     {
         $di = new \Box_Di();
@@ -1270,7 +1231,6 @@ class ServiceTest extends \BBTestCase
         $this->service->setDi($di);
         $result = $this->service->getStartingDomainPrice();
         $this->assertEquals((double) $amount, $result);
-
     }
 }
  
