@@ -304,3 +304,4 @@
 [31-Aug-2020 15:30:08 UTC] Connection to server failed 0
 [31-Aug-2020 15:35:01 UTC] PHP Parse error:  syntax error, unexpected 'class' (T_CLASS), expecting identifier (T_STRING) or variable (T_VARIABLE) or '{' or '$' in /var/www/vhosts/webbhostingservices.com/httpdocs/boxbilling/bb-di.php on line 153
 [31-Aug-2020 15:40:02 UTC] PHP Parse error:  syntax error, unexpected 'class' (T_CLASS), expecting identifier (T_STRING) or variable (T_VARIABLE) or '{' or '$' in /var/www/vhosts/webbhostingservices.com/httpdocs/boxbilling/bb-di.php on line 153
+[31-Aug-2020 16:00:01 UTC] PHP Parse error:  syntax error, unexpected 'class' (T_CLASS), expecting identifier (T_STRING) or variable (T_VARIABLE) or '{' or '$' in /var/www/vhosts/webbhostingservices.com/httpdocs/boxbilling/bb-di.php on line 153
