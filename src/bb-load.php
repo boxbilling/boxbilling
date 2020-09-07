@@ -57,11 +57,11 @@ function handler_exception($e)
     ";
     $page = str_replace(PHP_EOL, "", $page);
     print $page;
-    if($e->getCode()) {
+    if($e->$code) {
         print sprintf('<p>Code: <em>%s</em></p>', $e->getCode());
     }
-    print sprintf('<p>%s</p>', $e->getMessage());
-    print sprintf('<p><a href="http://docs.boxbilling.com/en/latest/search.html?q=%s&check_keywords=yes&area=default" target="_blank">Look for detailed error explanation</a></p>', urlencode($e->getMessage()));
+    print sprintf('<p>%s</p>', $e->$message);
+    print sprintf('<p><a href="http://docs.boxbilling.com/en/latest/search.html?q=%s&check_keywords=yes&area=default" target="_blank">Look for detailed error explanation</a></p>', urlencode($e->$message));
 
     if(defined('BB_DEBUG') && BB_DEBUG) {
         print sprintf('<em>%s</em>', 'Set BB_DEBUG to FALSE, to hide the message below');
@@ -139,7 +139,7 @@ ini_set('error_log', BB_PATH_LOG . '/php_error.log');
 
 // Strip magic quotes from request data.
 /**
-Deprecated: Function get_magic_quotes_gpc() is deprecated in /var/www/vhosts/webbhostingservices.com/httpdocs/boxbilling/src/bb-load.php on line 141
+Deprecated: Function get_magic_quotes_gpc() is deprecated
 **/
 //if (function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()) 
 // Create lamba style unescaping function (for portability)
