@@ -18,7 +18,7 @@ define('BB_PATH_THEMES',    BB_PATH_ROOT . '/bb-themes');
 define('BB_PATH_MODS',      BB_PATH_ROOT . '/bb-modules');
 define('BB_PATH_LANGS',     BB_PATH_ROOT . '/bb-locale');
 define('BB_PATH_UPLOADS',   BB_PATH_ROOT . '/bb-uploads');
-define('BB_PATH_DATA',   BB_PATH_ROOT . '/bb-data');
+define('BB_PATH_DATA',      BB_PATH_ROOT . '/bb-data');
 
 function handler_error($number, $message, $file, $line)
 {
@@ -57,10 +57,10 @@ function handler_exception($e)
     ";
     $page = str_replace(PHP_EOL, "", $page);
     print $page;
-    if($e->$code) {
+    if($e->getCode()) {
         print sprintf('<p>Code: <em>%s</em></p>', $e->getCode());
     }
-    print sprintf('<p>%s</p>', $e->$message);
+    print sprintf('<p>%s</p>', $e->getMessage());
     print sprintf('<p><a href="http://docs.boxbilling.com/en/latest/search.html?q=%s&check_keywords=yes&area=default" target="_blank">Look for detailed error explanation</a></p>', urlencode($e->$message));
 
     if(defined('BB_DEBUG') && BB_DEBUG) {
