@@ -45,7 +45,7 @@ function handler_exception($e)
         print json_encode($result);
         return false;
     }
-}
+
     $page = "<!DOCTYPE html>
     <html lang=en>
     <meta charset=utf-8>
@@ -70,7 +70,7 @@ function handler_exception($e)
         print sprintf('<p>Line: "%s"</p>', $e->getLine());
         print sprintf('Trace: <pre>%s</pre>', $e->getTraceAsString());
     }
-
+}
 
 set_exception_handler("handler_exception");
 set_error_handler('handler_error');
