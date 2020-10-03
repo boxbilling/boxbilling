@@ -14,7 +14,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Copy .env
-      run: php -r "file_exists('composer.json') || copy('composer.json', 'composer.json');"
+      run: php -r "file_exists('/boxbilling/src/composer.json') || copy('/boxbilling/src/composer.json', '/boxbilling/src/composer.json');"
     - name: Install Dependencies
       run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
     - name: Generate key
