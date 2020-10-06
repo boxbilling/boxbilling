@@ -1,3 +1,4 @@
+<?php
 /** no direct access **/
 defined('MECEXEC') or die();
 
@@ -1441,7 +1442,7 @@ class tFPDF
     function _parsepng($file)
     {
         // Extract info from a PNG file
-        $f = fopen($file,'rb.php');
+        $f = fopen($file,'rb');
         if(!$f)
             $this->Error('Can\'t open image file: '.$file);
         $info = $this->_parsepngstream($f,$file);
@@ -1609,7 +1610,7 @@ class tFPDF
         if(!$im)
             $this->Error('Missing or incorrect image file: '.$file);
         imageinterlace($im,0);
-        $f = @fopen('php://temp','rb.php+');
+        $f = @fopen('php://temp','rb+');
         if($f)
         {
             // Perform conversion in memory
@@ -1756,7 +1757,7 @@ class tFPDF
             $this->_newobj();
             $this->FontFiles[$file]['n']=$this->n;
             $font='';
-            $f=fopen($this->_getfontpath().$file,'rb.php',1);
+            $f=fopen($this->_getfontpath().$file,'rb',1);
             if(!$f)
                 $this->Error('Font file not found');
             while(!feof($f))
