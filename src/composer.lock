@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9bd4a9c4b9e5394a8e3055f6c76aba1a",
+    "content-hash": "9cf271cc6af20220d492c6c9bd31627a",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -127,48 +127,6 @@
                 "pdf"
             ],
             "time": "2019-01-21T10:55:00+00:00"
-        },
-        {
-            "name": "fpdf/fpdf",
-            "version": "1.82.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/coreydoughty/Fpdf.git",
-                "reference": "a8eb66ba732813f282a935775bceb72ffd40b15d"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/coreydoughty/Fpdf/zipball/a8eb66ba732813f282a935775bceb72ffd40b15d",
-                "reference": "a8eb66ba732813f282a935775bceb72ffd40b15d",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.6.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Fpdf\\": "src/Fpdf"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Corey Doughty",
-                    "email": "corey@doughty.ca"
-                }
-            ],
-            "description": "FPDF Composer Wrapper",
-            "homepage": "https://github.com/coreydoughty/Fpdf",
-            "keywords": [
-                "fpdf",
-                "pdf",
-                "wrapper"
-            ],
-            "time": "2020-02-15T12:05:43+00:00"
         },
         {
             "name": "geoip2/geoip2",
@@ -1164,44 +1122,6 @@
             ],
             "description": "A polyfill for getallheaders.",
             "time": "2019-03-08T08:55:37+00:00"
-        },
-        {
-            "name": "rev42/tfpdf",
-            "version": "v1.25",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/rev42/tfpdf.git",
-                "reference": "08689ec41e757dde94db5e7527a98c5788555b61"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/rev42/tfpdf/zipball/08689ec41e757dde94db5e7527a98c5788555b61",
-                "reference": "08689ec41e757dde94db5e7527a98c5788555b61",
-                "shasum": ""
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "tFPDF": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "LGPL"
-            ],
-            "authors": [
-                {
-                    "name": "Ian Back",
-                    "email": "ianb@bpm1.com"
-                }
-            ],
-            "description": "tFPDF",
-            "homepage": "http://fpdf.org/fr/script/script92.php",
-            "keywords": [
-                "pdf"
-            ],
-            "abandoned": "docnet/tFPDF",
-            "time": "2015-10-10T22:37:26+00:00"
         },
         {
             "name": "setasign/fpdf",
@@ -3269,16 +3189,16 @@
         },
         {
             "name": "sebastian/type",
-            "version": "2.2.2",
+            "version": "2.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/type.git",
-                "reference": "e494dcaeb89d1458c9ccd8c819745245a1669aea"
+                "reference": "fa592377f3923946cb90bf1f6a71ba2e5f229909"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/type/zipball/e494dcaeb89d1458c9ccd8c819745245a1669aea",
-                "reference": "e494dcaeb89d1458c9ccd8c819745245a1669aea",
+                "url": "https://api.github.com/repos/sebastianbergmann/type/zipball/fa592377f3923946cb90bf1f6a71ba2e5f229909",
+                "reference": "fa592377f3923946cb90bf1f6a71ba2e5f229909",
                 "shasum": ""
             },
             "require": {
@@ -3290,7 +3210,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.2-dev"
+                    "dev-master": "2.3-dev"
                 }
             },
             "autoload": {
@@ -3317,7 +3237,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-09-28T06:01:38+00:00"
+            "time": "2020-10-06T08:41:03+00:00"
         },
         {
             "name": "sebastian/version",
