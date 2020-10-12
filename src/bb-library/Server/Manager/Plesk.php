@@ -2,7 +2,12 @@
 #!/usr/bin/env php
 // Copyright 1999-2016. Parallels IP Holdings GmbH. All Rights Reserved.
 require_once('PleskApiClient.php');
-class PleskApiClient{
+class PleskApiClient{public static function getForm()
+    {
+        return array(
+            'label'     =>  'Plesk',
+        );
+    }
 private function _request($request) {
 $host = getenv('REMOTE_HOST');
 $login = getenv('REMOTE_LOGIN') ?: 'admin';

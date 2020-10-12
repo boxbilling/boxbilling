@@ -15,19 +15,15 @@
  * @copyright Copyright (c) 2010-2012 BoxBilling (http://www.boxbilling.com)
  * @license   http://www.boxbilling.com/LICENSE.txt
  * @version   $Id$
- *
+ */
+/**
  *
  * Plesk server manager
  * Min version: 12.0
  * @see http://download1.parallels.com/Plesk/Doc/en-US/online/plesk-api-rpc/
  *
- **/
-// Copyright 1999-2016. Parallels IP Holdings GmbH. All Rights Reserved.
-
-/**
- * Client for Plesk API-RPC
- **/
-class Server_Manager_Plesk
+ */
+class Server_Manager_Plesk extends Server_Manager
 {
 	public function init() {
         if (!extension_loaded('curl')) {
@@ -49,7 +45,7 @@ class Server_Manager_Plesk
 		if (!$this->_config['secure']) {
             $protocol = 'http://';
         }
-        return $protocol.$this->_config['host'].':8443/enterprise/control/agent.php';
+        return $protocol.$this->_config['host'] . ':8443/enterprise/control/agent.php';
 	}
 
     public function getResellerLoginUrl()
@@ -83,76 +79,8 @@ class Server_Manager_Plesk
 
     	return false;
     }
-
-
-    private $_host;
-    private $_port;
-    private $_protocol;
-    private $_login;
-    private $_password;
-    private $_secretKey;
-
-    /**
-     * Create client
-     *
-     * @param string $host
-     * @param int $port
-     * @param string $protocol
-     **/
-    public function __construct($host, $port = 8443, $protocol = 'https://')
-    {
-        $this->_host = $host;
-        $this->_port = $port;
-        $this->_protocol = $protocol;
-    }
-    public function _makeRequest($request)
-    {
-        $curl = curl_init();
-
-        curl_setopt($curl, CURLOPT_URL,$protocol.$this->_config['host'].':8443/enterprise/control/agent.php');
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_POST, true);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $this->_getHeaders());
-        curl_setopt($curl, CURLOPT_POSTFIELDS,'$request');
-
-        $result = curl_exec($curl);
-
-        curl_close($curl);
-
-        return $result;
-    }
-
-    /**
-     * Setup credentials for authentication
-     *
-     * @param string $login
-     * @param string $password
-     **/
-    public function setCredentials($login, $password)
-    {
-        $this->_login = $login;
-        $this->_password = $password;
-    }
-
-    /**
-     * Define secret key for alternative authentication
-     *
-     * @param string $secretKey
-     **/
-    public function setSecretKey($secretKey)
-    {
-        $this->_secretKey = $secretKey;
-    }
-
-    /**
-     * Perform API request
-     *
-     * @param string $request
-     * @return string
-     **/
- public function synchronizeAccount(Server_Account $a)
+    
+    public function synchronizeAccount(Server_Account $a)
     {
         $this->getLog()->info('Synchronizing account with server '.$a->getUsername());
         return $a;
@@ -200,7 +128,7 @@ class Server_Manager_Plesk
     	return true;
     }
 
-public function setSubscription(Server_Account $a)
+    public function setSubscription(Server_Account $a)
     {
         $p = $a->getPackage();
         $params = array (
@@ -653,6 +581,36 @@ public function setSubscription(Server_Account $a)
         throw new Server_Exception('Server manager does not support ip changes');
     }
     
+    private function _makeRequest($params) {
+    	$headers = array(
+    		'HTTP_AUTH_LOGIN: ' . $this->_config['username'],
+    		'HTTP_AUTH_PASSWD: ' . $this->_config['password'],
+    		'HTTP_PRETTY_PRINT: TRUE',
+    		'Content-Type: text/xml'
+    	);
+
+    	$xml = $this->_arrayToXml($params, new SimpleXMLElement('<packet />'))
+    				->asXML();
+        error_log($xml);
+    	$ch = curl_init ();
+    	curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, 0);
+    	curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, false);
+    	curl_setopt ($ch, CURLOPT_HTTPHEADER, $headers);
+    	curl_setopt ($ch, CURLOPT_URL, $this->getLoginUrl());
+    	curl_setopt ($ch, CURLOPT_RETURNTRANSFER, true);
+    	curl_setopt ($ch, CURLOPT_TIMEOUT, 60);
+    	curl_setopt ($ch, CURLOPT_POSTFIELDS, $xml);
+        curl_setopt ($ch, CURLOPT_POST, count($xml));
+
+		$result = curl_exec($ch);
+
+		if (curl_errno ($ch)) {
+			throw new Server_Exception('cURL error: ' . curl_errno ($ch) . ' - ' . curl_error ($ch));
+		}
+
+		return $this->_parseResponse($result);
+    }
+
     private function _arrayToXml(array $arr, SimpleXMLElement $xml) {
     	$numbers = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
     	foreach ($arr as $k => $v) {
@@ -676,11 +634,12 @@ public function setSubscription(Server_Account $a)
     }
 
     /**
+     *
      * Creates new client account
      * @param Server_Account $a
      * @throws Server_Exception
      * @return integer client's plesk id
-     **/
+     */
     private function _creatClient(Server_Account $a) {
     	if ($a->getReseller()) {
     		$type = 'reseller';
@@ -1003,28 +962,4 @@ public function setSubscription(Server_Account $a)
    			return false;
    		}
     }
-
-
-    /**
-     * Retrieve list of headers needed for request
-     *
-     * @return array
-     **/
-    private function _getHeaders()
-    {
-        $headers = array(
-            "Content-Type: text/xml",
-            "HTTP_PRETTY_PRINT: TRUE",
-        );
-
-        if ($this->_secretKey) {
-            $headers[] = "KEY: $this->_secretKey";
-        } else {
-            $headers[] = "HTTP_AUTH_LOGIN: $this->_login";
-            $headers[] = "HTTP_AUTH_PASSWD: $this->_password";
-        }
-
-        return $headers;
-    }
-
 }
