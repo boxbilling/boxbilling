@@ -3,7 +3,7 @@
  * BoxBilling
  *
  * LICENSE
-00 *
+ *
  * This source file is subject to the license that is bundled
  * with this package in the file LICENSE.txt
  * It is also available through the world-wide-web at this URL:
@@ -15,19 +15,18 @@
  * @copyright Copyright (c) 2010-2012 BoxBilling (http://www.boxbilling.com)
  * @license   http://www.boxbilling.com/LICENSE.txt
  * @version   $Id$
- */
-/**
+ *
  *
  * Plesk server manager
  * Min version: 12.0
  * @see http://download1.parallels.com/Plesk/Doc/en-US/online/plesk-api-rpc/
  *
- */
+ **/
 // Copyright 1999-2016. Parallels IP Holdings GmbH. All Rights Reserved.
 
 /**
  * Client for Plesk API-RPC
- */
+ **/
 class Server_Manager_Plesk
 {
 	public function init() {
@@ -99,7 +98,7 @@ class Server_Manager_Plesk
      * @param string $host
      * @param int $port
      * @param string $protocol
-     */
+     **/
     public function __construct($host, $port = 8443, $protocol = 'https://')
     {
         $this->_host = $host;
@@ -130,7 +129,7 @@ class Server_Manager_Plesk
      *
      * @param string $login
      * @param string $password
-     */
+     **/
     public function setCredentials($login, $password)
     {
         $this->_login = $login;
@@ -141,7 +140,7 @@ class Server_Manager_Plesk
      * Define secret key for alternative authentication
      *
      * @param string $secretKey
-     */
+     **/
     public function setSecretKey($secretKey)
     {
         $this->_secretKey = $secretKey;
@@ -152,7 +151,7 @@ class Server_Manager_Plesk
      *
      * @param string $request
      * @return string
-     */
+     **/
  public function synchronizeAccount(Server_Account $a)
     {
         $this->getLog()->info('Synchronizing account with server '.$a->getUsername());
@@ -682,7 +681,7 @@ public function setSubscription(Server_Account $a)
      * @param Server_Account $a
      * @throws Server_Exception
      * @return integer client's plesk id
-     */
+     **/
     private function _creatClient(Server_Account $a) {
     	if ($a->getReseller()) {
     		$type = 'reseller';
@@ -1011,7 +1010,7 @@ public function setSubscription(Server_Account $a)
      * Retrieve list of headers needed for request
      *
      * @return array
-     */
+     **/
     private function _getHeaders()
     {
         $headers = array(
