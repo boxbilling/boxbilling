@@ -23,7 +23,7 @@
  * @see http://download1.parallels.com/Plesk/Doc/en-US/online/plesk-api-rpc/
  *
  */
-class Server_Manager_Plesk
+class Server_Manager_Plesk extends Server_Manager
 {
 	public function init() {
         if (!extension_loaded('curl')) {
@@ -141,7 +141,6 @@ class Server_Manager_Plesk
 
     	return false;
     }
-    
     public function synchronizeAccount(Server_Account $a)
     {
         $this->getLog()->info('Synchronizing account with server '.$a->getUsername());
@@ -335,7 +334,6 @@ class Server_Manager_Plesk
 
     public function createServicePlan(Server_Account $a)
     {
-        
     }
 
     public function updateSubscription(Server_Account $a)
@@ -632,7 +630,6 @@ class Server_Manager_Plesk
     {
         throw new Server_Exception('Server manager does not support username changes');
     }
-    
     public function changeAccountDomain(Server_Account $a, $new)
     {
         throw new Server_Exception('Server manager does not support domain changes');
@@ -642,7 +639,6 @@ class Server_Manager_Plesk
     {
         throw new Server_Exception('Server manager does not support ip changes');
     }
-    
     private function _makeRequest($params) {
     	$headers = array(
     		'HTTP_AUTH_LOGIN: ' . $this->_config['username'],
