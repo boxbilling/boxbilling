@@ -676,7 +676,6 @@ public function setSubscription(Server_Account $a)
     }
 
     /**
-     *
      * Creates new client account
      * @param Server_Account $a
      * @throws Server_Exception
@@ -1029,5 +1028,3 @@ public function setSubscription(Server_Account $a)
     }
 
 }
-
-
