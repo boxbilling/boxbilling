@@ -1138,9 +1138,10 @@ class ServiceTest extends \BBTestCase
             ->method('load')
             ->withConsecutive(array('Product'))
             ->willReturnOnConsecutiveCalls($modelProduct);
+        $exceptionError = 'Client not found';
         $dbMock->expects($this->atLeastOnce())
             ->method('getExistingModelById')
-            ->withConsecutive(array('Client'))
+            ->withConsecutive(array('Client', $model->id, $exceptionError))
             ->willReturnOnConsecutiveCalls($modelClient);
 
         $toolsMock = $this->getMockBuilder('\Box_Tools')->getMock();
