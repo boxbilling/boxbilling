@@ -54,6 +54,6 @@
         "psr-0": { "": "../tests/bb-library" }
     },
     "scripts": {
-        "test": "bb-vendor/bin/phpunit"
+        "test": "bb-vendor/bin/phpunit ../test/bb-modules"
     }
 }
