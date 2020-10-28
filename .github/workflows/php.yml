@@ -42,6 +42,8 @@ jobs:
           ${{ env.home}}/src/bb-data/log/license.log
           ${{ env.home}}/src/bb-data/log/php_error.log
           ${{ env.home}}/src/bb-data/log/application.log
+        contents: |
+          echo ""  
         write-mode: overwrite
 
     - name: Run test suite
