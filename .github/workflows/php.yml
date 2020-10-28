@@ -36,5 +36,4 @@ jobs:
     # Docs: https://getcomposer.org/doc/articles/scripts.md
 
     - name: Run test suite
-      run: composer run-script test
-      working-directory: ./src
+      run: php ./src/bb-vendor/bin/phpunit ./tests/bb-modules/
