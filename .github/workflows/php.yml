@@ -36,4 +36,6 @@ jobs:
     # Docs: https://getcomposer.org/doc/articles/scripts.md
 
     - name: Run test suite
-      run: php ./src/bb-vendor/bin/phpunit ./tests/bb-modules/
+      run: |
+        cp ./src/bb-config-sample.php ./src/bb-config.php
+        php ./src/bb-vendor/bin/phpunit ./tests/bb-modules/
