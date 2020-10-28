@@ -52,5 +52,8 @@
     },
     "autoload-dev": {
         "psr-0": { "": "../tests/bb-library" }
+    },
+    "scripts": {
+        "test": "bb-vendor/bin/phpunit"
     }
 }
