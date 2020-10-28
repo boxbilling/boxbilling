@@ -34,12 +34,18 @@ jobs:
 
     # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
     # Docs: https://getcomposer.org/doc/articles/scripts.md
+    
+    - name: Create log files for testing  
+    - uses: DamianReeves/write-file-action
+      with:
+        path: |
+          ${{ env.home}}/src/bb-data/log/license.log
+          ${{ env.home}}/src/bb-data/log/php_error.log
+          ${{ env.home}}/src/bb-data/log/application.log
+        write-mode: overwrite
 
     - name: Run test suite
       run: |
         cp ./src/bb-config-sample.php ./src/bb-config.php
-        mkdir ./src/bb-data/cache
-        touch ./src/bb-data/log/license.log
-        touch ./src/bb-data/log/php_error.log
-        touch ./src/bb-data/log/application.log        
+        mkdir ./src/bb-data/cache       
         php ./src/bb-vendor/bin/phpunit ./tests/bb-modules/
