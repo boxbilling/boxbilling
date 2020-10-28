@@ -36,7 +36,7 @@ jobs:
     # Docs: https://getcomposer.org/doc/articles/scripts.md
     
     - name: Create log files for testing  
-    - uses: DamianReeves/write-file-action@v1.0
+      uses: DamianReeves/write-file-action@v1.0
       with:
         path: |
           ${{ env.home}}/src/bb-data/log/license.log
