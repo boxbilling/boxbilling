@@ -361,4 +361,9 @@ $di['translate'] = $di->protect(function($textDomain = '') use ($di) {
 $di['array_get'] = $di->protect(function (array $array, $key, $default = null) use ($di) {
     return array_key_exists($key, $array)  ? $array[$key] : $default;
 });
+$di['scss'] = function() use ($di) {
+    $scss =  new \Box\Scss();
+    $scss->setDi($di);
+    return $scss;
+};
 return $di;

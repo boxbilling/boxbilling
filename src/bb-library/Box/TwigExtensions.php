@@ -39,6 +39,7 @@ class Box_TwigExtensions extends Twig\Extension\AbstractExtension implements \Bo
     public function getFilters()
     {
         return array(
+            'compile_scss' => new Twig\TwigFilter('compile_scss', array($this, 'twig_compile_scss'), array('needs_environment' => false, 'is_safe' => array('html'))),
             'alink'     => new Twig\TwigFilter('alink', array($this, 'twig_bb_admin_link_filter'), array('is_safe' => array('html'))),
             'link'      => new Twig\TwigFilter('link', array($this, 'twig_bb_client_link_filter'), array('is_safe' => array('html'))),
             'gravatar'  => new Twig\TwigFilter('gravatar','twig_gravatar_filter'),
@@ -78,6 +79,15 @@ class Box_TwigExtensions extends Twig\Extension\AbstractExtension implements \Bo
     public function getName()
     {
         return 'bb';
+    }
+    
+    public function twig_compile_scss($file = 'style.scss', $forceCompile = false)
+    {
+        if (isset($_GET['SCSS_COMPILE']))
+        {
+            $forceCompile = true;
+        }
+        return $this->di['scss']->compile($file, $forceCompile);
     }
 
     public function twig_bb_date($time, $format = null)
