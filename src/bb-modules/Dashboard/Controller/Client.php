@@ -11,9 +11,9 @@
  */
 
 
-namespace Box\Mod\Branding;
+namespace Box\Mod\Dashboard\Controller;
 
-class Service implements \Box\InjectionAwareInterface
+class Client implements \Box\InjectionAwareInterface
 {
     protected $di;
 
@@ -33,9 +33,14 @@ class Service implements \Box\InjectionAwareInterface
         return $this->di;
     }
 
-    public function uninstall()
+    public function register(\Box_App &$app)
     {
-        return true;
+        $app->get('/dashboard', 'get_dashboard_index', array(), get_class($this));
     }
 
+    public function get_dashboard_index(\Box_App $app)
+    {
+        $this->di['is_client_logged'];
+        return $app->render('mod_dashboard_index');
+    }
 }
