@@ -774,23 +774,20 @@
         },
         {
             "name": "mustangostang/spyc",
-            "version": "0.6.3",
+            "version": "0.5.1",
             "source": {
                 "type": "git",
-                "url": "git@github.com:mustangostang/spyc.git",
-                "reference": "4627c838b16550b666d15aeae1e5289dd5b77da0"
+                "url": "https://github.com/mustangostang/spyc.git",
+                "reference": "dc4785b4d7227fd9905e086d499fb8abfadf9977"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mustangostang/spyc/zipball/4627c838b16550b666d15aeae1e5289dd5b77da0",
-                "reference": "4627c838b16550b666d15aeae1e5289dd5b77da0",
+                "url": "https://api.github.com/repos/mustangostang/spyc/zipball/dc4785b4d7227fd9905e086d499fb8abfadf9977",
+                "reference": "dc4785b4d7227fd9905e086d499fb8abfadf9977",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.1"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "4.3.*@dev"
             },
             "type": "library",
             "extra": {
@@ -805,7 +802,7 @@
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "MIT"
+                "MIT License"
             ],
             "authors": [
                 {
@@ -2096,7 +2093,6 @@
         },
         {
             "name": "phpunit/php-code-coverage",
-<<<<<<< HEAD
             "version": "9.2.3",
             "source": {
                 "type": "git",
@@ -2107,18 +2103,6 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/6b20e2055f7c29b56cb3870b3de7cc463d7add41",
                 "reference": "6b20e2055f7c29b56cb3870b3de7cc463d7add41",
-=======
-            "version": "9.2.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "229099d7d69fe5044f6e464f669b1fd34f252e8d"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/229099d7d69fe5044f6e464f669b1fd34f252e8d",
-                "reference": "229099d7d69fe5044f6e464f669b1fd34f252e8d",
->>>>>>> 075896b1dc3073a05dcc82cb55844d7d2701497c
                 "shasum": ""
             },
             "require": {
