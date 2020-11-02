@@ -4,7 +4,7 @@ require('tfpdf.php');
 class PDF_ImageAlpha extends FPDF
 {
 //Private properties
-var $tmpFiles = array(); 
+var $tmpFiles = array();
 
 /*******************************************************************************
 *                                                                              *
@@ -125,10 +125,10 @@ function ImagePngWithAlpha($file,$x,$y,$w=0,$h=0,$link='')
     imagecopy($plain_img, $img, 0, 0, 0, 0, $wpx, $hpx );
     imagepng($plain_img, $tmp_plain);
     imagedestroy($plain_img);
-    
+
     //first embed mask image (w, h, x, will be ignored)
-    $maskImg = $this->Image($tmp_alpha, 0,0,0,0, 'PNG', '', true); 
-    
+    $maskImg = $this->Image($tmp_alpha, 0,0,0,0, 'PNG', '', true);
+
     //embed image, masked with previously embedded mask
     $this->Image($tmp_plain,$x,$y,$w,$h,'PNG',$link, false, $maskImg);
 }
@@ -231,7 +231,7 @@ function _parsepng($file)
     elseif($ct==3)
         $colspace='Indexed';
     else {
-        fclose($f);      // the only changes are 
+        fclose($f);      // the only changes are
         return 'alpha';  // made in those 2 lines
     }
     if(ord($this->_readstream($f,1))!=0)
