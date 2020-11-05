@@ -38,3 +38,7 @@ php:
     file: boxbilling/* 
     run:
       - php bin/prepare.php
+  
+  branches:
+  only:
+    - dev/heroku    
