@@ -2,11 +2,11 @@
 cd "$(dirname "$0")"
 
 #heroku run sh bin/heroku.sh --app <appname>
-
-cp -r ../src/bb-config-heroku.php ../src/bb-config.php
-php prepare.php
-cp -r ../src/htaccess.txt ../src/.htaccess
-rm -rf ../src/install
-rm -rf ../src/htaccess.txt
-rm -rf ../src/bb-config-heroku.php
-rm -rf ../src/bb-config-sample.php
+wget https://github.com/boxbilling/boxbilling/releases/latest/download/BoxBilling.zip
+unzip Boxbilling.zip -d boxbilling
+cp -r ../src/bb-config-heroku.php ../boxbilling/bb-config.php
+cp -r ../boxbilling/htaccess.txt ../boxbilling/.htaccess
+rm -rf ../boxbilling/install
+rm -rf ../boxbilling/htaccess.txt
+rm -rf ../boxbilling/bb-config-sample.php
+rm -rf BoxBilling.zip
