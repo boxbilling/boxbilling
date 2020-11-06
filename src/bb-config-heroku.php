@@ -9,6 +9,12 @@
  * Open browser http://www.youdomain.com/index.php?_url=/bb-admin to create new admin account.
  * Remove /install directory
  */
+$url = parse_url(getenv("CLEARDB_DATABASE_URL"));
+
+$host = $url["host"];
+$username = $url["user"];
+$password = $url["pass"];
+$db = substr($url["path"], 1);
 
 return array(
 
@@ -84,22 +90,22 @@ return array(
         /**
          * Database hostname. Don't change this if in doubt.
          */
-        'host'   => getenv('BB_DB_HOST'),
+        'host'   => $host,
 
         /**
          * The name of the database for BoxBilling
          */
-        'name'   =>getenv('BB_DB_NAME'),
+        'name'   => $db,
 
         /**
          * Database username
          */
-        'user'   =>getenv('BB_DB_USER'),
+        'user'   => $username,
 
         /**
          * Database password
          */
-        'password'   =>getenv('BB_DB_PASSWORD'),
+        'password'   => $password,
     ),
 
     'twig'   =>  array(
