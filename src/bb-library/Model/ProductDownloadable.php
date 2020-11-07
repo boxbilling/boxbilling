@@ -11,7 +11,7 @@
  */
 
 
-class Model_ProductDownloadable extends \RedBean_SimpleModel
+class Model_ProductDownloadable extends \RedBean\SimpleModel
 {
     
 }

@@ -11,7 +11,7 @@
  */
 
 
-class Model_ClientGroup extends RedBean_SimpleModel
+class Model_ClientGroup extends Box_Model
 {
 
 }

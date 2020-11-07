@@ -30,7 +30,8 @@
         "laminas/laminas-httphandlerrunner": "^1.2.0",
         "fpdf/fpdf": "^1.82",
         "docnet/tfpdf": "^2.2",
-        "setasign/fpdf": "^1.8"
+        "setasign/fpdf": "^1.8",
+        "gabordemooij/redbean": "v5.6"
 
     },
     "suggest": {

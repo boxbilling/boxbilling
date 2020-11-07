@@ -11,7 +11,7 @@
  */
 
 
-class Model_Promo extends RedBean_SimpleModel
+class Model_Promo extends Box_Model
 {
 	const PERCENTAGE    = 'percentage';
 	const ABSOLUTE      = 'absolute';

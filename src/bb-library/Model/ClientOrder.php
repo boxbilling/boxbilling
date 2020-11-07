@@ -11,7 +11,7 @@
  */
 
 
-class Model_ClientOrder extends RedBean_SimpleModel
+class Model_ClientOrder extends Box_Model
 {
 	const STATUS_PENDING_SETUP = "pending_setup";
 	const STATUS_FAILED_SETUP = "failed_setup";

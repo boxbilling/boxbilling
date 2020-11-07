@@ -11,7 +11,7 @@
  */
 
 
-class Model_ForumTopicMessage extends RedBean_SimpleModel
+class Model_ForumTopicMessage extends Box_Model
 {
 
 }

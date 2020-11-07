@@ -11,6 +11,6 @@
  */
 
 
-class Model_ProductCategory extends RedBean_SimpleModel
+class Model_ProductCategory extends Box_Model
 {
 }

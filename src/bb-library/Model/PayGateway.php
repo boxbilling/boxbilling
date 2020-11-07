@@ -11,7 +11,7 @@
  */
 
 
-class Model_PayGateway extends RedBean_SimpleModel
+class Model_PayGateway extends Box_Model
 {
 
 }

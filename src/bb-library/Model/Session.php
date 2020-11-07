@@ -11,7 +11,7 @@
  */
 
 
-class Model_Session extends \RedBean_SimpleModel
+class Model_Session extends Box_Model
 {
 
 }

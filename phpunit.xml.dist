@@ -5,7 +5,6 @@
       <directory suffix=".php">src</directory>
     </include>
     <exclude>
-      <file>src/rb.php</file>
       <file>src/bb-modules/Spamchecker/recaptchalib.php</file>
       <file>src/bb-modules/Spamchecker/akismet.curl.class.php</file>
       <file>src/bb-library/Box/Zip.php</file>

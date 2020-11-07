@@ -11,6 +11,6 @@
  */
 
 
-class Model_SupportTicketMessage extends RedBean_SimpleModel
+class Model_SupportTicketMessage extends Box_Model
 {
 }

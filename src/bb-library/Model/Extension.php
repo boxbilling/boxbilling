@@ -11,7 +11,7 @@
  */
 
 
-class Model_Extension extends RedBean_SimpleModel
+class Model_Extension extends Box_Model
 {
 
 }

@@ -11,7 +11,7 @@
  */
 
 
-class Model_Currency extends \RedBean_SimpleModel
+class Model_Currency extends Box_Model
 {
     
 }

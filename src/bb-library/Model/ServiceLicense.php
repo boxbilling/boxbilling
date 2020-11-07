@@ -11,7 +11,7 @@
  */
 
 
-class Model_ServiceLicense extends \RedBean_SimpleModel
+class Model_ServiceLicense extends Box_Model
 {
     private function _decodeJson($j)
     {

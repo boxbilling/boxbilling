@@ -11,7 +11,7 @@
  */
 
 
-class Model_ClientBalance extends RedBean_SimpleModel
+class Model_ClientBalance extends Box_Model
 {
 
 }
