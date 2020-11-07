@@ -11,7 +11,7 @@
  */
 
 
-class Model_CartProduct extends \RedBean_SimpleModel
+class Model_CartProduct extends Box_Model
 {
 
 }

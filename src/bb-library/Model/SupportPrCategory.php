@@ -11,6 +11,6 @@
  */
 
 
-class Model_SupportPrCategory extends RedBean_SimpleModel
+class Model_SupportPrCategory extends Box_Model
 {
 }

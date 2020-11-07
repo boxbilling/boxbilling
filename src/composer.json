@@ -17,18 +17,22 @@
         "ext-zlib": "*",
         "ext-PDO": "*",
         "ext-mbstring" : "*",
-        "pimple/pimple": "^3.3",
-        "twig/twig": "^2.13.0",
+        "pimple/pimple": "v3.3.0",
+        "twig/twig": "^v2.13.0",
         "twig/extensions": "^1.5.4",
-        "geoip2/geoip2": "^2.10.0",
-        "phpmailer/phpmailer": "6.5.0",
+        "geoip2/geoip2": "v2.10.0",
+        "ircmaxell/password-compat": "v1.0.4",
+        "phpmailer/phpmailer": "6.1.6",
         "mustangostang/spyc": "^0.6.3",
         "michelf/php-markdown": "1.9.0",
-        "stripe/stripe-php": "^7.92.0",
-        "guzzlehttp/guzzle": "*",
-        "laminas/laminas-httphandlerrunner": "^2.0.1",
+        "stripe/stripe-php": "2.1.1",
+	    "guzzlehttp/guzzle": "*",
+        "laminas/laminas-httphandlerrunner": "^1.2.0",
+        "fpdf/fpdf": "^1.82",
         "docnet/tfpdf": "^2.2",
-        "infinityfree/mofh-client": "^0.7.0"
+        "setasign/fpdf": "^1.8",
+        "gabordemooij/redbean": "v5.6"
+
     },
     "suggest": {
         "ext-gettext": "*"
@@ -43,7 +47,7 @@
 
     "require-dev": {
         "phpunit/phpunit": "^9.0",
-        "squizlabs/php_codesniffer": "^2.8"
+        "squizlabs/php_codesniffer": "1.*"
 
     },
     "autoload-dev": {

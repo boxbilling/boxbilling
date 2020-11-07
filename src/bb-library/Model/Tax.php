@@ -11,7 +11,7 @@
  */
 
 
-class Model_Tax extends RedBean_SimpleModel
+class Model_Tax extends Box_Model
 {
 
 }

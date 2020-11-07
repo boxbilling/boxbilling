@@ -11,7 +11,7 @@
  */
 
 
-class Model_ActivitySystem extends RedBean_SimpleModel
+class Model_ActivitySystem extends Box_Model
 {
 
 }

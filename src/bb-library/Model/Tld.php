@@ -11,6 +11,6 @@
  */
 
 
-class Model_Tld extends \RedBean_SimpleModel
+class Model_Tld extends Box_Model
 {
 }

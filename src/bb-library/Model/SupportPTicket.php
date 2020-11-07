@@ -11,7 +11,7 @@
  */
 
 
-class Model_SupportPTicket extends RedBean_SimpleModel
+class Model_SupportPTicket extends Box_Model
 {
     const OPENED = 'open';
     const ONHOLD = 'on_hold';

@@ -11,7 +11,7 @@
  */
 
 
-class Model_ActivityAdminHistory extends RedBean_SimpleModel
+class Model_ActivityAdminHistory extends Box_Model
 {
 
 }

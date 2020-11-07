@@ -11,7 +11,7 @@
  */
 
 
-class Model_Forum extends RedBean_SimpleModel
+class Model_Forum extends Box_Model
 {
     const STATUS_ACTIVE = 'active';
     const STATUS_LOCKED = 'locked';

@@ -78,8 +78,8 @@ $di['pdo'] = function() use ($di) {
 };
 $di['db'] = function() use ($di) {
 
-    require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'rb.php';
-    R::setup($di['pdo']);
+    \RedBeanPHP\R::setup($di['pdo']);
+    \RedBeanPHP\Util\DispenseHelper::setEnforceNamingPolicy( false );
 
     $helper = new Box_BeanHelper();
     $helper->setDi($di);

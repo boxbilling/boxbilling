@@ -10,7 +10,7 @@
  * with this source code in the file LICENSE
  */
 
-class Model_EmailTemplate extends \RedBean_SimpleModel
+class Model_EmailTemplate extends Box_Model
 {
 
 }

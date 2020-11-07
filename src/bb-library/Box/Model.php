@@ -10,8 +10,9 @@
  * with this source code in the file LICENSE
  */
 
+use RedBeanPHP\SimpleModel;
 
-class Model_ProductHosting extends Box_Model
+class Box_Model extends SimpleModel
 {
 
 }

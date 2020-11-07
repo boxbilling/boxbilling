@@ -11,7 +11,7 @@
  */
 
 
-class Model_SupportTicketNote extends RedBean_SimpleModel
+class Model_SupportTicketNote extends Box_Model
 {
 
 }

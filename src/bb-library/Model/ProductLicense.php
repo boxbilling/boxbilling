@@ -11,7 +11,7 @@
  */
 
 
-class Model_ProductLicense extends \RedBean_SimpleModel
+class Model_ProductLicense extends Box_Model
 {
 
 }

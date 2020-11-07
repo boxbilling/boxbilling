@@ -11,7 +11,7 @@
  */
 
 
-class Model_Invoice extends RedBean_SimpleModel
+class Model_Invoice extends Box_Model
 {
     const STATUS_PAID   = 'paid';
     const STATUS_UNPAID = 'unpaid';

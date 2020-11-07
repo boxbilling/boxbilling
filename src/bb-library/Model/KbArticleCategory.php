@@ -10,7 +10,7 @@
  * with this source code in the file LICENSE
  */
 
-class Model_KbArticleCategory extends \RedBean_SimpleModel
+class Model_KbArticleCategory extends Box_Model
 {
     
 }

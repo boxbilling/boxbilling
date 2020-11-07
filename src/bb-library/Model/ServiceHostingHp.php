@@ -11,7 +11,7 @@
  */
 
 
-class Model_ServiceHostingHp extends RedBean_SimpleModel
+class Model_ServiceHostingHp extends Box_Model
 {
 
 }
