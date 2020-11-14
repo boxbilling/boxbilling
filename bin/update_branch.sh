@@ -19,7 +19,7 @@ pull_master() {
   git checkout stash@{0} -- bin/update_branch.sh
   git checkout stash^3 -- .
   git add .
-  git commit -m "merged master" 
+  git commit -m "merged master [skip ci]" 
   #git merge --no-ff --allow-unrelated-histories -X theirs origin/master
 }
 
