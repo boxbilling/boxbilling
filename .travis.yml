@@ -2,28 +2,25 @@ os: linux
 dist: trusty
 language: php
 php:
-- 7.2
-- 7.3
 - 7.4
 install: skip
-
 script: skip
+after_success:
+- git config credential.helper "store --file=.git/credentials"
+- echo "https://${GH_TOKEN}:@github.com" > .git/credentials  
+- chmod +x bin/update_branch.sh
 notifications:
   email: false
 before_deploy:
-  - wget https://github.com/boxbilling/boxbilling/releases/latest/download/BoxBilling.zip 
-  - unzip ./BoxBilling.zip -d boxbilling
-  - cp -r ./src/bb-config-heroku.php ./boxbilling/bb-config.php
-  - cp -r ./boxbilling/htaccess.txt ./boxbilling/.htaccess
-  - cp -r ./bin/prepare.php ./boxbilling/prepare.php
-  - cp -r ./composer.json ./boxbilling/composer.json
-  - cp -r ./composer.lock ./boxbilling/composer.lock
-  - cp -r ./Procfile ./boxbilling/Procfile
-  - rm -rf ./boxbilling/install
-  - rm -rf ./boxbilling/htaccess.txt
-  - rm -rf ./boxbilling/bb-config-sample.php
-  - rm -rf BoxBilling.zip
-  - cd boxbilling
+- ./bin/update_branch.sh
+- cp -r ./src/bb-config-heroku.php ./src/bb-config.php
+- cp -r ./src/htaccess.txt ./src/.htaccess
+- cp -r ./bin/prepare.php ./src/prepare.php
+- cp -r ./Procfile ./src/Procfile
+- rm -rf ./src/install
+- rm -rf ./src/htaccess.txt
+- rm -rf ./src/bb-config-sample.php
+- cd src
 deploy:
   provider: heroku
   api_key:
@@ -34,6 +31,8 @@ deploy:
     branch: dev/heroku
   run:
   - php prepare.php
-
 after_deploy:
-  - cd ../  
+- cd ../
+env:
+  global:
+    secure: tVzZ+3U0ndBGvoUpFqA6ikg6fDKnPgMoNqK1pvTdEp0xmrFtjMP/fuc8+awObhj89iEC+MyzfsOP57CZbHR/UjmUSHPQew+BvTwxYmTUzgUeyUrYsTEI7WJgB7tsL35aRgrpxk102tlSmlX7EonufUT0svPOAQ1p4NgZRm3GI3A=
