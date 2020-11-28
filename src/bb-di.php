@@ -339,7 +339,7 @@ $di['ftp'] = $di->protect(function($params) use($di){ return new \Box_Ftp($param
 
 $di['pdf'] = function () use ($di) {
     include BB_PATH_LIBRARY . '/PDF_ImageAlpha.php';
-    return new \PDF_ImageAlpha();
+    return new \tFPDF\PDF();
 };
 
 $di['geoip'] = function () use ($di) { return new \GeoIp2\Database\Reader(BB_PATH_LIBRARY . '/GeoLite2-Country.mmdb'); };
