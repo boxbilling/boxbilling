@@ -1,7 +1,7 @@
 <?php
 require('PDF.php');
 
-class PDF_ImageAlpha extends TFPDF
+class PDF_ImageAlpha extends PDF
 {
 //Private properties
 var $tmpFiles = array();
