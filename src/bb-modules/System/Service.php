@@ -182,16 +182,7 @@ class Service
 
         return $details;
     }
-
-    public function getLicenseInfo($data)
-    {
-        $result = array(
-            'licensed_to'   =>  'BoxBilling CE',
-            'key'           =>  'BoxBilling CE',
-        );
-        return $result;
-    }
-
+    
     public function getParams($data)
     {
         $query = "SELECT param, value
@@ -239,6 +230,10 @@ class Service
         $install = BB_PATH_ROOT.'/install';
         if($this->di['tools']->fileExists(BB_PATH_ROOT.'/install')) {
             $msgs['info'][] = sprintf('Install module "%s" still exists. Please remove it for security reasons.', $install);
+        }
+
+        if($this->getVersion() == "0.0.1") {
+            $msgs['info'][] = 'BoxBilling couldn\'t find valid version information. This is okay if you\'ve brought a copy of BoxBilling directly from the master branch, and not from releases. But beware, master branch may not be stable enough to be used for production use.';
         }
 
         if(!extension_loaded('openssl')) {
