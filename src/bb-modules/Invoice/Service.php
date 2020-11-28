@@ -1193,15 +1193,15 @@ class Service implements InjectionAwareInterface
         $pdf           = $this->di['pdf'];
         $pdf->AddPage();
 
-        $pdf->AddFont('DejaVu', '', 'DejaVuSansCondensed.ttf', true);
-        $pdf->AddFont('DejaVu', 'B', 'DejaVuSansCondensed-Bold.ttf', true);
-        $pdf->SetFont('DejaVu', 'B', 20);
+        $pdf->AddFont('dejavusanscondensed', '', 'DejaVuSansCondensed.ttf', true);
+        $pdf->AddFont('dejavusanscondensed', 'B', 'DejaVuSansCondensed-Bold.ttf', true);
+        $pdf->SetFont('dejavusanscondensed', 'B', 20);
         $font_size = 8;
         $left      = 10;
 
         $pdf->text(90, 20, $invoice['serie_nr']);
 
-        $pdf->SetFont('DejaVu', '', $font_size);
+        $pdf->SetFont('dejavusanscondensed', '', $font_size);
 
         if (isset($company['logo_url']) && !empty($company['logo_url'])) {
             $url = $company['logo_url'];
@@ -1228,9 +1228,9 @@ class Service implements InjectionAwareInterface
             __("Invoice date: ") . $invoiceDate . "\n" .
             __("Due date: ") . strftime($localeDateFormat, strtotime($invoice['due_at'])) . "\n" .
             __("Invoice status: ") . ucfirst($invoice['status']);
-        $pdf->SetFont('DejaVu', 'B', $font_size);
+        $pdf->SetFont('dejavusanscondensed', 'B', $font_size);
         $pdf->text($left + 15, 75, __("Invoice"));
-        $pdf->SetFont('DejaVu', '', $font_size);
+        $pdf->SetFont('dejavusanscondensed', '', $font_size);
 
         $pdf->SetXY($left, 70);
         $pdf->MultiCell(60, 10, "\n" . $invoice_info, 0, "L", 0);
@@ -1242,9 +1242,9 @@ class Service implements InjectionAwareInterface
             __("Account: ") . $invoice['seller']['account_number'] . "\n" .
             __("Phone: ") . $invoice['seller']['phone'] . "\n" .
             __("Email: ") . $invoice['seller']['email'];
-        $pdf->SetFont('DejaVu', 'B', $font_size);
+        $pdf->SetFont('dejavusanscondensed', 'B', $font_size);
         $pdf->text(95, 75, __("Company"));
-        $pdf->SetFont('DejaVu', '', $font_size);
+        $pdf->SetFont('dejavusanscondensed', '', $font_size);
         $pdf->SetXY(75, 70);
         $pdf->MultiCell(60, 10, "\n" . $company_info, 0, "L", 0);
 
@@ -1254,9 +1254,9 @@ class Service implements InjectionAwareInterface
             __("Company VAT: ") . $invoice['seller']['company_vat'] . "\n" .
             __("Company number: ") . $invoice['seller']['company_number'] . "\n" .
             __("Phone: ") . $invoice['buyer']['phone'];
-        $pdf->SetFont('DejaVu', 'B', $font_size);
+        $pdf->SetFont('dejavusanscondensed', 'B', $font_size);
         $pdf->text(145, 75, __("Billing and delivery address"));
-        $pdf->SetFont('DejaVu', '', $font_size);
+        $pdf->SetFont('dejavusanscondensed', '', $font_size);
 
         $pdf->SetXY(140, 70);
         $pdf->MultiCell(60, 10, "\n" . $buyer_info, 0, "L", 0);
@@ -1297,7 +1297,7 @@ class Service implements InjectionAwareInterface
             $pdf->SetX(120);
         }
 
-        $pdf->SetFont('DejaVu', 'B', $font_size + 2);
+        $pdf->SetFont('dejavusanscondensed', 'B', $font_size + 2);
         $pdf->Cell(40, 10, __('Total'), 'LRTB', 0, 'C');
         $pdf->Cell(40, 10, $this->money($invoice['total'], $currencyCode), 'LRTB', 0, 'C');
         $pdf->Ln();
