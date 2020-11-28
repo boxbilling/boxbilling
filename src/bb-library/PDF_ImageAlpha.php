@@ -465,7 +465,7 @@ class PDF
      */
     public function __construct($str_orientation = 'P', $str_units = 'mm', $str_size = 'A4')
     {
-        $this->str_font_path = __DIR__ . '/../font/';
+        $this->str_font_path = __DIR__ . '/font/';
 
         if (defined('FPDF_FONTPATH')) {
             $this->str_font_path = FPDF_FONTPATH;
