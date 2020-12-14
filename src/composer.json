@@ -29,7 +29,8 @@
         "guzzlehttp/guzzle": "*",
         "laminas/laminas-httphandlerrunner": "^1.2.0",
         "docnet/tfpdf": "^2.2",
-        "infinityfree/mofh-client": "^0.7.0"
+        "infinityfree/mofh-client": "^0.7.0",
+        "gettext/gettext": "^5.5"
     },
     "suggest": {
         "ext-gettext": "*"
