@@ -65,7 +65,7 @@ class Service implements InjectionAwareInterface
     {
         $data["style"]["type"] = isset ($data["type"])? $data["type"] : "horizontal";
         $data["style"]["show_title"] = isset ($data["show_title"])? $data["show_title"] : "0";
-        $data["style"] = json_encode($data["style"],JSON_FORCE_OBJECT);
+        $data["style"] = json_encode($data["style"], JSON_FORCE_OBJECT);
 
         $bean = $this->di['db']->dispense('Form');
         $bean->name = $data['name'];
@@ -75,7 +75,7 @@ class Service implements InjectionAwareInterface
 
         $form_id = $this->di['db']->store($bean);
         $this->di['logger']->info('Created new form %s with id %s', $data['name'], $form_id);
-        return $form_id;
+        return $data;
     }
 
     public function addNewField($field) //TODO server-side required check
@@ -376,10 +376,8 @@ class Service implements InjectionAwareInterface
 
         if (isset($fields) && is_array($fields)) {
             foreach ($fields as $field_data) {
-                if (isset($field_data)) {
-                    $field_data['form_id'] = $new_form_id;
-                    $this->addNewField($field_data);
-                }
+                $field_data['form_id'] = $new_form_id;
+                $this->addNewField($field_data);
             }
         }
         $this->di['logger']->info('Copied form with id %s to new form %s with id %s', $data['form_id'], $data['name'], $new_form_id);
