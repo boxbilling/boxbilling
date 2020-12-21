@@ -376,8 +376,10 @@ class Service implements InjectionAwareInterface
 
         if (isset($fields) && is_array($fields)) {
             foreach ($fields as $field_data) {
-                $field_data['form_id'] = $new_form_id;
-                $this->addNewField($field_data);
+                if (isset($field_data) {
+                    $field_data['form_id'] = $new_form_id;
+                    $this->addNewField($field_data);
+                }
             }
         }
         $this->di['logger']->info('Copied form with id %s to new form %s with id %s', $data['form_id'], $data['name'], $new_form_id);
