@@ -376,7 +376,7 @@ class Service implements InjectionAwareInterface
 
         if (isset($fields) && is_array($fields)) {
             foreach ($fields as $field_data) {
-                if (isset($field_data) {
+                if (isset($field_data)) {
                     $field_data['form_id'] = $new_form_id;
                     $this->addNewField($field_data);
                 }
