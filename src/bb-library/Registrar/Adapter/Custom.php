@@ -47,8 +47,12 @@ class Registrar_Adapter_Custom extends Registrar_AdapterAbstract
         if($this->config['use_whois']) {
             $w = new Whois($domain->getName());
             return $w->isAvailable();
+        } else {
+            $domain = $domain->getName();
+            if ( gethostbyname($domain) == $domain ) :
+                return true;
+            endif;
         }
-        return true;
     }
 
     public function modifyNs(Registrar_Domain $domain)
