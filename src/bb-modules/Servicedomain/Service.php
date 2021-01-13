@@ -775,7 +775,8 @@ class Service implements \Box\InjectionAwareInterface
         $model->price_renew        = $data['price_renew'];
         $model->price_transfer     = $data['price_transfer'];
         $model->min_years          = isset($data['min_years']) ? (int)$data['min_years'] : 1;
-        $model->allow_register     = isset($data['allow_register']) ? (bool)$data['allow_transfer'] : true;
+        $model->allow_register     = isset($data['allow_register']) ? (bool)$data['allow_register'] : true;
+        $model->allow_transfer     = isset($data['allow_transfer']) ? (bool)$data['allow_transfer'] : true;
         $model->active             = isset($data['active']) ? (bool)$data['active'] : false;
         $model->updated_at         = date('Y-m-d H:i:s');
         $model->created_at         = date('Y-m-d H:i:s');
@@ -907,7 +908,7 @@ class Service implements \Box\InjectionAwareInterface
 
     public function registrarGetAvailable()
     {
-        $query = "SELECT tr.registrar, tr.name FROM tld_registrar tr GROUP BY registrar";
+        $query = "SELECT 'registrar', 'name' FROM tld_registrar GROUP BY registrar";
 
         $exists = $this->di['db']->getAssoc($query);
 
@@ -970,7 +971,8 @@ class Service implements \Box\InjectionAwareInterface
         if (!$registrar instanceof \Registrar_AdapterAbstract) {
             throw new \Box_Exception('Registrar adapter :adapter should extend Registrar_AdapterAbstract', array(':adapter' => $class));
         }
-
+        
+        $registrar->setLog($this->di['logger']);
 
         if (isset($r->test_mode) && $r->test_mode) {
             $registrar->enableTestMode();

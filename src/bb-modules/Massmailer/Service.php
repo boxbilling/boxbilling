@@ -109,7 +109,7 @@ class Service implements \Box\InjectionAwareInterface
             }
         }
         
-        $sql .= ' GROUP BY c.id ORDER BY c.id DESC';
+        $sql .= ' ORDER BY c.id DESC';
         
         if(isset($data['debug']) && $data['debug']) {
             throw new \Exception($sql. ' '. print_r($values, 1));
@@ -128,15 +128,13 @@ class Service implements \Box\InjectionAwareInterface
 
         $vars = array();
         $vars['c'] = $clientArr;
-        $vars['_client_id'] = $client->id;
         $vars['_tpl'] = $model->subject;
-        $ps = $systemService->renderString($vars['_tpl'], true, $vars);
+        $ps = $systemService->renderString($vars['_tpl'], false, $vars);
         
         $vars = array();
         $vars['c'] = $clientArr;
-        $vars['_client_id'] = $client->id;
         $vars['_tpl'] = $model->content;
-        $pc = $systemService->renderString($vars['_tpl'], true, $vars);
+        $pc = $systemService->renderString($vars['_tpl'], false, $vars);
         
         return array($ps, $pc);
     }
@@ -171,11 +169,6 @@ class Service implements \Box\InjectionAwareInterface
             return true;
         }
 
-		/**
-		By: Samuel A.
-		Modified: 07.07.2019
-		Log email to database
-		*/ 
 		$mod      = $this->di['mod']('email');
         $settings = $mod->getConfig();
 

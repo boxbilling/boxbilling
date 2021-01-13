@@ -4,25 +4,20 @@
  *
  * If you are not using the web-installer, you can rename this file
  * to "bb-config.php" and fill in the values.
- * Import /install/structure.sql to your database
- * Import /install/content.sql to your database
- * Open browser http://www.youdomain.com/index.php?_url=/bb-admin to create new admin account.
+ * Import /install/sql/structure.sql to your database
+ * Import /install/sql/content.sql to your database
+ * Open browser http://www.yourdomain.com/index.php?_url=/bb-admin to create new admin account.
  * Remove /install directory
  */
 
 return array(
-
-    /**
-     * Set BoxBilling license key. Get license key at http://www.boxbilling.com
-     */
-    'license'     => '',
 
     'salt'        => '',
 
     /**
      * Full URL where BoxBilling is installed with trailing slash
      */
-    'url'     => 'http://www.boxbilling.test/',
+    'url'     => 'http://localhost/',
 
     'admin_area_prefix' =>  '/bb-admin',
 
@@ -36,7 +31,7 @@ return array(
      * Configure .htaccess file before enabling this feature
      * Set to TRUE if using nginx
      */
-    'sef_urls'  => false,
+    'sef_urls'  => true,
 
     /**
      * Application timezone
@@ -78,22 +73,22 @@ return array(
         /**
          * Database hostname. Don't change this if in doubt.
          */
-        'host'   =>'127.0.0.1',
+        'host'   => getenv('DB_HOST') ?: '127.0.0.1',
 
         /**
          * The name of the database for BoxBilling
          */
-        'name'   =>'boxbilling',
+        'name'   => getenv('DB_NAME') ?: 'boxbilling',
 
         /**
          * Database username
          */
-        'user'   =>'foo',
+        'user'   => getenv('DB_USER') ?: 'foo',
 
         /**
          * Database password
          */
-        'password'   =>'foo',
+        'password'   => getenv('DB_PASS') ?: 'foo',
     ),
 
     'twig'   =>  array(

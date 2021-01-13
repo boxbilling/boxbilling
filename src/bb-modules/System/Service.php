@@ -182,32 +182,7 @@ class Service
 
         return $details;
     }
-
-    public function getLicenseInfo($data)
-    {
-        $details = $this->di['license']->getDetails();
-        $owner = null;
-        $expires_at = null;
-        if(isset($details['expires_at']) && $details['expires_at']) {
-            if(is_numeric($details['expires_at'])) {
-                $expires_at = date('Y-m-d H:i:s', $details['expires_at']);
-            } else {
-                $expires_at = $details['expires_at'];
-            }
-        }
-
-        if(isset($details['licensed_to']) && $details['licensed_to']) {
-            $owner = $details['licensed_to'];
-        }
-
-        $result = array(
-            'licensed_to'   =>  $owner,
-            'key'           =>  $this->di['config']['license'],
-            'expires_at'    =>  $expires_at,
-        );
-        return $result;
-    }
-
+    
     public function getParams($data)
     {
         $query = "SELECT param, value
@@ -257,6 +232,10 @@ class Service
             $msgs['info'][] = sprintf('Install module "%s" still exists. Please remove it for security reasons.', $install);
         }
 
+        if($this->getVersion() == "0.0.1") {
+            $msgs['info'][] = 'BoxBilling couldn\'t find valid version information. This is okay if you\'ve brought a copy of BoxBilling directly from the master branch, and not from releases. But beware, master branch may not be stable enough to be used for production use.';
+        }
+
         if(!extension_loaded('openssl')) {
             $msgs['info'][] = sprintf('BoxBilling requires %s extension to be enabled on this server for security reasons.', 'php openssl');
         }
@@ -285,6 +264,7 @@ class Service
     public function renderString($tpl, $try_render, $vars)
     {
         $twig = $this->di['twig'];
+        //add client api if _client_id is set
         if(isset($vars['_client_id'])) {
             $identity = $this->di['db']->load('Client', $vars['_client_id']);
             if($identity instanceof \Model_Client) {
@@ -296,11 +276,13 @@ class Service
                 }
             }
         }
-
+        else{
+            // attempt adding admin api to twig
         try {
             $twig->addGlobal('admin', $this->di['api_admin']);
         } catch(\Exception $e) {
             //skip if admin is not logged in
+        }
         }
 
         try {
@@ -1536,14 +1518,7 @@ class Service
      */
     public function checkLimits($model, $limit = 2)
     {
-        if (!$this->di['license']->isPro()) {
-            $model = str_replace('Model_', '', $model);
-            $count = count($this->di['db']->find($model));
 
-            if ($count >= $limit) {
-                throw new \Box_Exception('You have reached free version limit. Upgrade to PRO version of BoxBilling if you want this limit removed.', null, 875);
-            }
-        }
     }
 
     public function getNameservers()
