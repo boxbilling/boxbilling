@@ -349,7 +349,7 @@ class Service implements InjectionAwareInterface
         AND id != field_id
         ");
 
-        $result = $this->di['db']->findOne('FormField', 'form_id = ? and name = ? and id != ?', array($form_id, $field_name, $field_id));
+        $result = $this->di['db']->findOne('FormField', 'form_id' = ? and 'name' = ? and 'id' != ?'', array('$form_id, $field_name, $field_id'));
         return ($result) ? true : false;
     }
 
