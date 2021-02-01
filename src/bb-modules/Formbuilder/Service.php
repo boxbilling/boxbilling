@@ -344,9 +344,9 @@ class Service implements InjectionAwareInterface
         $sql = ("
         SELECT COUNT( * )
         FROM  `form_field`
-        WHERE form_id = :form_id
-        AND name =  :field_name
-        AND id != :field_id
+        WHERE form_id = form_id
+        AND name =  field_name
+        AND id != field_id
         ");
 
         $result = $this->di['db']->findOne('FormField', 'form_id = ? and name = ? and id != ?', array($form_id, $field_name, $field_id));
@@ -369,7 +369,7 @@ class Service implements InjectionAwareInterface
     public function duplicateForm($data)
     {
         $fields = $this->getFormFields($data['form_id']);
-        $new_form_id = $this->addNewForm(array('name' => $data['name']));
+        $new_form_id = $this->addNewForm(array("name" => $data['name']));
 
         if (isset($fields) && is_array($fields)) {
             foreach ($fields as $field_data) {
