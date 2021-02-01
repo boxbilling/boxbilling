@@ -369,7 +369,7 @@ class Service implements InjectionAwareInterface
     public function duplicateForm($data)
     {
         $fields = $this->getFormFields($data['form_id']);
-        $new_form_id = $this->addNewForm(array("name" => $data['name']));
+        $new_form_id = $this->addNewForm(array('field_name' => $data['name']));
 
         if (isset($fields) && is_array($fields)) {
             foreach ($fields as $field_data) {
