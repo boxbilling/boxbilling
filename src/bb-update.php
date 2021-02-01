@@ -10,6 +10,18 @@
  * with this source code in the file LICENSE
  */
 
+/**
+ * Unnamed new release
+ */
+class BBPatch_24 extends BBPatchAbstract
+{
+    public function patch()
+    {
+        $q = "CREATE TABLE IF NOT EXISTS `custom_pages` (`id` int(11) NOT NULL AUTO_INCREMENT, `title` varchar(255) NOT NULL, `description` varchar(555) NOT NULL, `keywords` varchar(555) NOT NULL, `content` text NOT NULL, `slug` varchar(255) NOT NULL, `created_at` timestamp NOT NULL DEFAULT current_timestamp(), PRIMARY KEY (`id`)) ENGINE=MyISAM DEFAULT CHARSET=utf8";
+        $this->execSql($q);
+    }
+}
+
 class BBPatch_23 extends BBPatchAbstract
 {
     public function patch()
@@ -103,7 +115,6 @@ class BBPatch_20 extends BBPatchAbstract
             'promo'                     => array('start_at', 'end_at', 'created_at', 'updated_at'),
             'queue'                     => array('created_at', 'updated_at'),
             'queue_message'             => array('execute_at', 'created_at', 'updated_at'),
-            'service_boxbillinglicense' => array('created_at', 'updated_at'),
             'service_custom'            => array('created_at', 'updated_at'),
             'service_domain'            => array('synced_at', 'registered_at', 'expires_at', 'created_at', 'updated_at'),
             'service_downloadable'      => array('created_at', 'updated_at'),
