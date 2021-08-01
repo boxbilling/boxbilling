@@ -155,6 +155,7 @@ final class Box_Installer
                     'box_ver_ok' => $se->isBoxVersionOk(),
                     'php_ver' => $options['php']['version'],
                     'php_ver_req' => $options['php']['min_version'],
+                    'php_ver_cutoff' => $options['php']['cutoff_version'],
                     'php_safe_mode' => $options['php']['safe_mode'],
                     'php_ver_ok' => $se->isPhpVersionOk(),
                     'extensions' => $se->extensions(),

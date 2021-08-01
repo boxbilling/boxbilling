@@ -94,7 +94,7 @@
                                     <tr>
                                         <td>PHP version</td>
                                         <td><strong class="{{ php_ver_ok ? 'green' : 'red'}}">{{ php_ver }}</strong></td>
-                                        <td>{% if not php_ver_ok %}Required PHP version >{{ php_ver_req }}{% endif %}</td>
+                                        <td>{% if not php_ver_ok %}Required PHP version is greater than {{ php_ver_req }} and less than {{ php_ver_cutoff }}{% endif %}</td>
                                     </tr>
 
                                     <tr>

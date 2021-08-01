@@ -42,6 +42,7 @@ class Box_Requirements implements \Box\InjectionAwareInterface
                  ),
                 'version'       =>  PHP_VERSION,
                 'min_version'   =>  '7.2',
+                'cutoff_version' => '8.0',
                 'safe_mode'     =>  ini_get('safe_mode'),
             ),
             'writable_folders' => array(
@@ -107,7 +108,13 @@ class Box_Requirements implements \Box\InjectionAwareInterface
     {
         $current = $this->_options['php']['version'];
         $required = $this->_options['php']['min_version'];
-        return version_compare($current, $required, '>=');
+        $cutoff = $this->_options['php']['cutoff_version'];
+		
+        if(version_compare($current, $cutoff, '>=') <= 0 && version_compare($current, $required, '>=') > 0){
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public function isBoxVersionOk()
