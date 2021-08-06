@@ -88,7 +88,7 @@ class Server_Manager_CWP extends Server_Manager
 			'action'  => 'list',
 		);
 
-        if(makeAPIRequest($host, $port, 'typeserver', $data) {
+        if(makeAPIRequest($host, $port, 'typeserver', $data)) {
             return true;
         } else {
             throw new Server_Exception('Failed to connect to server');
@@ -159,7 +159,7 @@ class Server_Manager_CWP extends Server_Manager
 			$data['reseller'] = 1;
 		}
 
-        if(makeAPIRequest($host, $port, 'account', $data) {
+        if(makeAPIRequest($host, $port, 'account', $data)) {
             return true;
         } else {
             throw new Server_Exception('Failed to create account!');
@@ -183,7 +183,7 @@ class Server_Manager_CWP extends Server_Manager
 			'user'     => $a->getUsername()
 		);
 
-        if(makeAPIRequest($host, $port, 'account', $data) {
+        if(makeAPIRequest($host, $port, 'account', $data)) {
             return true;
         } else {
             throw new Server_Exception('Failed to suspend account!');
@@ -207,7 +207,7 @@ class Server_Manager_CWP extends Server_Manager
 			'user'     => $a->getUsername()
 		);
 
-        if(makeAPIRequest($host, $port, 'account', $data) {
+        if(makeAPIRequest($host, $port, 'account', $data)) {
             return true;
         } else {
             throw new Server_Exception('Failed to unsuspend account!');
@@ -232,7 +232,7 @@ class Server_Manager_CWP extends Server_Manager
 			'email'   => $client->getEmail()
 		);
 
-        if(makeAPIRequest($host, $port, 'account', $data) {
+        if(makeAPIRequest($host, $port, 'account', $data)) {
             return true;
         } else {
             throw new Server_Exception('Failed to cancel / delete account!');
@@ -262,7 +262,7 @@ class Server_Manager_CWP extends Server_Manager
 			'package'  => $package
 		);
 
-        if(makeAPIRequest($host, $port, 'changepack', $data) {
+        if(makeAPIRequest($host, $port, 'changepack', $data)) {
             return true;
         } else {
             throw new Server_Exception('Failed to change the account package!');
@@ -287,7 +287,7 @@ class Server_Manager_CWP extends Server_Manager
 			'pass'    => $new
 		);
 
-        if(makeAPIRequest($host, $port, 'changepass', $data) {
+        if(makeAPIRequest($host, $port, 'changepass', $data)) {
             return true;
         } else {
             throw new Server_Exception('Failed to change the account password!');
