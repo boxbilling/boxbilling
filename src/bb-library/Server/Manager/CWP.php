@@ -88,7 +88,11 @@ class Server_Manager_CWP extends Server_Manager
 			'action'  => 'list',
 		);
 
-		return makeAPIRequest($host, $port, 'typeserver', $data);
+        if(makeAPIRequest($host, $port, 'typeserver', $data) {
+            return true;
+        } else {
+            throw new Server_Exception('Failed to connect to server');
+        }
 	}
     
     /**
@@ -154,7 +158,12 @@ class Server_Manager_CWP extends Server_Manager
 		if($a->getReseller()) {
 			$data['reseller'] = 1;
 		}
-		return makeAPIRequest($host, $port, 'account', $data);
+
+        if(makeAPIRequest($host, $port, 'account', $data) {
+            return true;
+        } else {
+            throw new Server_Exception('Failed to create account!');
+        }
 	}
 
 	public function suspendAccount(Server_Account $a)
@@ -173,7 +182,12 @@ class Server_Manager_CWP extends Server_Manager
 			'action'   => 'susp',
 			'user'     => $a->getUsername()
 		);
-		return makeAPIRequest($host, $port, 'account', $data);
+
+        if(makeAPIRequest($host, $port, 'account', $data) {
+            return true;
+        } else {
+            throw new Server_Exception('Failed to suspend account!');
+        }
 	}
 
 	public function unsuspendAccount(Server_Account $a)
@@ -192,7 +206,12 @@ class Server_Manager_CWP extends Server_Manager
 			'action'   => 'unsp',
 			'user'     => $a->getUsername()
 		);
-		return makeAPIRequest($host, $port, 'account', $data);
+
+        if(makeAPIRequest($host, $port, 'account', $data) {
+            return true;
+        } else {
+            throw new Server_Exception('Failed to unsuspend account!');
+        }
 	}
 
 	public function cancelAccount(Server_Account $a)
@@ -212,7 +231,12 @@ class Server_Manager_CWP extends Server_Manager
 			'user'    => $a->getUsername(),
 			'email'   => $client->getEmail()
 		);
-		return makeAPIRequest($host, $port, 'account', $data);
+
+        if(makeAPIRequest($host, $port, 'account', $data) {
+            return true;
+        } else {
+            throw new Server_Exception('Failed to cancel / delete account!');
+        }
 	}
 
 	/**
@@ -237,7 +261,12 @@ class Server_Manager_CWP extends Server_Manager
 			'user'     => $a->getUsername(),
 			'package'  => $package
 		);
-		return makeAPIRequest($host, $port, 'changepack', $data);
+
+        if(makeAPIRequest($host, $port, 'changepack', $data) {
+            return true;
+        } else {
+            throw new Server_Exception('Failed to change the account package!');
+        }
 	}
 
 	public function changeAccountPassword(Server_Account $a, $new)
@@ -257,7 +286,12 @@ class Server_Manager_CWP extends Server_Manager
 			'user'    => $a->getUsername(),
 			'pass'    => $new
 		);
-		return makeAPIRequest($host, $port, 'changepass', $data);
+
+        if(makeAPIRequest($host, $port, 'changepass', $data) {
+            return true;
+        } else {
+            throw new Server_Exception('Failed to change the account password!');
+        }
 	}
 
 	/**
@@ -307,10 +341,10 @@ class Server_Manager_CWP extends Server_Manager
 		}
 
 		if($status == 'OK' && $func != 'accountdetail'){
-			return 1;
+			return true;
 		} else {
 			if($status == 'Error'){
-		        return 0;
+		        return false;
 			} else {
 			    return $result;
 			}
