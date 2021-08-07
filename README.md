@@ -8,13 +8,14 @@
 
 <div align="center">
   
-[![Build Status](https://travis-ci.org/boxbilling/boxbilling.svg?branch=master)](https://travis-ci.org/boxbilling/boxbilling)
+[![Build Status](https://travis-ci.com/boxbilling/boxbilling.svg?branch=master)](https://travis-ci.com/github/boxbilling/boxbilling)
 [![Download Latest](https://img.shields.io/github/downloads/boxbilling/boxbilling/total)](https://github.com/boxbilling/boxbilling/releases/latest)
 [![BoxBilling Issues](https://img.shields.io/github/issues/boxbilling/boxbilling.svg?style=popout)](https://github.com/boxbilling/boxbilling/issues)
 [![BoxBilling Demo](https://img.shields.io/badge/boxbilling-demo-blue)](https://demo.boxbilling.com)
 ![BoxBilling Size](https://img.shields.io/github/repo-size/boxbilling/boxbilling.svg?style=popout)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/boxbilling/boxbilling/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/boxbilling/boxbilling/?branch=master)
+[![CodeFactor](https://www.codefactor.io/repository/github/boxbilling/boxbilling/badge)](https://www.codefactor.io/repository/github/boxbilling/boxbilling)
 
 </div>
 
@@ -37,7 +38,7 @@ You can simplify your web hosting business by putting your billing cycle in cont
 
 ## Requirements
 Although BoxBilling *may* work in lower or smaller conditions, we **highly recommend** you to ensure that your environment has the following software installed:
-- PHP 7.2, or higher.
+- PHP 7.2, or higher. PHP 8 is not supported at the moment.
 - MySQL 8, or higher.
 - Following PHP extensions:
     - pdo_mysql
