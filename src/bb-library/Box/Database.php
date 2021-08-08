@@ -78,7 +78,7 @@ class Box_Database implements InjectionAwareInterface
     {
         $type = $this->_getTypeFromModelName($modelName);
         $bean = $this->orm->findOne($type, $sql, $values);
-        if($type == $modelName)
+        if($type == $modelName) {
             return $bean;
         }
         if($bean && $bean->id) {

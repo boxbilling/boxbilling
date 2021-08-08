@@ -5267,7 +5267,7 @@ class Box_Zip
     {
 
       // ----- Nothing to duplicate, so duplicate is a success.
-        return 1;
+      return 1;
     }
 
     // ----- Open the zip file
