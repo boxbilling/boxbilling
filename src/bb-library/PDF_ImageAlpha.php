@@ -27,8 +27,10 @@ function Image($file, $x=null, $y=null, $w=0, $h=0, $type='', $link='', $isMask=
         $type=strtolower($type);
         if($type=='png'){
             $info=$this->_parsepng($file);
-            if($info=='alpha')
-                return $this->ImagePngWithAlpha($file,$x,$y,$w,$h,$link);
+            if($info=='alpha'){
+                $this->ImagePngWithAlpha($file,$x,$y,$w,$h,$link);
+                break;
+            }
         }
         else
         {

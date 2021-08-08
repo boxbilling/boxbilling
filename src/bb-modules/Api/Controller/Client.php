@@ -59,7 +59,7 @@ class Client implements InjectionAwareInterface
     public function get_method(\Box_App $app, $role, $class, $method)
     {
         $call = $class.'_'.$method;
-        return $this->tryCall($role, $call, $_GET);
+        $this->tryCall($role, $call, $_GET);
     }
 
     public function post_method(\Box_App $app, $role, $class, $method)
@@ -73,7 +73,7 @@ class Client implements InjectionAwareInterface
         }
         
         $call = $class.'_'.$method;
-        return $this->tryCall($role, $call, $p);
+        $this->tryCall($role, $call, $p);
     }
 
     /**

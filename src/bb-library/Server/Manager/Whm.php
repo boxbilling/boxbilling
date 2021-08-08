@@ -1072,7 +1072,6 @@ class xmlapi {
 
 		// Set the $auth string
 		
-		$authstr;
 		if ( $this->auth_type == 'hash' ) {
 			$authstr = 'Authorization: WHM ' . $this->user . ':' . $this->auth . "\r\n";
 		} elseif ($this->auth_type == 'pass' ) {
@@ -1087,7 +1086,6 @@ class xmlapi {
 
 		// Perform the query (or pass the info to the functions that actually do perform the query)
 		
-		$response;
 		if ( $this->http_client == 'curl' ) {
 			$response = $this->curl_query($url, $args, $authstr);
 		} elseif ( $this->http_client == 'fopen' ) {
