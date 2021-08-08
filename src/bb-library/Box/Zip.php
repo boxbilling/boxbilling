@@ -1106,10 +1106,7 @@ class Box_Zip
   function deleteByIndex($p_index)
   {
 
-    $p_list = $this->delete(PCLZIP_OPT_BY_INDEX, $p_index);
-
-    // ----- Return
-    return $p_list;
+    return $this->delete(PCLZIP_OPT_BY_INDEX, $p_index);
   }
   // --------------------------------------------------------------------------------
 
@@ -2207,10 +2204,7 @@ class Box_Zip
     {
 
       // ----- Do a create
-      $v_result = $this->privCreate($p_filedescr_list, $p_result_list, $p_options);
-
-      // ----- Return
-      return $v_result;
+      return $this->privCreate($p_filedescr_list, $p_result_list, $p_options);
     }
     // ----- Magic quotes trick
     $this->privDisableMagicQuotes();
@@ -3671,7 +3665,7 @@ class Box_Zip
     }
 
     // ----- Look for all path to remove
-    if ($p_remove_all_path == true) {
+    if ($p_remove_all_path) {
         // ----- Look for folder entry that not need to be extracted
         if (($p_entry['external']&0x00000010)==0x00000010) {
 
@@ -5094,10 +5088,7 @@ class Box_Zip
     {
 
       // ----- Nothing to merge, so merge is a success
-      $v_result = 1;
-
-      // ----- Return
-      return $v_result;
+      return 1;
     }
 
     // ----- Look if the archive exists
@@ -5105,10 +5096,7 @@ class Box_Zip
     {
 
       // ----- Do a duplicate
-      $v_result = $this->privDuplicate($p_archive_to_add->zipname);
-
-      // ----- Return
-      return $v_result;
+      return $this->privDuplicate($p_archive_to_add->zipname);
     }
 
     // ----- Open the zip file
@@ -5279,10 +5267,7 @@ class Box_Zip
     {
 
       // ----- Nothing to duplicate, so duplicate is a success.
-      $v_result = 1;
-
-      // ----- Return
-      return $v_result;
+        return 1;
     }
 
     // ----- Open the zip file
@@ -5698,9 +5683,7 @@ class Box_Zip
 	    }
     }
 
-    $v_result = 'Unknown';
-
-    return $v_result;
+    return 'Unknown';
   }
   // --------------------------------------------------------------------------------
 
