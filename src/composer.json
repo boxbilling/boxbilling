@@ -27,7 +27,7 @@
         "michelf/php-markdown": "1.9.0",
         "stripe/stripe-php": "^7.92.0",
         "guzzlehttp/guzzle": "*",
-        "laminas/laminas-httphandlerrunner": "^1.2.0",
+        "laminas/laminas-httphandlerrunner": "^2.0.1",
         "docnet/tfpdf": "^2.2",
         "infinityfree/mofh-client": "^0.7.0"
     },
