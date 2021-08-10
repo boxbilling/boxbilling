@@ -6,23 +6,30 @@
  * ---- jsUrl
  * ---- tokenLength
  */
+
+$di = new Box_Di();
+$di['config'] = function() {
+    $array = include BB_PATH_ROOT . '/bb-config.php';
+    return new Box_Config($array);
+};
+
 return array(
     "CSRFP_TOKEN" => "",
-	"failedAuthAction" => array(
-		"GET" => 0,
-		"POST" => 0),
-	"errorRedirectionPage" => "",
-	"customErrorMessage" => "",
-	"jsUrl" => $config['url'] .'/bb-library/Security/CSRF-Protector-PHP/js/csrfprotector.js',
-	"tokenLength" => 10,
-	"cookieConfig" => array(
-		"path" => '',
-		"domain" => '',
-		"secure" => false,
-		"expire" => '',
-	),
-	"disabledJavascriptMessage" => "This site attempts to protect users against <a href=\"https://www.owasp.org/index.php/Cross-Site_Request_Forgery_%28CSRF%29\">
-	Cross-Site Request Forgeries </a> attacks. In order to do so, you must have JavaScript enabled in your web browser otherwise this site will fail to work correctly for you.
-	 See details of your web browser for how to enable JavaScript.",
-	"verifyGetFor" => array()
+    "failedAuthAction" => array(
+        "GET" => 0,
+        "POST" => 0),
+    "errorRedirectionPage" => "",
+    "customErrorMessage" => "",
+    "jsUrl" => $di['config']['url'] .'/bb-library/Security/CSRF-Protector-PHP/js/csrfprotector.js',
+    "tokenLength" => 10,
+    "cookieConfig" => array(
+        "path" => '',
+        "domain" => '',
+        "secure" => false,
+        "expire" => '',
+    ),
+    "disabledJavascriptMessage" => "This site attempts to protect users against <a href=\"https://www.owasp.org/index.php/Cross-Site_Request_Forgery_%28CSRF%29\">
+    Cross-Site Request Forgeries </a> attacks. In order to do so, you must have JavaScript enabled in your web browser otherwise this site will fail to work correctly for you.
+     See details of your web browser for how to enable JavaScript.",
+    "verifyGetFor" => array()
 );
