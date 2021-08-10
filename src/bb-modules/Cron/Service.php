@@ -51,6 +51,16 @@ class Service
         $api = $this->di['api_system'];
         $this->di['logger']->info('- Started executing cron');
 
+        $MaxLogSizeMB = 2;
+        $LogPath = BB_PATH_LOG . '/php_error.log';
+
+        if(filesize($LogPath) > $MaxLogSizeMB * 1000000 ){
+            $this->di['logger']->info('- Cleaning large PHP log');
+            if(!unlink($LogPath)){
+                $this->di['logger']->info('- Failed to clean large PHP log');
+            }
+        }
+        
         //@core tasks
         $this->_exec($api, 'hook_batch_connect');
         $this->di['events_manager']->fire(array('event'=>'onBeforeAdminCronRun'));
