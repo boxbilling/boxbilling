@@ -3853,7 +3853,7 @@ class Box_Zip
     if ($p_entry['status'] == 'ok') {
 
       // ----- Do the extraction (if not a folder)
-      if (!(($p_entry['external']&0x00000010)==0x00000010))
+      if ((($p_entry['external']&0x00000010) != 0x00000010))
       {
         // ----- Look for not compressed file
         if ($p_entry['compression'] == 0) {
@@ -4125,7 +4125,7 @@ class Box_Zip
     if ($p_entry['status'] == 'ok') {
 
       // ----- Do the extraction (if not a folder)
-      if (!(($p_entry['external']&0x00000010)==0x00000010)) {
+      if ((($p_entry['external']&0x00000010) !== 0x00000010)) {
         // ----- Look for not compressed file
         if ($p_entry['compressed_size'] == $p_entry['size']) {
 
@@ -4239,7 +4239,7 @@ class Box_Zip
     if ($p_entry['status'] == 'ok') {
 
       // ----- Do the extraction (if not a folder)
-      if (!(($p_entry['external']&0x00000010)==0x00000010)) {
+      if ((($p_entry['external']&0x00000010) !== 0x00000010)) {
         // ----- Look for not compressed file
   //      if ($p_entry['compressed_size'] == $p_entry['size'])
         if ($p_entry['compression'] == 0) {

@@ -104,7 +104,7 @@ class subresActing extends openSRS_base {
 			$this->resultFullFormated = convertArray2Formated ($this->_formatHolder, $this->resultFullRaw);
 			$this->resultFormated = convertArray2Formated ($this->_formatHolder, $this->resultRaw);
 		} else {
-			echo ("Incorrect call data.<br>\n");
+			echo "Incorrect call data. <br>\n";
 		}
 	}
 

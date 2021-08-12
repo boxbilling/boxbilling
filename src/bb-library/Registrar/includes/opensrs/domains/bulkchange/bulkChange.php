@@ -277,7 +277,7 @@ class bulkChange extends openSRS_base {
 					$cmd['attributes']['dns_record_data']['subdomain'] = $this->_dataObject->data->dns_record_data->subdomain;
 				if (isSet($this->_dataObject->data->dns_record_data->ipv6_address) && $this->_dataObject->data->dns_record_data->ipv6_address!= "") 
 					$cmd['attributes']['dns_record_data']['ipv6_address'] = $this->_dataObject->data->dns_record_data->ipv6_address;
-				if (isSet($this->_dataObject->data->dns_record_data->hostname) && $this->_dataObject->data->dns_record_data->hostname!= "") $
+				if (isSet($this->_dataObject->data->dns_record_data->hostname) && $this->_dataObject->data->dns_record_data->hostname!= "")
 					$cmd['attributes']['dns_record_data']['hostname'] = $this->_dataObject->data->dns_record_data->hostname;
 				if (isSet($this->_dataObject->data->dns_record_data->priority) && $this->_dataObject->data->dns_record_data->priority!= "") 
 					$cmd['attributes']['dns_record_data']['priority'] = $this->_dataObject->data->dns_record_data->priority;
