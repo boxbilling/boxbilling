@@ -5702,7 +5702,7 @@ class Box_Zip
   {
     if (stristr(php_uname(), 'windows')) {
       // ----- Look for potential disk letter
-      if (($p_remove_disk_letter) && (($v_position = strpos($p_path, ':')) != false)) {
+      if (($p_remove_disk_letter) && (($v_position = strpos($p_path, ':')))) {
           $p_path = substr($p_path, $v_position+1);
       }
       // ----- Change potential windows directory separator

@@ -48,13 +48,13 @@ class openSRS_base {
 
 		// Load and read active config file
 		$actConfig = $xmlHand->xml2array(ACTIVECONFIG);
-		if ($actConfig != false){
+		if ($actConfig){
 			$actFileArray = $xmlHand->getValueByPath ($actConfig, "config/file");
 			$actFile = $actFileArray['value'];
 		
 			// Load active Config
 			$fileConfig = $xmlHand->xml2array(OPENSRSURI . OPENSRSCONFINGS . $actFile);
-			if ($fileConfig != false){
+			if ($fileConfig){
 				$fileFileArray = $xmlHand->getValueByPath ($fileConfig, "config/osrsRegular");
 	
 				foreach ($fileFileArray as $ffa){
