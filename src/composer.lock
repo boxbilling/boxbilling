@@ -4,11 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-<<<<<<< HEAD
-    "content-hash": "c9a9f97beca4614f17f1075a64956171",
-=======
     "content-hash": "3e83ef77c7e78350dba0181e3fc58c17",
->>>>>>> f3c23962ed74745ef392159d996f05cf19a1ab5f
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -196,15 +192,11 @@
             ],
             "support": {
                 "issues": "https://github.com/gabordemooij/redbean/issues",
-<<<<<<< HEAD
-                "source": "https://github.com/gabordemooij/redbean/tree/v5.6"
-            },
-            "time": "2020-10-03T14:18:27+00:00"
-=======
+
                 "source": "https://github.com/gabordemooij/redbean/tree/v5.7"
             },
             "time": "2021-03-28T11:01:15+00:00"
->>>>>>> f3c23962ed74745ef392159d996f05cf19a1ab5f
+
         },
         {
             "name": "geoip2/geoip2",
