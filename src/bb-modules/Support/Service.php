@@ -355,7 +355,7 @@ class Service implements \Box\InjectionAwareInterface
             $query = $query . ' WHERE ' . implode(' AND ', $where);
         }
 
-        $query .= " ORDER BY st.priority ASC, st.id DESC";
+        $query .= " GROUP BY st.id ORDER BY st.priority ASC, st.id DESC";
 
         return array($query, $bindings);
     }
@@ -816,7 +816,7 @@ class Service implements \Box\InjectionAwareInterface
         }
 
         $ticket               = $this->di['db']->dispense('SupportPTicket');
-        $ticket->hash         = sha1(uniqid());
+        $ticket->hash         = sha1(random_bytes(13));
         $ticket->author_name  = $data['name'];
         $ticket->author_email = $data['email'];
         $ticket->subject      = $subject;
@@ -1055,7 +1055,7 @@ class Service implements \Box\InjectionAwareInterface
             $query = $query . ' WHERE ' . implode(' AND ', $where);
         }
 
-        $query .= " ORDER BY spt.id DESC, sptm.id ASC";
+        $query .= " GROUP BY spt.id, sptm.id ORDER BY spt.id DESC, sptm.id ASC";
 
         return array($query, $bindings);
     }
@@ -1206,7 +1206,7 @@ class Service implements \Box\InjectionAwareInterface
         $this->di['events_manager']->fire(array('event' => 'onBeforeAdminPublicTicketOpen', 'params' => $data));
 
         $ticket               = $this->di['db']->dispense('SupportPTicket');
-        $ticket->hash         = sha1(uniqid());
+        $ticket->hash         = sha1(random_bytes(13));
         $ticket->author_name  = $data['name'];
         $ticket->author_email = $data['email'];
         $ticket->subject      = $data['subject'];

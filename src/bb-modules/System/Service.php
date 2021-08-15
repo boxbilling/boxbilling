@@ -182,16 +182,7 @@ class Service
 
         return $details;
     }
-
-    public function getLicenseInfo($data)
-    {
-        $result = array(
-            'licensed_to'   =>  'BoxBilling CE',
-            'key'           =>  'BoxBilling CE',
-        );
-        return $result;
-    }
-
+    
     public function getParams($data)
     {
         $query = "SELECT param, value
@@ -242,7 +233,7 @@ class Service
         }
 
         if($this->getVersion() == "0.0.1") {
-            $msgs['info'][] = 'BoxBilling couldn\'t find valid version information. This is okay if you\'ve brought a copy of BoxBilling directly from the master branch, and not from releases. But beware, master branch may not be stable enough to be used for production use.';
+            $msgs['info'][] = 'BoxBilling couldn\'t find valid version information. This is okay if you downloaded BoxBilling directly from the master branch, instead of a released version. But beware, the master branch may not be stable enough for production use.';
         }
 
         if(!extension_loaded('openssl')) {

@@ -108,7 +108,9 @@ class ServiceTest extends \BBTestCase {
             'server_id' => 1,
             'hosting_plan_id' => 2,
             'sld' => 'great',
-            'tld' => 'com'
+            'tld' => 'com',
+            'username' => 'username',
+            'password' => 'password'
         );
         
         $orderServiceMock = $this->getMockBuilder('\Box\Mod\Order\Service')->getMock();
@@ -126,7 +128,7 @@ class ServiceTest extends \BBTestCase {
         $toolsMock = $this->getMockBuilder('\Box_Tools')->getMock();
         $toolsMock->expects($this->atLeastOnce())
             ->method('generatePassword')
-            ->will($this->returnValue('generatedPass'));
+            ->will($this->returnValue('generatePassword'));
 
         $dbMock = $this->getMockBuilder('\Box_Database')->getMock();
         $dbMock->expects($this->atLeastOnce())
@@ -163,7 +165,7 @@ class ServiceTest extends \BBTestCase {
         $orderModel = new \Model_ClientOrder();
         $orderModel->loadBean(new \RedBeanPHP\OODBBean());
 
-        $model = new \Model_ServiceHosting();
+        $model = new \Model_ServiceHostingHp();
         $model->loadBean(new \RedBeanPHP\OODBBean());
 
         $orderServiceMock = $this->getMockBuilder('\Box\Mod\Order\Service')->getMock();
@@ -562,7 +564,7 @@ class ServiceTest extends \BBTestCase {
         $data = array();
 
         $this->expectException(\Box_Exception::class);
-        $this->expectExceptionMessage('Account password is missing or is not valid');
+        $this->expectExceptionMessage('Account username is missing or is not valid');
         $this->service->changeAccountUsername($orderModel, $model, $data);
     }
 
@@ -784,7 +786,7 @@ class ServiceTest extends \BBTestCase {
         $hostingServer = new \Model_ServiceHostingServer();
         $hostingServer->loadBean(new \RedBeanPHP\OODBBean());
         $hostingServer->manager = 'Custom';
-        $hostingHp = new\Model_ServiceHostingHp();
+        $hostingHp = new \Model_ServiceHostingHp();
         $hostingHp->loadBean(new \RedBeanPHP\OODBBean());
 
 

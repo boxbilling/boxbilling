@@ -19,11 +19,16 @@ define('BB_PATH_MODS',      BB_PATH_ROOT . '/bb-modules');
 define('BB_PATH_LANGS',     BB_PATH_ROOT . '/bb-locale');
 define('BB_PATH_UPLOADS',   BB_PATH_ROOT . '/bb-uploads');
 define('BB_PATH_DATA',   BB_PATH_ROOT . '/bb-data');
+define('isCLI', php_sapi_name() == 'cli');
 
-function handler_error($number, $message, $file, $line)
+function handler_error(int $number, string $message, string $file, int $line)
 {
     if (E_RECOVERABLE_ERROR===$number) {
+      if (isCLI) {
+        echo "Error #[$number] occurred in [$file] at line [$line]: [$message]";
+      } else {
         handler_exception(new ErrorException($message, $number, 0, $file, $line));
+      }
     } else {
         error_log($number." ".$message." ".$file." ".$line);
     }
@@ -33,6 +38,9 @@ function handler_error($number, $message, $file, $line)
 // Removed Exception type. Some errors are thrown as exceptions causing fatal errors.
 function handler_exception($e)
 {
+  if (isCLI) {
+    echo "Error #[". $e->getCode() ."] occurred in [". $e->getFile() ."] at line [". $e->getLine() ."]: [". trim(strip_tags($e->getMessage())) ."]";
+  } else {
     if(APPLICATION_ENV == 'testing') {
         print $e->getMessage() . PHP_EOL;
         return ;
@@ -62,11 +70,7 @@ function handler_exception($e)
     
         <!-- Custom stlylesheet -->
         <link type=\"text/css\" rel=\"stylesheet\" href=\"css/style.css\" />
-    
-        <!--[if lt IE 9]>
-            <script src=\"https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js\"></script>
-            <script src=\"https://oss.maxcdn.com/respond/1.4.2/respond.min.js\"></script>
-        <![endif]-->
+
         <style>
         * {
             -webkit-box-sizing: border-box;
@@ -168,6 +172,14 @@ function handler_exception($e)
               padding-top: 110px;
             }
           }
+
+          code {
+            font-family: Consolas,'courier new';
+            color: crimson;
+            background-color: #f1f1f1;
+            padding: 2px;
+            font-size: 90%;
+          }
           
         </style>
     </head>
@@ -183,19 +195,20 @@ function handler_exception($e)
         print sprintf('<h2>Error code: <em>%s</em></h1>', $e->getCode());
     }
     print sprintf('<p>%s</p>', $e->getMessage());
-    print sprintf('<center><p><a href="http://docs.boxbilling.com/en/latest/search.html?q=%s&check_keywords=yes&area=default" target="_blank">Look for detailed error explanation</a></p></center>', urlencode($e->getMessage()));
-
+    
     if(defined('BB_DEBUG') && BB_DEBUG) {
-        print sprintf('<em>%s</em>', 'Set BB_DEBUG to FALSE, to hide the message below');
+        print sprintf('<hr><center><small><p><b>%s</b></p></small></center>', 'Set BB_DEBUG to FALSE, to hide the message below');
         print sprintf('<p>Class: "%s"</p>', get_class($e));
         print sprintf('<p>File: "%s"</p>', $e->getFile());
         print sprintf('<p>Line: "%s"</p>', $e->getLine());
-        print sprintf('Trace: <pre>%s</pre>', $e->getTraceAsString());
+        print sprintf('Trace: <code>%s</code>', $e->getTraceAsString());
     }
-    print("<center><hr><p>Powered by <a href=//www.boxbilling.com/>BoxBilling</a></p></center>
+    print sprintf('<center><p><a href="http://docs.boxbilling.com/en/latest/search.html?q=%s&check_keywords=yes&area=default" target="_blank">Look for detailed error explanation</a></p></center>', urlencode($e->getMessage()));
+    print("<center><hr><p>Powered by <a href=//https://github.com/boxbilling/boxbilling/>BoxBilling</a></p></center>
     </body>
     
     </html>");
+  }
 }
 
 set_exception_handler("handler_exception");
@@ -229,11 +242,11 @@ if(!file_exists($configPath) || 0 == filesize($configPath)) {
     // Try to create an empty configuration file
     @file_put_contents($configPath, '');
     
-    $base_url = "http://".$_SERVER['HTTP_HOST'];
+    $base_url = "http".(isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 'on' || $_SERVER['HTTPS'] == 1) || isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' ? 's' : '')."://".$_SERVER['HTTP_HOST'];
     $base_url .= preg_replace('@/+$@','',dirname($_SERVER['SCRIPT_NAME']));
-    $url = $base_url . 'install/index.php';
+    $url = $base_url . '/install/index.php';
     $configFile = pathinfo($configPath, PATHINFO_BASENAME);
-    $msg = sprintf("The <em>$configFile</em> path seems to be invalid. You may have not generated the configuration file yet, or the configuration file may not contain the required configuration parameters. BoxBilling needs to have a valid configuration file present in order to function properly.</p><p>Need some help with the installation? <a target='_blank' href='http://docs.boxbilling.com/en/latest/reference/installation.html'>We got it</a>. You can create the configuration file using the interactive installer, or manually create the configuration file.</p><p>If it's your first time setting up BoxBilling, you can <a href='%s' class='button'>continue with the web-based interactive BoxBilling installation</a>.", $url);
+    $msg = sprintf("The <em>$configFile</em> path seems to be invalid. You may have not generated the configuration file yet, or the configuration file may not contain the required configuration parameters. BoxBilling needs to have a valid configuration file present in order to function properly.</p> <p>Need some help with the installation? <a target='_blank' href='http://docs.boxbilling.com/en/latest/reference/installation.html'>We got it</a>. You can create the configuration file using the interactive installer, or manually create the configuration file.</p> <p>If it's your first time setting up BoxBilling, you can <a href='%s' class='button'>continue with the web-based interactive BoxBilling installation</a>.", $url);
     throw new Exception($msg, 101);
 }
 
@@ -259,6 +272,11 @@ if($config['sef_urls']) {
 } else {
     define('BB_URL_API',    $config['url'] . 'index.php?_url=/api/');
 }
+
+include_once BB_PATH_LIBRARY .'/Security/CSRF-Protector-PHP/libs/csrf/csrfprotector.php';
+
+// Initialize CSRFProtector library
+csrfProtector::init();
 
 if($config['debug']) {
     error_reporting(E_ALL);

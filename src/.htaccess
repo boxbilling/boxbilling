@@ -1,8 +1,7 @@
 # Read documentation http://docs.boxbilling.com/ for more information
 # If you are receiving "Internal Server Error" message, make sure mod_rewrite is enabled in apache
 
-Options -Indexes
-Options +FollowSymLinks
+Options     -Indexes    +SymLinksIfOwnerMatch
 
 RewriteEngine On
 
@@ -38,6 +37,7 @@ RewriteCond %{REQUEST_FILENAME} -s [OR]
 RewriteCond %{REQUEST_FILENAME} -l [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^.*$ - [NC,L]
+RewriteRule ^page/(.*)$ index.php?_url=/custompages/$1
 RewriteRule ^(.*)$ index.php?_url=/$1 [QSA,L]
 
 <FilesMatch "\.(htaccess|htpasswd|ini|log|sh|inc|bak|phtml|sql)$">

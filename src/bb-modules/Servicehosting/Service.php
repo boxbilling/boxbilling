@@ -99,8 +99,8 @@ class Service implements InjectionAwareInterface
     {
         $orderService = $this->di['mod_service']('order');
         $model = $orderService->getOrderService($order);
-        if(!$model instanceof \Model_ServiceHosting) {
-            throw new \Box_Exception('Could not activate order. Service was not created');
+        if(!$model instanceof \RedBean_SimpleModel) {
+            throw new \Box_Exception('Order :id has no active service', array(':id'=>$order->id));
         }
 
         $pass = $this->di['tools']->generatePassword(10, 4);
@@ -257,7 +257,7 @@ class Service implements InjectionAwareInterface
     public function changeAccountUsername(\Model_ClientOrder $order, \Model_ServiceHosting $model, $data)
     {
         if(!isset($data['username']) || empty($data['username'])) {
-            throw new \Box_Exception('Account password is missing or is not valid');
+            throw new \Box_Exception('Account username is missing or is not valid');
         }
 
         $u = strtolower($data['username']);
