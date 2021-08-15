@@ -140,18 +140,6 @@
         },
         {
             "name": "gabordemooij/redbean",
-<<<<<<< HEAD
-            "version": "v5.6",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/gabordemooij/redbean.git",
-                "reference": "6b589df8bcf63b9b8525c50a5c1575e20a14de1b"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/gabordemooij/redbean/zipball/6b589df8bcf63b9b8525c50a5c1575e20a14de1b",
-                "reference": "6b589df8bcf63b9b8525c50a5c1575e20a14de1b",
-=======
             "version": "v5.7",
             "source": {
                 "type": "git",
@@ -162,7 +150,6 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/gabordemooij/redbean/zipball/e31aad3b38d5c34a809381f9a5283645ce4abb29",
                 "reference": "e31aad3b38d5c34a809381f9a5283645ce4abb29",
->>>>>>> f3c23962ed74745ef392159d996f05cf19a1ab5f
                 "shasum": ""
             },
             "require": {
