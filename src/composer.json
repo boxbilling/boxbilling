@@ -26,14 +26,9 @@
         "michelf/php-markdown": "1.9.0",
         "stripe/stripe-php": "^7.92.0",
         "guzzlehttp/guzzle": "*",
-<<<<<<< HEAD
-        "laminas/laminas-httphandlerrunner": "^1.2.0",
-        "docnet/tfpdf": "^2.2",
-=======
         "laminas/laminas-httphandlerrunner": "^2.0.1",
         "docnet/tfpdf": "^2.2",
         "infinityfree/mofh-client": "^0.7.0",
->>>>>>> f3c23962ed74745ef392159d996f05cf19a1ab5f
         "gabordemooij/redbean": "^5.6"
     },
     "suggest": {
