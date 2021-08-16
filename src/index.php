@@ -9,9 +9,7 @@
  * This source file is subject to the Apache-2.0 License that is bundled
  * with this source code in the file LICENSE
  */
-include_once __DIR__ .'/bb-vendor/owasp/csrf-protector-php/libs/csrf/csrfprotector.php';
-// Initialise CSRFProtector library
-csrfProtector::init();
+
 require_once dirname(__FILE__) . '/bb-load.php';
 $di = include dirname(__FILE__) . '/bb-di.php';
 $url = $di['request']->getQuery('_url');
