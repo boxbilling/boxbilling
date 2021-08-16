@@ -225,7 +225,7 @@ if (!defined('__CSRF_PROTECTOR__')) {
             // TODO(mebjas): this method is valid for same origin request only, 
             // enable it for cross origin also sometime for cross origin the
             // functionality is different.
-            if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            if ($_SERVER["REQUEST_METHOD"] == 'POST') {
                 // Set request type to POST
                 self::$requestType = "POST";
 
@@ -233,7 +233,7 @@ if (!defined('__CSRF_PROTECTOR__')) {
                 $token = self::getTokenFromRequest();
 
                 // Currently for same origin only
-                if (!($token && isset($_SESSION[self::$config['CSRFP_TOKEN']])
+                if (!empty ($token && isset($_SESSION[self::$config['CSRFP_TOKEN']])
                     && (self::isValidToken($token)))) {
 
                     // Action in case of failed validation
