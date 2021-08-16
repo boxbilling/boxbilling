@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3e83ef77c7e78350dba0181e3fc58c17",
+    "content-hash": "e687a130961e7191e1dc1a8f4512b514",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -179,11 +179,9 @@
             ],
             "support": {
                 "issues": "https://github.com/gabordemooij/redbean/issues",
-
                 "source": "https://github.com/gabordemooij/redbean/tree/v5.7"
             },
             "time": "2021-03-28T11:01:15+00:00"
-
         },
         {
             "name": "geoip2/geoip2",
@@ -810,6 +808,46 @@
                 "yml"
             ],
             "time": "2019-09-10T13:16:29+00:00"
+        },
+        {
+            "name": "owasp/csrf-protector-php",
+            "version": "v1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mebjas/CSRF-Protector-PHP.git",
+                "reference": "98b60b05b2fdc0f66fef68f51890dc437b72c3f5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mebjas/CSRF-Protector-PHP/zipball/98b60b05b2fdc0f66fef68f51890dc437b72c3f5",
+                "reference": "98b60b05b2fdc0f66fef68f51890dc437b72c3f5",
+                "shasum": ""
+            },
+            "require-dev": {
+                "satooshi/php-coveralls": "~1.0"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "libs/csrf/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "description": "CSRF protector php, a standalone php library for csrf mitigation in web applications. Easy to integrate in any php web app.",
+            "homepage": "https://github.com/mebjas/CSRF-Protector-PHP",
+            "keywords": [
+                "csrf",
+                "owasp",
+                "security"
+            ],
+            "support": {
+                "issues": "https://github.com/mebjas/CSRF-Protector-PHP/issues",
+                "source": "https://github.com/mebjas/CSRF-Protector-PHP/tree/v1.0.2"
+            },
+            "time": "2020-05-23T10:16:10+00:00"
         },
         {
             "name": "phpmailer/phpmailer",

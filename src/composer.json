@@ -29,7 +29,8 @@
         "laminas/laminas-httphandlerrunner": "^2.0.1",
         "docnet/tfpdf": "^2.2",
         "infinityfree/mofh-client": "^0.7.0",
-        "gabordemooij/redbean": "^5.6"
+        "gabordemooij/redbean": "^5.6",
+        "owasp/csrf-protector-php": "^1.0"
     },
     "suggest": {
         "ext-gettext": "*"
