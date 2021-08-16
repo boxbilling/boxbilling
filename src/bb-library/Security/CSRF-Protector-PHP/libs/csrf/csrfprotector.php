@@ -225,8 +225,7 @@ if (!defined('__CSRF_PROTECTOR__')) {
             // TODO(mebjas): this method is valid for same origin request only, 
             // enable it for cross origin also sometime for cross origin the
             // functionality is different.
-		
-            if ($_SERVER["REQUEST_METHOD"] == 'POST') {
+	if(isset($_SERVER["REQUEST_METHOD"])  {
                 // Set request type to POST
                 self::$requestType = "POST";
 
