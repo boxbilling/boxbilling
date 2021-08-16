@@ -273,7 +273,7 @@ if($config['sef_urls']) {
     define('BB_URL_API',    $config['url'] . 'index.php?_url=/api/');
 }
 
-include_once BB_PATH_LIBRARY .'/Security/CSRF-Protector-PHP/libs/csrf/csrfprotector.php';
+include_once BB_PATH_VENDOR .'/owasp/csrf-protector-php/libs/csrf/csrfprotector.php';';
 
 // Initialize CSRFProtector library
 csrfProtector::init();
