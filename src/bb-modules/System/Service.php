@@ -905,7 +905,7 @@ class Service
     {
         $list = array(
             'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI',
-            'FR', 'GB', 'GR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL',
+            'FR', 'GR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL',
             'PL', 'PT', 'RO', 'SE', 'SI', 'SK');
         $c = $this->getCountries();
         $res = array();
@@ -946,7 +946,6 @@ class Service
             'SI' => 22, //Slovenia
             'ES' => 21, //Spain
             'SE' => 25, //Sweden
-            'GB' => 20, //United Kingdom
         );
     }
 
