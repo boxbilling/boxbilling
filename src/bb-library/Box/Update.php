@@ -40,8 +40,7 @@ class Box_Update
      */
     private function _getLatestVersionInfo()
     {
-        //return $this->di['tools']->cache_function(array($this, 'getJson'), array(), 86400);
-        return $this->getJson();
+        return $this->di['tools']->cache_function(array($this, 'getJson'), array(), 86400);
     }
 
     /**
