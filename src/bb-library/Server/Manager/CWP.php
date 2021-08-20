@@ -149,11 +149,11 @@ class Server_Manager_CWP extends Server_Manager
 			'action'       => 'add',
 			'domain'       => $a->getDomain(),
 			'user'         => $a->getUsername(),
-			'pass'         => $a->getPassword(),
+			'pass'         => base64_encode($a->getPassword()),
 			'email'        => $client->getEmail(),
 			'package'      => $package,
 			'server_ips'   => $ip,
-			'encodepass'   => false
+			'encodepass'   => true
 		);
 		if($a->getReseller()) {
 			$data['reseller'] = 1;
