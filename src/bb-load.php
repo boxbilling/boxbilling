@@ -257,9 +257,9 @@ if(file_exists($configPath) && 0 !== filesize($configPath) && file_exists(BB_PAT
 
 $config = require_once $configPath;
 require BB_PATH_VENDOR . '/autoload.php';
-include_once BB_PATH_VENDOR .'/owasp/csrf-protector-php/libs/csrf/csrfprotector.php';
+//include_once BB_PATH_VENDOR .'/owasp/csrf-protector-php/libs/csrf/csrfprotector.php';
 // Initialize CSRFProtector library
-csrfProtector::init();
+//csrfProtector::init();
 date_default_timezone_set($config['timezone']);
 
 define('BB_DEBUG',          $config['debug']);
