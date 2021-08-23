@@ -10,6 +10,7 @@ jobs:
   build:
 
     runs-on: ${{ matrix.operating-system }}
+    timeout-minutes: 5
     strategy:
       matrix:
         operating-system: [ubuntu-latest, windows-latest]
