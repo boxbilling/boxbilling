@@ -9,10 +9,23 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      matrix:
+        operating-system: [ubuntu-latest, windows-latest, macOS-latest]
+        php-versions: ['7.2', '7.3', '7.4', '8.0']
 
+    name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Install PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-versions }}
+
+    - name: Check PHP Version
+      run: php -v
 
     - name: Validate composer.json and composer.lock
       run: composer validate
@@ -45,26 +58,10 @@ jobs:
         echo > ./src/bb-data/log/php_error.log
         rm -rf ./src/install
 
-    - name: Run test suite for bb-modules on PHP 7.4
-      with:
-        php-version: '7.4'
+    - name: Run test suite for bb-modules
       run: |
         php ./src/bb-vendor/bin/phpunit ./tests/bb-modules/
 
-    - name: Run test suite for bb-library PHP 7.4
-      with:
-        php-version: '7.4'
-      run: |
-        php ./src/bb-vendor/bin/phpunit ./tests/bb-library/
-
-    - name: Run test suite for bb-modules PHP 8
-      with:
-        php-version: '8.0'
-      run: |
-        php ./src/bb-vendor/bin/phpunit ./tests/bb-modules/
-
-    - name: Run test suite for bb-library PHP 8
-      with:
-        php-version: '8.0'
+    - name: Run test suite for bb-library
       run: |
         php ./src/bb-vendor/bin/phpunit ./tests/bb-library/
