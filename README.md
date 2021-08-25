@@ -43,7 +43,7 @@ BoxBilling is designed to be extensible and to integrate easily with your favour
 The following environment is highly recommended for running BoxBilling. It *may* be possible to install and run the software in other environments, but it will be untested and unsupported. 
 
 - A suitable web server (Apache/Nginx/LSWS)
-- PHP 7.2, or higher. *Note: PHP 8 is not yet supported.*
+- PHP 7.4, or higher. *Note: PHP 7.2 / 7.3 should work as well, however we don't support them anymore*
 - MySQL 8, or higher. *MariaDB and other direct MySQL compatible DBs also work.*
 - The Following PHP extensions:
     - pdo_mysql
@@ -144,8 +144,10 @@ Don't hesitate to create an [issue](https://github.com/boxbilling/boxbilling/iss
 
 BoxBilling is open source software, and is released under the Apache v2.0 license. See [LICENSE](https://github.com/boxbilling/boxbilling/blob/master/LICENSE) for the full license terms.
 
+This product includes GeoLite2 data created by MaxMind, available from [https://www.maxmind.com](https://www.maxmind.com).
+
 ## Links
 
-* [Website](https:/boxbilling.org)
+* [Website](https://www.boxbilling.org/)
 * [Documentation](https://docs.boxbilling.com/)
 * [Slack](https://boxbilling.slack.com/)
