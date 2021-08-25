@@ -28,8 +28,7 @@ function Image($file, $x=null, $y=null, $w=0, $h=0, $type='', $link='', $isMask=
         if($type=='png'){
             $info=$this->_parsepng($file);
             if($info=='alpha'){
-                $this->ImagePngWithAlpha($file,$x,$y,$w,$h,$link);
-                break;
+                return $this->ImagePngWithAlpha($file,$x,$y,$w,$h,$link);
             }
         }
         else
