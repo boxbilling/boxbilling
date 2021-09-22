@@ -48,7 +48,7 @@
 
                 <nav class="d-inline-flex mt-2 mt-md-0 ms-md-auto">
                     <a class="me-3 py-2 text-dark text-decoration-none" href="/"><i class="bi-house"></i> Home</a>
-                    <a class="me-3 py-2 text-dark text-decoration-none" href="https://github.com/boxbilling/boxbilling/releases/latest" target="_blank"><span class="badge bg-primary"><i class="bi-download"></i> v4.22-beta.1</span></a>
+                    <a class="me-3 py-2 text-dark text-decoration-none" href="https://github.com/boxbilling/boxbilling/releases/latest" id="navbar-download" target="_blank"><span class="badge bg-primary"><i class="bi-download"></i> <span id="download-text">Download</span></span></a>
                 </nav>
             </div>
 
@@ -58,11 +58,11 @@
                     <p class="lead mb-4">BoxBilling is an open source hosting automation.<br/>It's free as in both <i>free speech</i> and <i>free beer</i>.</p>
                     <div class="mb-5">
                         <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                            <a href="https://github.com/boxbilling/boxbilling/releases" type="button" target="_blank" class="btn btn-primary btn-lg px-4 me-sm-3">Download</a>
+                            <a href="https://github.com/boxbilling/boxbilling/releases" id="primary-download" type="button" target="_blank" class="btn btn-primary btn-lg px-4 me-sm-3">Download</a>
                             <a href="https://github.com/boxbilling/boxbilling" target="_blank" type="button" class="btn btn-outline-secondary btn-lg px-4">Source code</a>
                         </div>
                         <br/>
-                        <p><a class="text-decoration-none" href="https://github.com/boxbilling/boxbilling#download-the-latest-stable-version" target="_blank"><i class="bi-info"></i> <small>Installation instructions</small></a></p>
+                        <p><a class="text-decoration-none" href="https://github.com/boxbilling/boxbilling#download-the-latest-stable-version" target="_blank"><i class="bi-info"></i> <small>Installation instructions</a><br/><small class="placeholder-glow text-muted" id="latest-release-date"><span class="placeholder col-4"></span></small></small></p>
                     </div>
                 </div>
                 <div class="overflow-hidden" style="max-height: 30vh;">
@@ -210,6 +210,7 @@
     </div>
 
     <script src="./assets/js/bootstrap.bundle.min.js"></script>
+    <script src="./assets/js/box.js"></script>
 </body>
 
 </html>
