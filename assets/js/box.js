@@ -18,9 +18,10 @@ function getLatestReleaseVersion() {
         .then(data => {
             // Using release data
             document.getElementById('latest-release-date').innerHTML = `Latest release: ${new Date(data.published_at).toLocaleDateString()}`;
+            document.getElementById('release-notes').innerHTML = `<a class="text-decoration-none" href="${data.html_url}">Release notes</a>`;
             document.getElementById('download-text').innerHTML = data.tag_name;
-            document.getElementById('navbar-download').setAttribute('href', data.html_url);
-            document.getElementById('primary-download').setAttribute('href', data.html_url);
+            document.getElementById('navbar-download').setAttribute('href', data.assets[0].browser_download_url);
+            document.getElementById('primary-download').setAttribute('href', data.assets[0].browser_download_url);
         }).catch(error => {
             // Uh oh
             console.error('There has been a problem while fetching versioning details from GitHub releases:', error);
