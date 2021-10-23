@@ -226,18 +226,18 @@ final class Box_Installer
             )
         );
 
-        $pdo->exec( 'SET NAMES "utf8"' );
-        $pdo->exec( 'SET CHARACTER SET utf8' );
-        $pdo->exec( 'SET CHARACTER_SET_CONNECTION = utf8' );
-        $pdo->exec( 'SET CHARACTER_SET_DATABASE = utf8' );
-        $pdo->exec( 'SET character_set_results = utf8' );
-        $pdo->exec( 'SET character_set_server = utf8' );
+        $pdo->exec( 'SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci' );
+        $pdo->exec( 'SET CHARACTER SET utf8mb4' );
+        $pdo->exec( 'SET CHARACTER_SET_CONNECTION = utf8mb4' );
+        $pdo->exec( 'SET CHARACTER_SET_DATABASE = utf8mb4' );
+        $pdo->exec( 'SET character_set_results = utf8mb4' );
+        $pdo->exec( 'SET character_set_server = utf8mb4' );
         $pdo->exec( 'SET SESSION interactive_timeout = 28800' );
         $pdo->exec( 'SET SESSION wait_timeout = 28800' );
 
-        // try create database if permissions allows
+        // Try creating a database if host allows
         try {
-            $pdo->exec("CREATE DATABASE `$db` CHARACTER SET utf8 COLLATE utf8_general_ci;");
+            $pdo->exec("CREATE DATABASE `$db` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
         } catch (PDOException $e) {
             error_log($e->getMessage());
         }
