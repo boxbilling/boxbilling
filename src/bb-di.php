@@ -49,7 +49,7 @@ $di['crypt'] = function() use ($di) {
 $di['pdo'] = function() use ($di) {
     $c = $di['config']['db'];
 
-    $pdo = new PDO($c['type'].':host='.$c['host'].';port='.$c['port'].';dbname='.$c['name'],
+    $pdo = new PDO($c['type'].':host='.$c['host'].';port='.$c['port'].';dbname='.$c['name'].';charset=utf8mb4',
         $c['user'],
         $c['password'],
         array(
@@ -64,12 +64,12 @@ $di['pdo'] = function() use ($di) {
     }
 
     if($c['type'] == 'mysql') {
-        $pdo->exec( 'SET NAMES "utf8"' );
-        $pdo->exec( 'SET CHARACTER SET utf8' );
-        $pdo->exec( 'SET CHARACTER_SET_CONNECTION = utf8' );
-        $pdo->exec( 'SET CHARACTER_SET_DATABASE = utf8' );
-        $pdo->exec( 'SET character_set_results = utf8' );
-        $pdo->exec( 'SET character_set_server = utf8' );
+        $pdo->exec( 'SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci' );
+        $pdo->exec( 'SET CHARACTER SET utf8mb4' );
+        $pdo->exec( 'SET CHARACTER_SET_CONNECTION = utf8mb4' );
+        $pdo->exec( 'SET CHARACTER_SET_DATABASE = utf8mb4' );
+        $pdo->exec( 'SET character_set_results = utf8mb4' );
+        $pdo->exec( 'SET character_set_server = utf8mb4' );
         $pdo->exec( 'SET SESSION interactive_timeout = 28800' );
         $pdo->exec( 'SET SESSION wait_timeout = 28800' );
     }
