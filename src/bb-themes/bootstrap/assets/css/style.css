@@ -9,10 +9,43 @@
 html,
 body {
     height: 100%;
+    padding-top: 1.25rem;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif; // Default Bootstrap font doesn't look very nice
+    font-size: 14px;
 }
 
-body {
-    padding-top: 50px; /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
+.navbar, .card {
+    margin-bottom: 1.25rem;
+}
+
+.card-header {
+    padding: 15px 15px;
+}
+
+/* Making this look like BS3 */
+.breadcrumb {
+    padding: 8px 15px;
+    margin-bottom: 20px;
+    list-style: none;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+}
+
+/* Related to the sidebar */
+.sidebar {
+    padding-top: 1rem;
+    padding-bottom: 2.5rem;
+}
+
+.sidebar-logo {
+    padding-top: 2.5rem;
+}
+
+.page-header {
+    padding-top: 1.25rem;
+    padding-bottom: 9px;
+    margin: 40px 0 20px;
+    border-bottom: 1px solid #eee;
 }
 
 .img-portfolio {
@@ -21,6 +54,14 @@ body {
 
 .img-hover:hover {
     opacity: 0.8;
+}
+
+/* Buttons */
+.btn-group-xs > .btn, .btn-xs {
+    padding: 1px 5px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 3px;
 }
 
 /* Home Page Carousel */

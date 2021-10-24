@@ -1,21 +1,22 @@
-<div class="list-group">
-	{% if settings.side_menu_home %}<a href="{{ ''|link }}" title="{% trans 'Home' %}" class="list-group-item{% if request._url == '/' %} active{% endif %}" ><i class="fa fa-home"></i> {% trans 'Home' %}</a>{% endif %}
-	{% if settings.side_menu_order %}<a href="{{ '/order'|link }}" title="{% trans 'Order' %}" class="list-group-item{% if request._url starts with '/order/service' %}{% elseif request._url starts with '/order' %} active{% endif %}" ><i class="fa fa-shopping-cart"></i> {% trans 'Order' %}</a>{% endif %}
-	{% if settings.side_menu_blog and guest.extension_is_on({"mod":"news"}) %}<a href="{{ '/news'|link }}" title="{% trans 'Blog' %}" class="list-group-item{% if request._url starts with '/news' %} active{% endif %}" ><i class="fa fa-bullhorn"></i> {% trans 'Blog' %}</a>{% endif %}
-	{% if settings.side_menu_forum and guest.extension_is_on({"mod":"forum"}) %}<a class="list-group-item{% if request._url starts with '/forum' %} active{% endif %}" href="{{ '/forum'|link }}"><i class="fa fa-comments"></i> {% trans 'Forum' %}</a>{% endif %}
-	{% if settings.side_menu_kb and guest.extension_is_on({"mod":"kb"}) %}<a href="{{ 'kb'|link }}" title="{% trans 'Knowledge Base' %}" class="list-group-item{% if request._url starts with '/kb' %} active{% endif %}"><i class="fa fa-graduation-cap"></i> {% trans 'Knowledge Base' %}</a>{% endif %}
-	{% if settings.side_menu_contact %}<a class="list-group-item{% if request._url starts with '/support/contact-us' %} active{% endif %}" href="{{ '/support/contact-us'|link }}"><i class="fa fa-envelope"></i> {% trans 'Contact us' %}</a>{% endif %}
+<div class="sidebar">
+<div class="list-group shadow">
+  {% if settings.side_menu_home %}<a href="{{ ''|link }}" title="{% trans 'Home' %}" class="list-group-item list-group-item-action{% if request._url == '/' %} active{% endif %}" aria-current="{% if request._url == '/' %}true{% else %}false{% endif %}"><i class="fa fa-fw fa-home"></i> {% trans 'Home' %}</a>{% endif %}
+  {% if settings.side_menu_order %}<a href="{{ '/order'|link }}" title="{% trans 'Order' %}" class="list-group-item list-group-item-action{% if request._url starts with '/order/service' %}{% elseif request._url starts with '/order' %} active{% endif %}" aria-current="{% if request._url starts with '/order/service' %}{% elseif request._url starts with '/order' %}true{% else %}false{% endif %}"><i class="fa fa-fw fa-shopping-cart"></i> {% trans 'Order' %}</a>{% endif %}
+  {% if settings.side_menu_blog and guest.extension_is_on({"mod":"news"}) %}<a href="{{ '/news'|link }}" title="{% trans 'Announcements' %}" class="list-group-item list-group-item-action{% if request._url starts with '/news' %} active{% endif %}" aria-current="{% if request._url starts with '/news' %}true{% else %}false{% endif %}"><i class="fa fa-fw fa-bullhorn"></i> {% trans 'Announcements' %}</a>{% endif %}
+  {% if settings.side_menu_forum and guest.extension_is_on({"mod":"forum"}) %}<a href="{{ '/forum'|link }}" title="{% trans 'Forums' %}" class="list-group-item list-group-item-action{% if request._url starts with '/forum' %} active{% endif %}" aria-current="{% if request._url starts with '/forum' %}true{% else %}false{% endif %}"><i class="fa fa-fw fa-comments"></i> {% trans 'Forums' %}</a>{% endif %}
+  {% if settings.side_menu_kb and guest.extension_is_on({"mod":"kb"}) %}<a href="{{ '/kb'|link }}" title="{% trans 'Knowledge Base' %}" class="list-group-item list-group-item-action{% if request._url starts with '/kb' %} active{% endif %}" aria-current="{% if request._url starts with '/kb' %}true{% else %}false{% endif %}"><i class="fa fa-fw fa-graduation-cap"></i> {% trans 'Knowledge Base' %}</a>{% endif %}
+  {% if settings.side_menu_contact %}<a href="{{ '/support/contact-us'|link }}" title="{% trans 'Contact us' %}" class="list-group-item list-group-item-action{% if request._url starts with '/support/contact-us' %} active{% endif %}" aria-current="{% if request._url starts with '/support/contact-us' %}truefalse{% endif %}"><i class="fa fa-fw fa-envelope"></i> {% trans 'Contact us' %}</a>{% endif %}
 </div>
+<hr>
 {% if client %}
-	<div class="list-group">
-		{% if settings.side_menu_services %}<a href="{{ 'order/service'|link }}" title="{% trans 'Services' %}" class="list-group-item{% if request._url starts with '/order/service' %} list-group-item-success{% endif %}"><span class="text-success"><i class="fa fa-cog"></i> {% trans 'Services' %}</span></a>{% endif %}
-		{% if settings.side_menu_support %}<a href="{{ 'support'|link }}" title="{% trans 'Tickets' %}" class="list-group-item{% if request._url starts with '/support' %} list-group-item-info{% endif %}"><span class="text-info"><i class="fa fa-life-ring"></i> {% trans 'Support' %}</span></a>{% endif %}
-		{% if settings.side_menu_invoices %}<a href="{{ 'invoice'|link }}" title="{% trans 'Invoices' %}" class="list-group-item{% if request._url starts with '/invoice' %} list-group-item-danger{% endif %}"><span class="text-danger"><i class="fa fa-credit-card"></i> {% trans 'Invoices' %}</span></a>{% endif %}
-		<!--<a href="{{ '/client/balance'|link }}" title="{% trans 'Payment history' %}" class="list-group-item" ><i class="fa fa-archive"></i> {% trans 'Payment history' %}</a>-->
-	</div>
+<div class="list-group shadow">
+  {% if settings.side_menu_services %}<a href="{{ 'order/service'|link }}" title="{% trans 'Services' %}" class="list-group-item list-group-item-action{% if request._url starts with '/order/service' %} active{% endif %}" aria-current="{% if request._url starts with '/order/service' %}true{% else %}false{% endif %}"><i class="fa fa-fw fa-cube"></i> {% trans 'Services' %}</a>{% endif %}
+  {% if settings.side_menu_support %}<a href="{{ 'support'|link }}" title="{% trans 'Support' %}" class="list-group-item list-group-item-action{% if request._url starts with '/support' %} active{% endif %}" aria-current="{% if request._url starts with '/support' %}true{% else %}false{% endif %}"><i class="fa fa-fw fa-life-ring"></i> {% trans 'Support' %}</a>{% endif %}
+  {% if settings.side_menu_invoices %}<a href="{{ 'invoice'|link }}" title="{% trans 'Invoices' %}" class="list-group-item list-group-item-action{% if request._url starts with '/invoice' %} active{% endif %}" aria-current="{% if request._url starts with '/invoice' %}true{% else %}false{% endif %}"><i class="fa fa-fw fa-credit-card"></i> {% trans 'Invoices' %}</a>{% endif %}
+</div>
 {% else %}
-	<div class="list-group">
-		{% if settings.side_menu_register %}<a href="{{ '/login'|link }}" title="{% trans 'Sign in / Register' %}" class="list-group-item list-group-item-success" >{% trans 'Sign in / Register' %}</a>{% endif %}
-	</div>
+<div class="list-group shadow">
+	{% if settings.side_menu_register %}<a href="{{ '/login'|link }}" title="{% trans 'Sign in / Register' %}" class="list-group-item list-group-item-action"><i class="fa fa-fw fa-sign-in-alt"></i> {% trans 'Sign in / Register' %}</a>{% endif %}
+</div>
 {% endif %}
-
+</div>

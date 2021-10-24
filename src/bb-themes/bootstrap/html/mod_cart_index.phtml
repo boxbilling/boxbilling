@@ -7,21 +7,20 @@
 {% set cart = guest.cart_get %}
 
 {% block content_before %}
-		<!-- Page Heading/Breadcrumbs -->
-        <div class="row">
-            <div class="col-lg-12">
-                <h1 class="page-header">{% if cart.items|length > 0 %}{% trans 'Select Product' %}{% else %}{% trans 'You have not selected any product' %}{% endif %}
-                    <small>{% trans 'Choose products we offer for selling' %}</small>
-                </h1>
-				{% include "partial_steps.phtml" with {'selected': 3} %}
-            </div>
-        </div>
-        <!-- /.row -->
+	<!-- Page Heading/Breadcrumbs -->
+    <div class="row">
+        <div class="col-lg-12">
+			<div class="page-header">
+				<h1>{% if cart.items|length > 0 %}{% trans 'Checkout' %}{% else %}{% trans 'Your cart is empty' %}{% endif %}</h1>
+			</div>
+			{% include "partial_steps.phtml" with {'selected': 3} %}
+    	</div>
+    </div>
+    <!-- /.row -->
 {% endblock %}
 {% block content %}	
 
 {% if cart.items|length > 0 %}
-	
 		<div class="row">
 			<div class="col-md-12">
 				<div class="well">
@@ -320,7 +319,8 @@
 {% else %}
 
     <div class="text-center">
-		<a class="btn btn-success btn-lg" href="{{ 'order'|link }}">{% trans 'Order new service' %}</a>
+		<p>{% trans 'You don\'t have anything in your shopping cart. Why don\'t you order something?' %}</p>
+		<a class="btn btn-success btn-lg" href="{{ 'order'|link }}">{% trans 'Order a service' %}</a>
     </div>
 
 {% endif %}
