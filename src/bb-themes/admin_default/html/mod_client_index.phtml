@@ -134,7 +134,7 @@
                         </td>
                         <td>
                             <span class="flag flag-{{ client.country }}" title="{{ guest.system_countries[client.country] }}"></span>
-                            <a href="{{ 'client/manage'|alink }}/{{ client.id }}" title="{{ client.first_name }} {{ client.last_name }}">{{ client.first_name|truncate('1', null, '.') }} {{ client.last_name|truncate(15) }}</a></td>
+                            <a href="{{ 'client/manage'|alink }}/{{ client.id }}" title="{{ client.first_name }} {{ client.last_name }}">{{ client.first_name|truncate(15) }} {{ client.last_name|truncate('1', null, '.') }}</a></td>
                         <td><a href="{{ 'client/manage'|alink }}/{{ client.id }}" title="{{ client.company }}">{{ client.company|default('-')|truncate(30) }}</a></td>
                         <td><a href="{{ 'client/manage'|alink }}/{{ client.id }}" title="{{ client.email }}">{{ client.email|truncate(30) }}</a></td>
                         <td>{{ mf.status_name(client.status) }}</td>

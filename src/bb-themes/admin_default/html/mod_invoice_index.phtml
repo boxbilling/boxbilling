@@ -98,9 +98,9 @@
 {% set statuses = admin.invoice_get_statuses %}
 <div class="stats">
     <ul>
-        <li><a href="{{ 'invoice'|alink({'status' : 'unpaid'}) }}" class="count blue" title="">{{ statuses.unpaid }}</a><span>{% trans 'Unpaid invoices' %}</span></li>
-        <li><a href="{{ 'invoice'|alink({'status' : 'refunded'}) }}" class="count red" title="">{{ statuses.refunded }}</a><span>{% trans 'Refunded invoices' %}</span></li>
-        <li><a href="{{ 'invoice'|alink({'status' : 'paid'}) }}" class="count green" title="">{{ statuses.paid }}</a><span>{% trans 'Paid invoices' %}</span></li>
+        <li><a href="{{ 'invoice'|alink({'status' : 'unpaid'}) }}" class="count green" title="">{{ statuses.unpaid }}</a><span>{% trans 'Unpaid invoices' %}</span></li>
+        <li><a href="{{ 'invoice'|alink({'status' : 'refunded'}) }}" class="count blue" title="">{{ statuses.refunded }}</a><span>{% trans 'Refunded invoices' %}</span></li>
+        <li><a href="{{ 'invoice'|alink({'status' : 'paid'}) }}" class="count red" title="">{{ statuses.paid }}</a><span>{% trans 'Paid invoices' %}</span></li>
         <li class="last"><a href="{{ 'invoice'|alink }}" class="count grey" title="">{{ statuses.paid + statuses.unpaid + statuses.refunded}}</a><span>{% trans 'Total' %}</span></li>
     </ul>
     <div class="fix"></div>
