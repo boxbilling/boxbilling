@@ -141,7 +141,7 @@
                             <a href="{{ 'client/manage'|alink }}/{{ order.client_id }}"><img src="{{ order.client.email|gravatar }}?size=20" alt="{{ order.client.email }}" /></a>
                         </span>
                         <span style="margin-left: 10px;">
-                            <a href="{{ 'client/manage'|alink }}/{{ order.client_id }}">{{order.client.first_name|truncate('1', null, '.')}} {{order.client.last_name}}</a>
+                            <a href="{{ 'client/manage'|alink }}/{{ order.client_id }}">{{order.client.first_name|truncate(15)}} {{order.client.last_name|truncate('1', null, '.')}}</a>
                         </span>
                     </td>
                     <td class="truncate">{{order.title }}</td>
