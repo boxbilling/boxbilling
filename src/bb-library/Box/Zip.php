@@ -35,7 +35,7 @@ class Box_Zip
         }
         catch(\PhpZip\Exception\ZipException $e){
             $zip->close();
-            throw new \Box_Exception('Failed to extract file! Exception:'. '<br>' . $e);
+            throw new \Box_Exception('Failed to extract file! Exception:<br>' . $e);
         }
     }
 }
