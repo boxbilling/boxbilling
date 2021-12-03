@@ -5,7 +5,7 @@ Release 4.22-beta.1.2 !!Update in progress!!
 * 
 
 **Security:**
-* 
+* Fix a potential XSS with the 'icon_url' parameter when creating a new product, category, or addon.
 
 **Bug Fixes:**
 * Fix plesk integration
