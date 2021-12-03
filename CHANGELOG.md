@@ -1,3 +1,43 @@
+Release 4.22-beta.1.1
+------------------------------------------------------------------------------
+
+**General:**
+* Dependency Updates
+* Added invoice printing support to Bootstrap theme
+* Quality of life changes
+* Added 2 missing options to DirectAdmin integration
+* Remove support for PHP versions older than 7.4
+
+**Security:**
+* Fixed three instances of XSS vulnerabilites
+* Use random_bytes instead of uniqid since it actually generates cryptographically secure pseudo-random bytes 
+
+**Bug Fixes**
+* Bugfixes with Bootstrap theme
+* Fix PDF generation
+* Fix KB entries, Tickets, and Invoices being duplicated in the BoxBilling interface
+* Fix "8192 Required parameter follows optional parameter"
+* Corrected path to stylesheet in Boostrap theme
+* Fixed PHP 8 support
+* Fix PDF generation on PHP 8
+* Fix BoxBilling updater and have it update off GitHub releases
+
+Release 4.22-beta.1 (2020-11-29)
+------------------------------------------------------------------------------
+* We've completely removed the licensing system. BoxBilling is now completely free and open-source, and 'PRO' features are now unlocked for everyone. 🎉
+* Added MyOwnFreeHost support
+* Added a module for custom pages
+* Dropped out support for the defunct YouHosting
+* Dropped out Kloxo support
+* Fixed compatibility issues for newer versions of MySQL
+* Brand new layout for error messages
+* New "bootstrap" theme
+* Critical security fixes
+* Nearly full support for PHP 7.4
+* Dropping out support for PHP versions lower than 7.2
+* Switched completely from MySQLi to PDO
+* Completely rewritten currency rate system. We integrated the European Central Bank and Currencylayer's API to BoxBilling and hooked the automatic conversion rate updating to the Cron jobs. So, whenever you fire up Cron jobs, the conversion rate will be updated automatically.
+
 Release 4.21
 ------------------------------------------------------------------------------
 * Removed License Check
