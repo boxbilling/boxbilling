@@ -86,10 +86,10 @@
 {% set count_clients = admin.client_get_statuses %}
 <div class="stats">
     <ul>
-        <li><a href="{{ 'client'|alink({'status' : 'active'}) }}" class="count green" title="">{{ count_clients.active }}</a><span>{% trans 'Active' %}</span></li>
-        <li><a href="{{ 'client'|alink({'status' : 'suspended'}) }}" class="count blue" title="">{{ count_clients.suspended }}</a><span>{% trans 'Suspended' %}</span></li>
-        <li><a href="{{ 'client'|alink({'status' : 'canceled'}) }}" class="count red" title="">{{ count_clients.canceled }}</a><span>{% trans 'Canceled' %}</span></li>
-        <li class="last"><a href="{{ 'client'|alink }}" class="count grey" title="">{{count_clients.active + count_clients.canceled + count_clients.suspended}}</a><span>{% trans 'Total' %}</span></li>
+        <li onclick="location.href='{{ 'client'|alink({'status' : 'active'}) }}';"><a href="{{ 'client'|alink({'status' : 'active'}) }}" class="count green" title="">{{ count_clients.active }}</a><span>{% trans 'Active' %}</span></li>
+        <li onclick="location.href='{{ 'client'|alink({'status' : 'suspended'}) }}';"><a href="{{ 'client'|alink({'status' : 'suspended'}) }}" class="count blue" title="">{{ count_clients.suspended }}</a><span>{% trans 'Suspended' %}</span></li>
+        <li onclick="location.href='{{ 'client'|alink({'status' : 'canceled'}) }}';"><a href="{{ 'client'|alink({'status' : 'canceled'}) }}" class="count red" title="">{{ count_clients.canceled }}</a><span>{% trans 'Canceled' %}</span></li>
+        <li onclick="location.href='{{ 'client'|alink }}';"><a href="{{ 'client'|alink }}" class="count grey" title="">{{count_clients.active + count_clients.canceled + count_clients.suspended}}</a><span>{% trans 'Total' %}</span></li>
     </ul>
     <div class="fix"></div>
 </div>
