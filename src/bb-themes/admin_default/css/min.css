@@ -11097,11 +11097,6 @@ li.plupload_droptext {
   background-color: #444;
 }
 
-#main {
-  transition: margin-left .5s;
-  padding: 16px;
-}
-
 .sidebar2 {
   height: 100%;
   width: 0;
@@ -11152,11 +11147,6 @@ li.plupload_droptext {
 
 .openbtn2:hover {
   background-color: #444;
-}
-
-#main2 {
-  transition: margin-left .5s;
-  padding: 16px;
 }
 
 .nav-vertical-separator {
