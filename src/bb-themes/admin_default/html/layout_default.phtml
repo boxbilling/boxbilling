@@ -26,13 +26,24 @@
 {% else %}
 <script>
 function openNav() {
-  document.getElementById("mySidebar").style.width = "250px";
-  document.getElementById("main").style.marginLeft = "250px";
+  document.getElementById("mySidebar").style.width = "220px";
+  document.getElementById("main").style.marginLeft = "220px";
 }
 
 function closeNav() {
   document.getElementById("mySidebar").style.width = "0";
   document.getElementById("main").style.marginLeft= "0";
+}
+</script>
+<script>
+function openNav2() {
+  document.getElementById("mySidebar2").style.width = "200px";
+  document.getElementById("main2").style.marginRight = "200px";
+}
+
+function closeNav2() {
+  document.getElementById("mySidebar2").style.width = "0";
+  document.getElementById("main2").style.marginRight= "0";
 }
 </script>
 <div id="topNav">
@@ -64,17 +75,17 @@ function closeNav() {
             
             {% if admin.system_is_allowed({"mod":"order"}) %}
             {% set count_orders = admin.order_get_statuses.failed_setup %}
-        	<li class="iOrders"><a href="{{ 'order'|alink({'status' : 'failed_setup'}) }}" title=""><span><i style="margin-right: auto;" class="dark-sprite-icon sprite-basket2"></i></span></a>{% if count_orders %}<span class="numberMiddle">{{ count_orders }}</span>{% endif %}</li>
+        	<li class="iOrders"><a href="{{ 'order'|alink({'status' : 'failed_setup'}) }}" title=""><span><i class="dark-sprite-icon sprite-basket2"></i></span></a>{% if count_orders %}<span class="numberMiddle">{{ count_orders }}</span>{% endif %}</li>
             {% endif %}
             
             {% if admin.system_is_allowed({"mod":"invoice"}) %}
             {% set count_invoices = admin.invoice_get_statuses.unpaid %}
-        	<li class="iInvoices"><a href="{{ 'invoice'|alink({'status' : 'unpaid'}) }}" title=""><span><i style="margin-right: auto;" class="dark-sprite-icon sprite-money"></i></span></a>{% if count_invoices %}<span class="numberMiddle">{{ count_invoices }}</span>{% endif %}</li>
+        	<li class="iInvoices"><a href="{{ 'invoice'|alink({'status' : 'unpaid'}) }}" title=""><span><i class="dark-sprite-icon sprite-money"></i></span></a>{% if count_invoices %}<span class="numberMiddle">{{ count_invoices }}</span>{% endif %}</li>
             {% endif %}
             
             {% if admin.system_is_allowed({"mod":"support"}) %}
             {% set count_tickets = admin.support_ticket_get_statuses.open %}
-        	<li class="iMes"><a href="{{ 'support'|alink({'status' : 'open'}) }}" title=""><span><i style="margin-right: auto;" class="dark-sprite-icon sprite-dialog"></i></span></a>{% if count_tickets %}<span class="numberMiddle">{{ count_tickets }}</span>{% endif %}</li>
+        	<li class="iMes"><a href="{{ 'support'|alink({'status' : 'open'}) }}" title=""><span><i class="dark-sprite-icon sprite-dialog"></i></span></a>{% if count_tickets %}<span class="numberMiddle">{{ count_tickets }}</span>{% endif %}</li>
             {% endif %}
             <li class="nav-vertical-separator"></li>
                     <li class="loading" style="display:none;"><img src="images/loader.gif" alt="" /><span>{% trans 'Loading ...' %}</span></li>
@@ -88,11 +99,14 @@ function closeNav() {
                     <li><a href="{{ 'api/admin/profile/logout'|link }}" title="" class="api-link" data-api-redirect="{{ 'staff/login'|alink }}"><span><i class="sprite-topnav sprite-topnav-logout" style="margin-right: 5px;"></i>{% trans 'Logout' %}</span></a></li>
                 </ul>
             </div>
+            <div class="userNav2">
+				<button class="openbtn2" onclick="openNav2()">☰ </button>  
+            </div>
             <div class="fix"></div>
         </div>
     </div>
 </div>
-<div id="header" class="wrapper">
+<div id="header" class="header">
     <div class="logo"><a href="{{ 'index'|alink }}" title=""><img src="{{ company.logo_url }}" alt="{{ company.name }}" style="max-height: 50px;"/></a></div>
     
     <div id="mySidebar" class="sidebar">
@@ -109,10 +123,57 @@ function closeNav() {
     {% block left_bottom %}{% endblock %}
     </div>
     
+<div id="mySidebar2" class="sidebar2">
+  <a href="javascript:void(0)" class="closebtn2" onclick="closeNav2()">×</a>
+                    <li>
+					<a href="{{ 'staff/profile'|alink }}" title=""><img src="{{ profile.email|gravatar }}?size=20" alt="{{ profile.name }}" /><span>{% trans 'Hi,' %} {{ profile.name }}!</a></span>
+					{% set languages = guest.extension_languages %}
+					{% if languages|length > 1 %}
+					<span>
+						<select name="lang" class="language_selector" style="background-color: #262b2f; color:white;">
+							{% for lang in languages %}
+							<option value="{{ lang }}" class="lang_{{ lang }}">{{ lang|trans }}</option>
+							{% endfor %}
+						</select>
+					</span>
+					{% endif %}
+                    </li>
+                <ul>
+            {% if admin.system_is_allowed({"mod":"notification"}) and guest.extension_is_on({"mod":"notification"}) %}
+            {% set count_notifications = admin.notification_get_list({"per_page":1}).total %}
+        	<li class="iMegaphone"><a href="{{ 'notification'|alink }}" title=""><span>{% trans 'Notifications' %}</span></a>{% if count_notifications %}<span class="numberMiddle">{{ count_notifications }}</span>{% endif %}</li>
+            {% endif %}
+            
+            {% if admin.system_is_allowed({"mod":"order"}) %}
+            {% set count_orders = admin.order_get_statuses.failed_setup %}
+        	<li class="iOrders"><a href="{{ 'order'|alink({'status' : 'failed_setup'}) }}" title=""><span><i class="dark-sprite-icon sprite-basket2"></i></span></a>{% if count_orders %}<span class="numberMiddle">{{ count_orders }}</span>{% endif %}</li>
+            {% endif %}
+            
+            {% if admin.system_is_allowed({"mod":"invoice"}) %}
+            {% set count_invoices = admin.invoice_get_statuses.unpaid %}
+        	<li class="iInvoices"><a href="{{ 'invoice'|alink({'status' : 'unpaid'}) }}" title=""><span><i class="dark-sprite-icon sprite-money"></i></span></a>{% if count_invoices %}<span class="numberMiddle">{{ count_invoices }}</span>{% endif %}</li>
+            {% endif %}
+            
+            {% if admin.system_is_allowed({"mod":"support"}) %}
+            {% set count_tickets = admin.support_ticket_get_statuses.open %}
+        	<li class="iMes"><a href="{{ 'support'|alink({'status' : 'open'}) }}" title=""><span><i class="dark-sprite-icon sprite-dialog"></i></span></a>{% if count_tickets %}<span class="numberMiddle">{{ count_tickets }}</span>{% endif %}</li>
+            {% endif %}
+                    <li class="loading" style="display:none;"><img src="images/loader.gif" alt="" /><span>{% trans 'Loading ...' %}</span></li>
+                    <li class="dd"><span><i class="sprite-topnav sprite-topnav-register" style="margin-right: 5px;"></i>{% trans 'New' %}</span>
+                        {% include "partial_menu_top.phtml" %}
+                    </li>
+                    {% if admin.system_is_allowed({"mod":"system"}) %}
+                    <li class="sidebar2m" ><a href="{{ 'system'|alink }}" title=""><span><i class="sprite-topnav sprite-topnav-settings" style="margin-right: 5px;"></i>{% trans 'Settings' %}</span></a></li>
+                    {% endif %}
+                    <li><a href="{{ '/'|link }}" title="" target="_blank"><span><i class="sprite-topnav sprite-topnav-mainWebsite" style="margin-right: 5px;"></i>{% trans 'Visit site' %}</span></a></li>
+                    <li><a href="{{ 'api/admin/profile/logout'|link }}" title="" class="api-link" data-api-redirect="{{ 'staff/login'|alink }}"><span><i class="sprite-topnav sprite-topnav-logout" style="margin-right: 5px;"></i>{% trans 'Logout' %}</span></a></li>
+                </ul>
+</div>
+    
     <div class="fix"></div>
 </div>
 
-<div class="wrapper">
+<div class="header">
     
     {% block before_content %}{% endblock %}
     <div class="content">
@@ -136,7 +197,7 @@ function closeNav() {
 </div>
 
 <div id="footer">
-	<div class="wrapper">
+	<div class="footer">
         {% include "partial_footer.phtml" with {'product': product} %}
     </div>
 </div>

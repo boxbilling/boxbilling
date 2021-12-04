@@ -7086,6 +7086,17 @@ div.tagsinput div {
 	margin: 0 10%;
 	clear: both;
     padding-top: 5px;
+    background: #262b2f;
+}
+.header {
+	margin: 0 10%;
+	clear: both;
+    padding-top: 5px;
+}
+.footer {
+	margin: 0 10%;
+	clear: both;
+    padding-top: 5px;
 }
 .img {
 	border: 1px solid #d5d5d5
@@ -7229,6 +7240,7 @@ p {
     position: absolute;
     top: 25%;
     left: 50%;
+    padding-bottom: 10%;
     transform: translateX(-50%);
 }
 .loginLogo {
@@ -7523,7 +7535,6 @@ input[type=submit] {
 	position: fixed;
 	background-color: #262b2f;
 	width: 100%;
-	height: 5%;
 	color: #eee;
 	border-bottom: 1px solid #fff;
 	z-index: 999
@@ -7543,6 +7554,18 @@ input[type=submit] {
 	font-size: 11px
 }
 .userNav {
+	float: right;
+	z-index: 6000;
+	position: relative;
+	font-size: 11px
+}
+.userNav2 {
+	float: right;
+	z-index: 6000;
+	position: relative;
+	font-size: 11px
+}
+.userNav3 {
 	float: right;
 	z-index: 6000;
 	position: relative;
@@ -7794,7 +7817,7 @@ ul.sub li a {
 	font-family: Arial, Helvetica, sans-serif;
 	color: #a9a9a9;
 	font-size: 11px;
-	padding: 8px 10px 8px 18px
+	padding: 8px 10px 8px 18px;
 }
 .sub li a:active,
 ul.sub li a:hover {
@@ -7818,24 +7841,24 @@ ul.sub li ul li {
   justify-content: center;
 }
 .stats ul li {
-    float: left;
-    display: inline;
-    margin: 0 50px 0 25px;
-    vertical-align: top;
-    min-width: 20%;
+    display: inline-block;
+    width: 300px;
     align-items: center;
 }
 .stats ul li:first-child {
     background: #28c77e;
     border-radius: 3px;
+    margin: 0 15px 0 0;
 }
 .stats ul li:nth-child(2) {
 	background: #00C0EF;
     border-radius: 3px;
+    margin: 0 15px 0 0;
 }
 .stats ul li:nth-child(3) {
     background: #f95353;
     border-radius: 3px;
+    margin: 0 15px 0 0;
 }
 .stats ul li:last-child {
     background: #e3971f;
@@ -7843,12 +7866,12 @@ ul.sub li ul li {
 }
 .stats ul li span {
     color: #ffffff;
-    font-size: 15px;
     display: block;
     vertical-align: middle;
     line-height: 40px;
     white-space: nowrap;
     overflow: hidden;
+    padding-right: 20px;
 }
 .count {
 	font-size: 26px;
@@ -8368,7 +8391,7 @@ a.count1 {
 	width: 100%;
 	color: #eee;
 	margin-top: 42px;
-	position: absolute;
+	position: fixed;
 	bottom: 0
 }
 #footer span {
@@ -10594,34 +10617,6 @@ li.plupload_droptext {
 		height: 100%;
 		margin-bottom: 22px
 	}
-	ul.sub {
-		position: absolute;
-		width: 100%;
-		left: 0;
-		z-index: 999;
-		border: 1px solid #d5d5d5;
-		border-bottom: 0
-	}
-	ul.sub li {
-		display: block;
-		width: 50%;
-		float: left;
-		margin-bottom: 0;
-		text-align: left;
-		border-bottom: 1px solid #d5d5d5;
-		padding: 0
-	}
-	ul.sub li a {
-		padding: 8px 10px 8px 24px;
-		background: url(../images/arrow.gif) no-repeat 12px 16px
-	}
-	.sub li a:active,
-	ul.sub li a:hover {
-		background-position: 12px 16px
-	}
-	ul.sub li:nth-child(odd) {
-		background: url(../images/tabsSepR.png) repeat-y 100% 0
-	}
 	ul#menu {
 		position: relative
 	}
@@ -10631,12 +10626,6 @@ li.plupload_droptext {
 }
 @media only screen and (max-width: 767px) {
 	.stats ul li {
-		display: inline-block;
-		float: none;
-		margin-left: 18px;
-		vertical-align: top;
-		width: 21%;
-		text-align: center
 	}
 	.stats ul {
 		text-align: center
@@ -10753,9 +10742,6 @@ li.plupload_droptext {
 		float: none;
 		text-align: center
 	}
-	.welcome {
-		display: none
-	}
 	.userNav {
 		float: none;
 		text-align: center;
@@ -10799,15 +10785,8 @@ li.plupload_droptext {
 		text-align: center
 	}
 	.stats ul li {
-		display: inline-block;
-		float: none;
-		margin: 5px;
-		vertical-align: top;
-		width: 46%;
-		text-align: center
 	}
 	.stats ul li:first-child {
-		margin: 5px
 	}
 	.count {
 		display: inline-block;
@@ -10969,6 +10948,47 @@ li.plupload_droptext {
 		max-width: 218px
 	}
 }
+
+@media only screen and (max-width: 838px) {
+    .userNav{
+        display:none;
+    }
+  .sidebar a {
+      font-size: 14px!important;
+    }
+  .sidebar2 a {
+      font-size: 14px!important;
+    }
+  .dd {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 14px!important;
+    color: #818181;
+    display: block!important;
+    transition: 0.3s;
+    float: none!important;
+    }
+  .numberMiddle{
+    top: auto;
+    }
+  .stats ul li:first-child {
+    margin: 0 3px 0 0;
+    }
+  .stats ul li:nth-child(2) {
+     margin: 0 3px 0 0;
+    }
+  .stats ul li:nth-child(3) {
+    margin: 0 3px 0 0;
+    }
+}
+@media only screen and (min-width: 840px) {
+    .userNav2 {
+		display: none
+    }
+    .sidebar2 {
+		display: none
+    }
+}
 @media only screen and (min-width: 480px) and (max-width: 767px) {
 	.moreFields ul li {
 		width: 13.4%
@@ -11009,7 +11029,7 @@ li.plupload_droptext {
 .sidebar {
   height: 100%;
   width: 0;
-  position: fixed;
+  position: absolute;
   z-index: 1;
   top: 0;
   left: 0;
@@ -11017,6 +11037,7 @@ li.plupload_droptext {
   overflow-x: hidden;
   transition: 0.5s;
   padding-top: 60px;
+  text-align: left;
 }
 
 .sidebar a {
@@ -11047,7 +11068,6 @@ li.plupload_droptext {
   padding: 10px 15px;
   border: none;
 }
-
 .openbtn:hover {
   background-color: #444;
 }
@@ -11057,14 +11077,79 @@ li.plupload_droptext {
   padding: 16px;
 }
 
-/* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
-@media screen and (max-height: 450px) {
-  .sidebar {padding-top: 15px;}
-  .sidebar a {font-size: 18px;}
+.sidebar2 {
+  height: 100%;
+  width: 0;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  background-color: #272b2f;
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 60px;
+  text-align: right;
 }
 
-.nav-vertical-separator{
+.sidebar2 a {
+  padding: 8px 8px 8px 32px;
+  text-decoration: none;
+  font-size: 25px;
+  color: #818181;
+  display: block;
+  transition: 0.3s;
+}
+
+.sidebar2 ul li ul li a {
+    background: url(../images/arrow.gif) no-repeat 8px 16px;
+    background-repeat: no-repeat;
+    background-position: right;
+}
+.sidebar2 a:hover {
+  color: #f1f1f1;
+}
+
+.sidebar2 .closebtn2 {
+  position: absolute;
+  left: 2px;
+  font-size: 36px;
+  margin-right: 50px;
+}
+
+.openbtn2 {
+  font-size: 20px;
+  cursor: pointer;
+  background-color: #262b2f;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+}
+
+.openbtn2:hover {
+  background-color: #444;
+}
+
+#main2 {
+  transition: margin-left .5s;
+  padding: 16px;
+}
+
+.nav-vertical-separator {
     border-left: 2px solid rgb(255 255 255 / 71%);
     height: 15px;
     margin: 10px 2px 0px 2px;
+}
+.sidebar2m {
+    font-size: 36px;
+    text-decoration: none;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+}
+.dd {
+    display: inline;
+    float: left;
+    position: relative;
+    cursor: pointer;
+    border-right: 1px solid #2f2f2f;
 }
