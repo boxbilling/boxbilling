@@ -1,16 +1,24 @@
-Release 4.22-beta.1.2 !!Update in progress!!
+Release 4.22-beta.1.2 (2021-12-5)
 ------------------------------------------------------------------------------
 
 **General:**
-* 
+* Convert domain name to lowercase when creating a new order to avoid potential errors. [Based on discussion here](https://github.com/boxbilling/boxbilling/discussions/1022#discussioncomment-1311819)
+* Automatically include .htaccess with releases
+* Removed MOFH
+* Be more descriptive with extraction errors.
+* Updated cURL user agent
+* Improved setup wording
 
 **Security:**
 * Fix a potential XSS with the 'icon_url' parameter when creating a new product, category, or addon.
 
 **Bug Fixes:**
-* Fix plesk integration
+* Fix Plesk integration
+* Fix spamChecker and removed reCAPTCHA v1 (Will not work until after cron is run at least once!)
+* Fix file_get_contents offset
+* Fixed missing KB icon in the admin dashboard
 
-Release 4.22-beta.1.1
+Release 4.22-beta.1.1 (2021-11-30)
 ------------------------------------------------------------------------------
 
 **General:**
