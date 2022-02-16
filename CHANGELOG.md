@@ -1,3 +1,14 @@
+Release 4.22-beta.1.4 (2022-2-15)
+------------------------------------------------------------------------------
+**Bug Fixes:**
+* Resolve issues with MySQL 8.0+ by removing use of deprecated variable
+
+Release 4.22-beta.1.3 (2021-12-5)
+------------------------------------------------------------------------------
+**General:**
+* Prepopulate boostrap theme settings
+* Auto rename .htaccess and theme configs during install
+
 Release 4.22-beta.1.2 (2021-12-5)
 ------------------------------------------------------------------------------
 
