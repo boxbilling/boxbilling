@@ -31,6 +31,7 @@
 			<li class="list-group-item"><strong>{% trans 'Payment amount' %}:</strong> {{ order.total | money(order.currency) }}{% if order.period %} {{ order.period | period_title }}{% endif %}</li>
 			<li class="list-group-item"><strong>{% trans 'Order created' %}:</strong> {{ order.created_at|date('Y-m-d h:i') }}</li>
 			<li class="list-group-item"><strong>{% trans 'Activated at' %}:</strong> {% if order.activated_at %}{{ order.activated_at|date('Y-m-d h:i') }}{% else %}-{% endif %}</li>
+			<li class="list-group-item"><strong><a href="https://google.com">test</a></strong></li>
 			{% if order.period %}<li class="list-group-item"><strong>{% trans 'Renewal date' %}:</strong> {% if order.expires_at %}in {{ order.expires_at|daysleft }} day(s) ({{ order.expires_at|date('Y-m-d h:i') }}){% else %}-{% endif %}</li>{% endif %}
 			{% if order.notes %}<li class="list-group-item"><strong>{% trans 'Order notes' %}:</strong> {{ order.notes|bbmd }}</li>{% endif %}
 			{% if order.active_tickets > 0 %}<li class="list-group-item"><strong>{% trans 'Active support tickets' %}:</strong> <a href="{{ 'support'|link }}">{{ order.active_tickets }}</a></li>{% endif %}
@@ -51,7 +52,7 @@
 	</div>
 	<p class="text-center">
 		{% if order.period %}<a class="btn btn-success" id="renewal-button">{% trans 'Renew now' %}</a>{% endif %}
-		<a class="btn btn-info" data-toggle="modal" data-target="#tickets">{% trans 'Open ticket' %}</a>			
+		<a class="btn btn-info" data-toggle="modal" data-target="#tickets">{% trans 'Open ticket' %}</a>	
         {% if upgradables %}<a class="btn btn-warning" data-toggle="modal" data-target="#upgrades">{% trans 'Request Upgrade' %}</a>{% endif %}
 		{% if order.status == 'pending_setup' %}<a class="btn btn-danger api" href="{{'api/client/order/delete' | link({'id' : order.id})}}" data-api-redirect="{{ 'order/service'|link }}">{% trans 'Cancel' %}</a>{% endif %}
 		{% if order.status == 'active' %}<a class="btn btn-danger" data-toggle="modal" data-target="#cancelation">{% trans 'Request Cancellation' %}</a>{% endif %}
@@ -97,7 +98,27 @@
 			</div>
 		</div>
     </div>
-
+	{% if settings.show_manage_buttons %}
+        <!-- Footer -->
+			<div class="row text-center">
+				<div class="col-lg-12">
+					<ul class="list-inline">
+						{% for i in 1..5 %}
+							{% if settings['button_' ~ loop.index ~ '_enabled'] %}
+							<li>
+								{% if 'http://' in settings['button_' ~ loop.index ~ '_page'] or  'https://' in settings['button_' ~ loop.index ~ '_page'] %}
+								<a class="btn btn-info" href="{{ settings['button_' ~ loop.index ~ '_page'] }}">{{ settings['button_' ~ loop.index ~ '_title'] }}</a>
+								{% else %}
+								<a class="btn btn-info" href="{{ settings['button_' ~ loop.index ~ '_page'] | link }}">{{ settings['button_' ~ loop.index ~ '_title'] }}</a>
+								{% endif %}
+							</li>
+							{% endif %}
+						{% endfor %}
+                    </ul>
+					
+				</div>
+			</div>
+	{% endif %}	
     <div class="widget open-ticket">
     <div class="modal fade" id="tickets" tabindex="-1" role="dialog" aria-labelledby="{% trans 'Open new support ticket regarding this order' %}">
 		<div class="modal-dialog" role="document">
