@@ -31,7 +31,6 @@
 			<li class="list-group-item"><strong>{% trans 'Payment amount' %}:</strong> {{ order.total | money(order.currency) }}{% if order.period %} {{ order.period | period_title }}{% endif %}</li>
 			<li class="list-group-item"><strong>{% trans 'Order created' %}:</strong> {{ order.created_at|date('Y-m-d h:i') }}</li>
 			<li class="list-group-item"><strong>{% trans 'Activated at' %}:</strong> {% if order.activated_at %}{{ order.activated_at|date('Y-m-d h:i') }}{% else %}-{% endif %}</li>
-			<li class="list-group-item"><strong><a href="https://google.com">test</a></strong></li>
 			{% if order.period %}<li class="list-group-item"><strong>{% trans 'Renewal date' %}:</strong> {% if order.expires_at %}in {{ order.expires_at|daysleft }} day(s) ({{ order.expires_at|date('Y-m-d h:i') }}){% else %}-{% endif %}</li>{% endif %}
 			{% if order.notes %}<li class="list-group-item"><strong>{% trans 'Order notes' %}:</strong> {{ order.notes|bbmd }}</li>{% endif %}
 			{% if order.active_tickets > 0 %}<li class="list-group-item"><strong>{% trans 'Active support tickets' %}:</strong> <a href="{{ 'support'|link }}">{{ order.active_tickets }}</a></li>{% endif %}
