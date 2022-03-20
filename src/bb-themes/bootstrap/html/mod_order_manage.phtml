@@ -47,25 +47,6 @@
 				{% endfor %}
 				{% endif %}
 			{% endif %}
-			{% if settings.show_manage_links %}
-			<div class="row text-center">
-				<div class="col-lg-12">
-					<ul class="list-inline">
-						{% for i in 1..5 %}
-							{% if settings['manage_link_' ~ loop.index ~ '_enabled'] %}
-							<li>
-								{% if 'http://' in settings['manage_link_' ~ loop.index ~ '_page'] or  'https://' in settings['manage_link_' ~ loop.index ~ '_page'] %}
-								<a href="{{ settings['manage_link_' ~ loop.index ~ '_page'] }}">{{ settings['manage_link_' ~ loop.index ~ '_title'] }}</a>
-								{% else %}
-								<a href="{{ settings['manage_link_' ~ loop.index ~ '_page'] | link }}">{{ settings['manage_link_' ~ loop.index ~ '_title'] }}</a>
-								{% endif %}
-							</li>
-							{% endif %}
-						{% endfor %}
-                    </ul>
-				</div>
-			</div>
-	{% endif %}
 		</ul>
 	</div>
 	<p class="text-center">
