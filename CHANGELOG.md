@@ -6,7 +6,12 @@ Release 4.22-beta.1.5 (2022-4-3)
 
 **New Features**
 * BoxBilling will now display release notes on the update screen.
-* Added the ability to add SEO (metadata) descriptions to announcements .
+* Added the ability to add SEO (metadata) descriptions to announcements.
+
+**General Updates**
+* Updated composer packages
+
+Note: This is expected to be the last release of BoxBilling that supports PHP 7.4
 
 Release 4.22-beta.1.4 (2022-2-15)
 ------------------------------------------------------------------------------
