@@ -13,7 +13,7 @@
 
 final class Box_Version
 {
-    const VERSION = '4.22.1.4';
+    const VERSION = '4.22.1.5';
 
     const TYPE_FREE = 'free';
     const TYPE_PRO  = 'pro';
