@@ -17,6 +17,15 @@ class BBPatch_24 extends BBPatchAbstract
 {
     public function patch()
     {
+        // Initializing meta description support for announcements
+        $q = "ALTER TABLE `post`  ADD `description` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NULL  AFTER `title`;"
+        $this->execSql($q);
+
+        // Clearing leftovers from deleted payment adapters
+        $q = "DELETE FROM `pay_gateway` WHERE `gateway` = 'AlertPay' OR `gateway` = 'WebToPay' OR `gateway` = 'Payza' OR `gateway` = 'SinglePay'";
+        $this->execSql($q);
+        
+        // Setting up the new custom pages extension
         $q = "CREATE TABLE IF NOT EXISTS `custom_pages` (`id` int(11) NOT NULL AUTO_INCREMENT, `title` varchar(255) NOT NULL, `description` varchar(555) NOT NULL, `keywords` varchar(555) NOT NULL, `content` text NOT NULL, `slug` varchar(255) NOT NULL, `created_at` timestamp NOT NULL DEFAULT current_timestamp(), PRIMARY KEY (`id`)) ENGINE=MyISAM DEFAULT CHARSET=utf8";
         $this->execSql($q);
     }
