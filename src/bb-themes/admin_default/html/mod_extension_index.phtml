@@ -108,6 +108,7 @@
             </div>
 
             <div class="body">
+                {{ admin.system_release_notes|bbmd }}
                 <a href="{{ 'api/admin/extension/update_core'|link }}" title="" class="btnIconLeft mr10 mt5 api-link" data-api-confirm="Make sure that you have made database and files backups before proceeding with automatic update. Click OK when you are ready to continue." data-api-msg="Update complete"><img src="images/icons/dark/cog.png" alt="" class="icon"><span>Update BoxBilling</span></a>
             </div>
 
