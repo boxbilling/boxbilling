@@ -1,3 +1,13 @@
+Release 4.22-beta.1.5 (2022-4-3)
+------------------------------------------------------------------------------
+**Bug Fixes:**
+* Fixed typo in config file error message.
+* Fixed "lorem ipsum" on Bootstrap theme.
+
+**New Features**
+* BoxBilling will now display release notes on the update screen.
+* Added the ability to add SEO (metadata) descriptions to announcements .
+
 Release 4.22-beta.1.4 (2022-2-15)
 ------------------------------------------------------------------------------
 **Bug Fixes:**
