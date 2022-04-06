@@ -95,7 +95,7 @@
                     {% for order in orders.list %}
                         <tr title="{{order.created_at|timeago}} ago">
                             <td><a href="{{ 'order/manage'|alink }}/{{ order.id }}">{{ order.title|truncate(35) }}</a></td>
-                            <td align="center"><a href="{{ 'client/manage'|alink }}/{{ order.client_id }}" title="">{{ order.client.first_name|truncate(1, null, '.') }} {{ order.client.last_name }}</a></td>
+                            <td align="center"><a href="{{ 'client/manage'|alink }}/{{ order.client_id }}" title="">{{ order.client.first_name|truncate(15) }} {{ order.client.last_name|truncate(1, null, '.') }}</a></td>
                         </tr>
                     {% else %}
                     <tr>

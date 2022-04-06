@@ -84,10 +84,10 @@
 {% set statuses = admin.invoice_transaction_get_statuses %}
 <div class="stats">
     <ul>
-        <li><a href="{{ 'invoice/transactions'|alink({'status' : 'processed'}) }}" class="count green" title="">{{ statuses.processed }}</a><span>{% trans 'Processed' %}</span></li>
-        <li><a href="{{ 'invoice/transactions'|alink({'status' : 'approved'}) }}" class="count blue" title="">{{ statuses.approved }}</a><span>{% trans 'Approved' %}</span></li>
-        <li><a href="{{ 'invoice/transactions'|alink({'status' : 'error'}) }}" class="count red" title="">{{ statuses.error }}</a><span>{% trans 'Error' %}</span></li>
-        <li class="last"><a href="{{ 'invoice/transactions'|alink }}" class="count grey" title="">{{ statuses.received + statuses.approved + statuses.processed + statuses.error }}</a><span>{% trans 'Total' %}</span></li>
+        <li onclick="location.href='{{ 'invoice/transactions'|alink({'status' : 'processed'}) }}';"><a href="{{ 'invoice/transactions'|alink({'status' : 'processed'}) }}" class="count green" title="">{{ statuses.processed }}</a><span>{% trans 'Processed' %}</span></li>
+        <li onclick="location.href='{{ 'invoice/transactions'|alink({'status' : 'approved'}) }}';"><a href="{{ 'invoice/transactions'|alink({'status' : 'approved'}) }}" class="count blue" title="">{{ statuses.approved }}</a><span>{% trans 'Approved' %}</span></li>
+        <li onclick="location.href='{{ 'invoice/transactions'|alink({'status' : 'error'}) }}';"><a href="{{ 'invoice/transactions'|alink({'status' : 'error'}) }}" class="count red" title="">{{ statuses.error }}</a><span>{% trans 'Error' %}</span></li>
+        <li onclick="location.href='{{ 'invoice/transactions'|alink }}';"><a href="{{ 'invoice/transactions'|alink }}" class="count grey" title="">{{ statuses.received + statuses.approved + statuses.processed + statuses.error }}</a><span>{% trans 'Total' %}</span></li>
     </ul>
     <div class="fix"></div>
 </div>

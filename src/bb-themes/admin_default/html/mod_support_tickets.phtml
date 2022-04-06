@@ -90,10 +90,10 @@
 {% set statuses = admin.support_ticket_get_statuses %}
 <div class="stats">
     <ul>
-        <li><a href="{{ 'support'|alink({'status' : 'open'}) }}" class="count green" title="">{{ statuses.open }}</a><span>{% trans 'Tickets waiting for staff reply' %}</span></li>
-        <li><a href="{{ 'support'|alink({'status' : 'on_hold'}) }}" class="count blue" title="">{{ statuses.on_hold }}</a><span>{% trans 'Tickets waiting for client reply' %}</span></li>
-        <li><a href="{{ 'support'|alink({'status' : 'closed'}) }}" class="count grey" title="">{{ statuses.closed }}</a><span>{% trans 'Solved tickets' %}</span></li>
-        <li class="last"><a href="{{ 'support'|alink }}" class="count grey" title="">{{ statuses.open + statuses.on_hold + statuses.closed }}</a><span>{% trans 'Total' %}</span></li>
+        <li onclick="location.href='{{ 'support'|alink({'status' : 'open'}) }}';"><a href="{{ 'support'|alink({'status' : 'open'}) }}" class="count green" title="">{{ statuses.open }}</a><span>{% trans 'Tickets waiting for staff reply' %}</span></li>
+        <li onclick="location.href='{{ 'support'|alink({'status' : 'on_hold'}) }}';"><a href="{{ 'support'|alink({'status' : 'on_hold'}) }}" class="count blue" title="">{{ statuses.on_hold }}</a><span>{% trans 'Tickets waiting for client reply' %}</span></li>
+        <li onclick="location.href='{{ 'support'|alink({'status' : 'closed'}) }}';"><a href="{{ 'support'|alink({'status' : 'closed'}) }}" class="count red" title="">{{ statuses.closed }}</a><span>{% trans 'Solved tickets' %}</span></li>
+        <li onclick="location.href='{{ 'support'|alink }}';"><a href="{{ 'support'|alink }}" class="count grey" title="">{{ statuses.open + statuses.on_hold + statuses.closed }}</a><span>{% trans 'Total' %}</span></li>
     </ul>
     <div class="fix"></div>
 </div>

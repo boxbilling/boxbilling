@@ -92,10 +92,10 @@
 {% set count_orders = admin.order_get_statuses %}
 <div class="stats">
     <ul>
-        <li><a href="{{ 'order'|alink({'status' : 'pending_setup'}) }}" class="count green" title="">{{ count_orders.pending_setup }}</a><span>{% trans 'Pending setup' %}</span></li>
-        <li><a href="{{ 'order'|alink({'status' : 'active'}) }}" class="count blue" title="">{{ count_orders.active }}</a><span>{% trans 'Active' %}</span></li>
-        <li><a href="{{ 'order'|alink({'status' : 'suspended'}) }}" class="count red" title="">{{ count_orders.suspended }}</a><span>{% trans 'Suspended' %}</span></li>
-        <li class="last"><a href="{{ 'order'|alink }}" class="count grey" title="">{{ count_orders.total }} </a><span>{% trans 'Total' %}</span></li>
+        <li onclick="location.href='{{ 'order'|alink({'status' : 'pending_setup'}) }}';"><a href="{{ 'order'|alink({'status' : 'pending_setup'}) }}" class="count green" title="">{{ count_orders.pending_setup }}</a><span>{% trans 'Pending setup' %}</span></li>
+        <li onclick="location.href='{{ 'order'|alink({'status' : 'active'}) }}';"><a href="{{ 'order'|alink({'status' : 'active'}) }}" class="count blue" title="">{{ count_orders.active }}</a><span>{% trans 'Active' %}</span></li>
+        <li onclick="location.href='{{ 'order'|alink({'status' : 'suspended'}) }}';"><a href="{{ 'order'|alink({'status' : 'suspended'}) }}" class="count red" title="">{{ count_orders.suspended }}</a><span>{% trans 'Suspended' %}</span></li>
+        <li onclick="location.href='{{ 'order'|alink }}';"><a href="{{ 'order'|alink }}" class="count grey" title="">{{ count_orders.total }} </a><span>{% trans 'Total' %}</span></li>
     </ul>
     <div class="fix"></div>
 </div>
@@ -141,7 +141,7 @@
                             <a href="{{ 'client/manage'|alink }}/{{ order.client_id }}"><img src="{{ order.client.email|gravatar }}?size=20" alt="{{ order.client.email }}" /></a>
                         </span>
                         <span style="margin-left: 10px;">
-                            <a href="{{ 'client/manage'|alink }}/{{ order.client_id }}">{{order.client.first_name|truncate('1', null, '.')}} {{order.client.last_name}}</a>
+                            <a href="{{ 'client/manage'|alink }}/{{ order.client_id }}">{{order.client.first_name|truncate(15)}} {{order.client.last_name|truncate('1', null, '.')}}</a>
                         </span>
                     </td>
                     <td class="truncate">{{order.title }}</td>
