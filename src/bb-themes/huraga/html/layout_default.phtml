@@ -19,6 +19,30 @@
     <link rel='stylesheet' type='text/css' href="{{ 'css/plugins/jquery.jgrowl.css' | asset_url }}">
     <link rel='stylesheet' type='text/css' href="{{ 'css/logos.css' | asset_url }}">
     <link rel='stylesheet' type='text/css' href="{{ 'css/flags16.css' | asset_url }}">
+    <!-- Fontawesome -->
+	{% if settings.fa_v3 %}
+	<!-- FA V3 -->
+	<link rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/3.2.1/css/font-awesome-ie7.css">
+	{% endif %}
+	{% if settings.fa_v4 %}
+	<!-- FA V4 -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"/>
+	{% endif %}
+	{% if settings.fa_v5 %}
+	<!-- FA V5 -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+	{% endif %}
+	{% if settings.fa_v6 %}
+	<!-- FA V6 -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
+	{% endif %}
+	{% if settings['fa_custom'] %}
+	{% if 'http://' in settings['fa_cdn_url_custom'] or  'https://' in settings['fa_cdn_url_custom'] %}
+	<link rel="icon" href="{{ settings['fa_cdn_url_custom'] }}" type="image/x-icon" />
+	{% else %}
+	<link rel="icon" href="{{ settings['fa_cdn_url_custom'] }}" type="image/x-icon" />
+	{% endif %}
+	{% endif %}
 
     <link rel="shortcut icon" href="{{ 'favicon.ico' | asset_url }}">
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="{{ 'img/icons/apple-touch-icon-114-precomposed.png' | asset_url }}">
