@@ -13,7 +13,7 @@
 	<meta name="author" content="{{ settings.meta_author }}">
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 
-    <link rel="shortcut icon" href="{{ 'favicon.ico' | asset_url }}" />
+    {% if settings.favicon_enabled %}{% if settings['favicon_enabled'] %}{% if 'http://' in settings['favicon_url'] or  'https://' in settings['favicon_url'] %}<link rel="icon" href="{{ settings['favicon_url'] }}" type="image/x-icon"/>{% else %}<link rel="icon" href="{{ settings['favicon_url'] }}" type="image/x-icon"/>{% endif %}{% endif %}{% endif %}
 	
 	<!-- Bootstrap Core CSS -->
 	{% if settings.theme != "default" %}<link href="{{ 'css/themes/theme-' | asset_url }}{{ settings.theme }}.min.css" rel="stylesheet">
