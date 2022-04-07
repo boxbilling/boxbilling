@@ -16,9 +16,9 @@
 			{% for i in 1..5 %}
 				{% if settings['sidebar_button_' ~ loop.index ~ '_enabled'] %}
 						{% if 'http://' in settings['sidebar_button_' ~ loop.index ~ '_page'] or  'https://' in settings['sidebar_button_' ~ loop.index ~ '_page'] %}
-							<a href="{{ settings['sidebar_button_' ~ loop.index ~ '_page'] }}" class="list-group-item"><span style="color: #0ce3ac;"><i class="fa {{ settings['sidebar_button_' ~ loop.index ~ '_icon'] }}"></i> {{ settings['sidebar_button_' ~ loop.index ~ '_title'] }}</a>
+							<a href="{{ settings['sidebar_button_' ~ loop.index ~ '_page'] }}" class="list-group-item"><span style="color: #0ce3ac;"><i class="{{ settings['sidebar_button_' ~ loop.index ~ '_icon'] }}"></i> {{ settings['sidebar_button_' ~ loop.index ~ '_title'] }}</a>
 						{% else %}
-						    <a href="{{ settings['sidebar_button_' ~ loop.index ~ '_page'] }}" class="list-group-item"><span style="color: #0ce3ac;"><i class="fa {{ settings['sidebar_button_' ~ loop.index ~ '_icon'] }}"></i> {{ settings['sidebar_button_' ~ loop.index ~ '_title'] }}</a>
+						    <a href="{{ settings['sidebar_button_' ~ loop.index ~ '_page'] }}" class="list-group-item"><span style="color: #0ce3ac;"><i class="{{ settings['sidebar_button_' ~ loop.index ~ '_icon'] }}"></i> {{ settings['sidebar_button_' ~ loop.index ~ '_title'] }}</a>
 						{% endif %}
 				{% endif %}
 			{% endfor %}
