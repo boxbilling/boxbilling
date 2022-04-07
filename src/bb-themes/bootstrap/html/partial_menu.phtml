@@ -12,13 +12,13 @@
 	<div class="list-group">
 		{% if settings.side_menu_services %}<a href="{{ 'order/service'|link }}" title="{% trans 'Services' %}" class="list-group-item{% if request._url starts with '/order/service' %} active{% endif %}"><span style="color: #0ce3ac;"><i class="fa fa-cog"></i> {% trans 'Services' %}</span></a>{% endif %}
 		{% if settings.side_menu_invoices %}<a href="{{ 'invoice'|link }}" title="{% trans 'Invoices' %}" class="list-group-item{% if request._url starts with '/invoice' %} active{% endif %}"><span style="color: #0ce3ac;"><i class="fa fa-credit-card"></i> {% trans 'Invoices' %}</span></a>{% endif %}
-		{% if settings.show_sidebar_buttons %}
+		{% if settings.show_page_footer %}
 			{% for i in 1..5 %}
 				{% if settings['sidebar_button_' ~ loop.index ~ '_enabled'] %}
-						{% if 'http://' in settings['footer_link_' ~ loop.index ~ '_page'] or  'https://' in settings['footer_link_' ~ loop.index ~ '_page'] %}
-							<a href="{{ settings['sidebar_button_' ~ loop.index ~ '_page'] | link }}" title="{% trans 'Panel' %}" class="list-group-item"><span style="color: #0ce3ac;"><i class="fa {{ settings['sidebar_button_' ~ loop.index ~ '_icon'] }}"></i> {{ settings['sidebar_button_' ~ loop.index ~ '_title'] }}</a>
+						{% if 'http://' in settings['sidebar_button_' ~ loop.index ~ '_page'] or  'https://' in settings['sidebar_button_' ~ loop.index ~ '_page'] %}
+							<a href="{{ settings['sidebar_button_' ~ loop.index ~ '_page'] }}" class="list-group-item"><span style="color: #0ce3ac;"><i class="fa {{ settings['sidebar_button_' ~ loop.index ~ '_icon'] }}"></i> {{ settings['sidebar_button_' ~ loop.index ~ '_title'] }}</a>
 						{% else %}
-						    <a href="{{ settings['sidebar_button_' ~ loop.index ~ '_page'] | link }}" title="{% trans 'Panel' %}" class="list-group-item"><span style="color: #0ce3ac;"><i class="fa {{ settings['sidebar_button_' ~ loop.index ~ '_icon'] }}"></i> {{ settings['sidebar_button_' ~ loop.index ~ '_title'] }}</a>
+						    <a href="{{ settings['sidebar_button_' ~ loop.index ~ '_page'] }}" class="list-group-item"><span style="color: #0ce3ac;"><i class="fa {{ settings['sidebar_button_' ~ loop.index ~ '_icon'] }}"></i> {{ settings['sidebar_button_' ~ loop.index ~ '_title'] }}</a>
 						{% endif %}
 				{% endif %}
 			{% endfor %}
