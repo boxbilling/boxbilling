@@ -83,7 +83,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="{{''|link }}">{{company.name}}</a>
+                <a class="navbar-brand" href="{{''|link }}">{{company.name}}</a>{% if settings.header_icon_enabled %}{% if settings['header_icon_enabled'] %}{% if 'http://' in settings['header_icon_url'] or  'https://' in settings['header_icon_url'] %}<img src="{{ settings['header_icon_url'] }}" width="55" title="{{company.name}}">{% else %}<img src="{{ settings['header_icon_url'] }}" width="55" title="{{company.name}}">{% endif %}{% endif %}{% endif %}
             </div>
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="mainmenu">
