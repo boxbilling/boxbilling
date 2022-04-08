@@ -94,6 +94,8 @@
 
 <fieldset>
     <legend>Home page</legend>
+    <h3>Favicon</h3>
+    <label for="favicon_enabled"><input type="checkbox" name="favicon_enabled"/> Enable favicon</label> <input type="text" name="favicon_url" value="" placeholder="Favicon URL"/>
 	<h3>Logged in</h3>
     <table>
         <tr>
@@ -209,6 +211,89 @@
 </fieldset>
 
 <fieldset>
+    <legend>Buttons on manage page</legend>
+    <table>
+    <tr>
+        <td><label>Show manage page buttons</label></td>
+        <td>
+            <input type="radio" name="show_manage_buttons" value="1" id="show_manage_buttons_1" checked="checked"/> <label for="show_manage_buttons_1">Yes</label>
+            <input type="radio" name="show_manage_buttons" value="0" id="show_manage_buttons_0" /> <label for="show_manage_buttons_0">No</label>
+        </td>
+    </tr>
+</table>
+    <br>
+    <table>
+        <tr>
+            <td><label>Button #1</label></td>
+            <td><input type="checkbox" name="button_1_enabled"/> <input type="text" name="button_1_title" value=""/> -> <input type="text" name="button_1_page"/></td>
+        </tr>
+
+        <tr>
+            <td><label>Button #2</label></td>
+            <td><input type="checkbox" name="button_2_enabled"/> <input type="text" name="button_2_title" value=""/> -> <input type="text" name="button_2_page"/></td>
+        </tr>
+
+        <tr>
+            <td><label>Button #3</label></td>
+            <td><input type="checkbox" name="button_3_enabled"/> <input type="text" name="button_3_title" value=""/> -> <input type="text" name="button_3_page"/></td>
+        </tr>
+
+        <tr>
+            <td><label>Button #4</label></td>
+            <td><input type="checkbox" name="button_4_enabled"/> <input type="text" name="button_4_title" value=""/> -> <input type="text" name="button_4_page"/></td>
+        </tr>
+
+        <tr>
+            <td><label>Button #5</label></td>
+            <td><input type="checkbox" name="button_5_enabled"/> <input type="text" name="button_5_title" value=""/> -> <input type="text" name="button_5_page"/></td>
+        </tr>
+
+    </table>
+</fieldset>
+
+<fieldset>
+    <legend>Sidebar buttons</legend>
+    <p>Most <a href="https://fontawesome.com/v4/icons/">Fontawesome 4</a> icons will work with BoxBilling</p><br>
+    <table>
+    <tr>
+        <td><label>Show sidebar buttons</label></td>
+        <td>
+            <input type="radio" name="show_sidebar_buttons" value="1" id="show_sidebar_buttons_1" checked="checked"/> <label for="show_sidebar_buttons_1">Yes</label>
+            <input type="radio" name="show_sidebar_buttons" value="0" id="show_sidebar_buttons_0" /> <label for="show_sidebar_buttons_0">No</label>
+        </td>
+    </tr>
+</table>
+    <br>
+    <table>
+        <tr>
+            <td><label>Button #1</label></td>
+            <td><input type="checkbox" name="sidebar_button_1_enabled"/> <input type="text" name="sidebar_button_1_icon" value="" placeholder="Icon"/> <input type="text" name="sidebar_button_1_title" value="" placeholder="Label"/> -> <input type="text" name="sidebar_button_1_page" placeholder="Destination"/></td>
+        </tr>
+
+        <tr>
+            <td><label>Button #2</label></td>
+            <td><input type="checkbox" name="sidebar_button_2_enabled"/> <input type="text" name="sidebar_button_2_icon" value="" placeholder="Icon"/> <input type="text" name="sidebar_button_2_title" value="" placeholder="Label"/> -> <input type="text" name="sidebar_button_2_page" placeholder="Destination"/></td>
+        </tr>
+
+        <tr>
+            <td><label>Button #3</label></td>
+            <td><input type="checkbox" name="sidebar_button_3_enabled"/> <input type="text" name="sidebar_button_3_icon" value="" placeholder="Icon"/> <input type="text" name="sidebar_button_3_title" value="" placeholder="Label"/> -> <input type="text" name="sidebar_button_3_page" placeholder="Destination"/></td>
+        </tr>
+
+        <tr>
+            <td><label>Button #4</label></td>
+            <td><input type="checkbox" name="sidebar_button_4_enabled"/> <input type="text" name="sidebar_button_4_icon" value="" placeholder="Icon"/> <input type="text" name="sidebar_button_4_title" value="" placeholder="Label"/> -> <input type="text" name="sidebar_button_4_page" placeholder="Destination"/></td>
+        </tr>
+
+        <tr>
+            <td><label>Button #5</label></td>
+            <td><input type="checkbox" name="sidebar_button_5_enabled"/> <input type="text" name="sidebar_button_5_icon" value="" placeholder="Icon"/> <input type="text" name="sidebar_button_5_title" value="" placeholder="Label"/> -> <input type="text" name="sidebar_button_5_page" placeholder="Destination"/></td>
+        </tr>
+
+    </table>
+</fieldset>
+
+<fieldset>
     <legend>Meta fields</legend>
 
     <table>
@@ -249,6 +334,7 @@
             <td>
                 <label for="show_client_balance"><input type="checkbox" name="show_client_balance" value="1" id="show_client_balance"/> Show Client balance</label><br/>
 				<label for="show_client_emails"><input type="checkbox" name="show_client_emails" value="1" id="show_client_emails"/> Show Emails sent to client</label><br/>
+                <label for="header_icon_enabled"><input type="checkbox" name="header_icon_enabled"/> Enable header icon</label> <input type="text" name="header_icon_url" value="" placeholder="Header icon URL"/>
             </td>
         </tr>
     </table>

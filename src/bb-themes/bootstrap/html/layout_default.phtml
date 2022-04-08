@@ -13,7 +13,7 @@
 	<meta name="author" content="{{ settings.meta_author }}">
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 
-    <link rel="shortcut icon" href="{{ 'favicon.ico' | asset_url }}" />
+    {% if settings.favicon_enabled %}{% if settings['favicon_enabled'] %}{% if 'http://' in settings['favicon_url'] or  'https://' in settings['favicon_url'] %}<link rel="icon" href="{{ settings['favicon_url'] }}" type="image/x-icon"/>{% else %}<link rel="icon" href="{{ settings['favicon_url'] }}" type="image/x-icon"/>{% endif %}{% endif %}{% endif %}
 	
 	<!-- Bootstrap Core CSS -->
 	{% if settings.theme != "default" %}<link href="{{ 'css/themes/theme-' | asset_url }}{{ settings.theme }}.min.css" rel="stylesheet">
@@ -32,10 +32,6 @@
 		{{ settings.inject_css|raw }}
 	</style>
 	{% endif %}
-
-    <!-- Font Awesome -->
-    <link href="{{ 'font-awesome/css/fontawesome.min.css' | asset_url }}" rel="stylesheet" type="text/css">
-	<link href="{{ 'font-awesome/css/solid.min.css' | asset_url }}" rel="stylesheet" type="text/css">
 
 	<!-- jQuery -->
     <script src="{{ 'js/jquery.js' | asset_url }}"></script>
@@ -83,7 +79,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="{{''|link }}">{{company.name}}</a>
+                <a class="navbar-brand" href="{{''|link }}">{{company.name}}</a>{% if settings.header_icon_enabled %}{% if settings['header_icon_enabled'] %}{% if 'http://' in settings['header_icon_url'] or  'https://' in settings['header_icon_url'] %}<img src="{{ settings['header_icon_url'] }}" width="55" title="{{company.name}}">{% else %}<img src="{{ settings['header_icon_url'] }}" width="55" title="{{company.name}}">{% endif %}{% endif %}{% endif %}
             </div>
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="mainmenu">
