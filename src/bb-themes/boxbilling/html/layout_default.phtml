@@ -42,9 +42,9 @@
 	{% endif %}
 	{% if settings['fa_custom'] %}
 	{% if 'http://' in settings['fa_cdn_url_custom'] or  'https://' in settings['fa_cdn_url_custom'] %}
-	<link rel="icon" href="{{ settings['fa_cdn_url_custom'] }}" type="image/x-icon" />
+    <link rel="stylesheet" href="{{ settings['fa_cdn_url_custom'] }}"/>
 	{% else %}
-	<link rel="icon" href="{{ settings['fa_cdn_url_custom'] }}" type="image/x-icon" />
+	<link rel="stylesheet" href="{{ settings['fa_cdn_url_custom'] }}"/>
 	{% endif %}
 	{% endif %}
 </head>
