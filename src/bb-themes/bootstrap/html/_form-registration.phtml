@@ -1,0 +1,122 @@
+{% set r = guest.client_required %}
+<div class="mb-3">
+    <label class="form-label" for="inputRegistrationEmail">{{ 'Email address'|trans }}:</label>
+    <input class="form-control" id="inputRegistrationEmail" type="email" name="email" value="{{ request.email }}" required>
+</div>
+<div class="mb-3">
+    <label class="form-label" for="inputRegistrationFirstName">{{ 'First name'|trans }}:</label>
+    <input class="form-control" id="inputRegistrationFirstName" type="text" name="first_name" value="{{ request.first_name }}" required>
+</div>
+{% if 'last_name' in r %}
+    <div class="mb-3">
+        <label class="form-label">{{ 'Last name'|trans }}:</label>
+        <input class="form-control" type="text" name="last_name" value="{{ request.last_name }}" required>
+    </div>
+{% endif %}
+
+{% if 'company' in r %}
+    <div class="mb-3">
+        <label class="form-label">{{ 'Company'|trans }}:</label>
+        <input class="form-control" type="text" name="company" value="{{ request.company }}" required>
+    </div>
+{% endif %}
+
+{% if 'birthday' in r %}
+    <div class="mb-3">
+        <label class="form-label" for="inputRegistrationBirthday">{{ 'Birthday'|trans }}:</label>
+        <input class="form-control" id="inputRegistrationBirthday" type="date" name="birthday">
+    </div>
+{% endif %}
+
+{% if 'gender' in r %}
+    <div class="mb-3">
+        <label class="form-label">{{ 'You are'|trans }}: </label>
+        <select class="form-select" name="gender">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+        </select>
+    </div>
+{% endif %}
+
+{% set custom_fields = guest.client_custom_fields %}
+
+{% for field_name, field in custom_fields %}
+    {% if field.active %}
+        <div class="form-group">
+            <label class="col-sm-4 control-label" for="{{ field_name }}">{% if field.title is not empty %}{{ field.title }}{% else %} {{ field_name | capitalize }} {% endif %}</label>
+            <div class="col-sm-8">
+                <input type="text" class="form-control" name="{{ field_name }}" id="{{ field_name }}" value="{{ attribute(request, field_name) }}"{% if field.required %} required{% endif %}>
+            </div>
+        </div>
+    {% endif %}
+{% endfor %}
+
+{% if 'address_1' in r %}
+<div class="mb-3">
+    <label class="form-label">{{ 'Address'|trans }}:</label>
+    <input class="form-control" type="text" name="address_1" value="{{ request.address_1 }}">
+</div>
+{% endif %}
+    
+{% if 'address_2' in r %}
+<div class="mb-3">
+    <label class="form-label">{{ 'Address 2'|trans }}:</label>
+    <input class="form-control" type="text" name="address_2" value="{{ request.address_2 }}">
+</div>
+{% endif %}
+    
+{% if 'city' in r %}
+<div class="mb-3">
+    <label class="form-label">{{ 'City'|trans }}:</label>
+    <input class="form-control" type="text" name="city" value="{{ request.city }}">
+</div>
+{% endif %}
+    
+{% if 'country' in r %}
+<div class="mb-3">
+    <label class="form-label">{{ 'Country'|trans }}:</label>
+    {{ mf.selectbox('country', guest.system_countries, request.country, 0, 'Select country') }}
+</div>
+{% endif %}
+    
+{% if 'state' in r %}
+<div class="mb-3">
+    <label class="form-label">{{ 'State'|trans }}:</label>
+    {# mf.selectbox('state', guest.system_states, request.state, 0, 'Select state') #}
+    <input class="form-control" type="text" name="state" value="{{ request.state }}">
+</div>
+{% endif %}
+    
+{% if 'postcode' in r %}
+<div class="mb-3">
+    <label class="form-label">{{ 'Zip/Postal Code'|trans }}:</label>
+    <input class="form-control" type="text" name="postcode" value="{{ request.postcode }}">
+</div>
+{% endif %}
+    
+{% if 'phone' in r %}
+<div class="mb-3 row">
+    <label class="form-label" for="inputRegistrationPhone">{{ 'Phone number'|trans }}:</label>
+    <div class="input-group">
+        <span class="input-group-text">+</span>
+        <input class="form-control" type="text" name="phone_cc" value="{{ request.phone_cc }}">
+        <input class="form-control w-75" id="inputRegistrationPhone" name="phone" type="tel" value="{{ request.phone }}">
+    </div>
+</div>
+{% endif %}
+
+<div class="mb-3">
+    <label class="form-label" for="inputRegistrationPassword">{{ 'Password'|trans }}:</label>
+    <div class="input-group">
+        <input class="form-control" id="inputRegistrationPassword" type="password" name="password" required>
+        <span class="input-group-text password-toggler">
+            <i class="fa fa-eye"></i>
+        </span>
+        <input class="form-control" id="inputRegistrationPasswordRepeat" type="password" name="password_confirm" placeholder="{{ 'Password confirm'|trans }}" required>
+    </div>
+</div>		
+{{ mf.recaptcha }}
+
+<div class="d-grid">
+    <input class="btn btn-success" type="submit" value="{{ 'Registration'|trans }}">
+</div>
