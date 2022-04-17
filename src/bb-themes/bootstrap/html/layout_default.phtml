@@ -179,11 +179,11 @@
             <aside class="d-none {% if side_menu != 'hidden' %}d-lg-block{% endif %} col-md-3">
                 {% if company.logo_url %}
                     <a href="{{ ''|link }}" class="d-block mb-3">
-                        <img src="{{ company.logo_url }}" alt="{{ company.name }}" class="img-responsive">
+                        <img src="{{ company.logo_url }}" alt="{{ company.name }}" class="img-fluid">
                     </a>
                 {% else %}
                     <a href="{{ ''|link }}" class="d-block mb-3">
-                        <img src=" {{ 'images/logo.png'|asset_url }}" alt="{{ company.name }}" class="img-responsive">
+                        <img src=" {{ 'images/logo.png'|asset_url }}" alt="{{ company.name }}" class="img-fluid">
                     </a>
                 {% endif %}
                 
