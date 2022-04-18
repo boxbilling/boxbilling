@@ -164,7 +164,7 @@
                                 <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#login">{{ 'Login'|trans }}</a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ 'login'|link({ 'register': 1 }) }}" class="nav-link">{{ 'Registration'|trans }}</a>
+                                <a href="{{ 'login'|link({ 'register': 1 }) }}" class="nav-link">{{ 'Register'|trans }}</a>
                             </li>
                         {% endif %}
                     </ul>
@@ -277,18 +277,6 @@
             </div>
         </footer>
     {% endif %}
-
-    <!-- Bootstrap Toast -->
-    <div class="position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 1070;">
-        <div class="toast" id="liveToast" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header">
-                <span class="p-2 border border-light rounded-circle me-2"></span>
-                <strong class="me-auto">{{ 'System message'|trans }}</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">Message.</div>
-        </div>
-    </div>
 
     <script src="{{ 'js/jquery.js'|asset_url }}"></script>
     <script src="{{ 'js/bootstrap.min.js' | asset_url }}"></script>

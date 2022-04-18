@@ -6,12 +6,10 @@ var bb = {
             data: params,
             dataType: 'json',
             error: function(jqXHR, textStatus, e) {
-                // bb.msg(e, 'error');
                 boxbilling.message(e, 'error');
             },
             success: function(data) {
                 if (data.error) {
-                    // bb.msg(data.error.message, 'error');
                     boxbilling.message(data.error.message, 'error');
                 } else {
                     if (typeof jsonp === 'function') {
@@ -30,12 +28,10 @@ var bb = {
             data: params,
             dataType: 'json',
             error: function(jqXHR, textStatus, e) {
-                // bb.msg(e, 'error');
                 boxbilling.message(e, 'error');
             },
             success: function(data) {
                 if (data.error) {
-                    // bb.msg(data.error.message, 'error');
                     boxbilling.message(data.error.message, 'error');
                 } else {
                     if (typeof jsonp === 'function') {
@@ -79,7 +75,6 @@ var bb = {
         bootbox.alert(txt);
     },
     apiForm: function() {
-        // $("form.api_form, form.api-form").bind('submit', function() {
         $("form.api-form").bind('submit', function() {
             var redirect = $(this).attr('data-api-redirect');
             var jsonp = $(this).attr('data-api-jsonp');
@@ -112,7 +107,6 @@ var bb = {
                 }
                 
                 if (msg !== undefined) {
-                    // bb.msg(msg);
                     boxbilling.message(msg);
 
                     return;
@@ -136,7 +130,6 @@ var bb = {
 
             bb.get($(this).attr('href'), {}, function(result) {
                 if (msg !== undefined) {
-                    // bb.msg(msg);
                     boxbilling.message(msg);
                     
                     return;
@@ -222,27 +215,29 @@ var bb = {
 }
 
 //===== Tabs =====//
-$.fn.simpleTabs = function() {
-    // Default Action
-    $(this).find(".tab_content").hide(); // Hide all content
-    $(this).find("ul.tabs li:first").addClass("activeTab").show(); // Activate first tab
-    $(this).find(".tab_content:first").show(); // Show first tab content
+// $.fn.simpleTabs = function() {
+//     // Default Action
+//     $(this).find(".tab_content").hide(); // Hide all content
+//     $(this).find("ul.tabs li:first").addClass("activeTab").show(); // Activate first tab
+//     $(this).find(".tab_content:first").show(); // Show first tab content
 
-    // On Click Event
-    $("ul.tabs li").click(function() {
-        $(this).parent().parent().find("ul.tabs li").removeClass("activeTab"); //Remove any "active" class
-        $(this).addClass("activeTab"); // Add "active" class to selected tab
-        $(this).parent().parent().find(".tab_content").hide(); // Hide all tab content
+//     // On Click Event
+//     $("ul.tabs li").click(function() {
+//         $(this).parent().parent().find("ul.tabs li").removeClass("activeTab"); //Remove any "active" class
+//         $(this).addClass("activeTab"); // Add "active" class to selected tab
+//         $(this).parent().parent().find(".tab_content").hide(); // Hide all tab content
         
-        var activeTab = $(this).find("a").attr("href"); // Find the rel attribute value to identify the active tab + content
+//         var activeTab = $(this).find("a").attr("href"); // Find the rel attribute value to identify the active tab + content
         
-        $(activeTab).show(); // Fade in the active content
+//         $(activeTab).show(); // Fade in the active content
         
-        return false;
-    });
-};
+//         return false;
+//     });
+// };
 
-//===== Scroll to top =====//
+/**
+ * Scroll to top
+ */
 $("a[href='#top']").click(function() {
 	$("html, body").animate({ scrollTop: 0 }, "slow");
 
@@ -273,7 +268,7 @@ jQuery(function ($) {
         $(this).hide();
     });
 
-    $("div.simpleTabs").simpleTabs();
+    // $("div.simpleTabs").simpleTabs();
 
     if ($("select.currency_selector").length) { bb.CurrencySelector(); }
     if ($("select.language_selector").length) { bb.LanguageSelector(); }
@@ -281,28 +276,60 @@ jQuery(function ($) {
 	if ($("a.api, a.api-link").length){ bb.apiLink(); }
 	if ($("form.api_form, form.api-form").length){ bb.apiForm(); }
 
-    $('#login-form-link').bind('click', function() {
-        $(this).fadeOut();
-        $('#login-form').slideDown();
+    // $('#login-form-link').bind('click', function() {
+    //     $(this).fadeOut();
+    //     $('#login-form').slideDown();
 
-        return false;
-    });
+    //     return false;
+    // });
 
-    if (jQuery().tipsy) {
-        $('a.show-tip').tipsy({fade: true, delayIn: 500});
-    }
+    // if (jQuery().tipsy) {
+    //     $('a.show-tip').tipsy({fade: true, delayIn: 500});
+    // }
 });
 
 const boxbilling = {
-    // TODO: Make create live Toast messages by JS. HTML hardcoded at now.
     message: (message, type = 'info') => {
-        let colorClass = 'error' === type ? 'bg-danger' : 'bg-primary';
+        switch(type) {
+            case 'error':
+                color = 'danger';
+                break;
+            case 'warning':
+                color = 'warning';
+                break;
+            default:
+                color = 'primary';
+          }
 
-        document.querySelector('#liveToast .toast-header').firstElementChild.classList.add(colorClass);
-        document.querySelector('#liveToast .toast-body').innerHTML = message;
+        const container = document.createElement('div');
+        container.classList.add('position-fixed', 'bottom-0', 'start-50', 'translate-middle-x', 'p-3');
+        container.style.zIndex = 1070;
 
-        let element = document.getElementById('liveToast')
-        let toast = new bootstrap.Toast(element);
+        const element = document.createElement('div');
+        element.setAttribute('id', 'liveToast');
+        element.classList.add('toast');
+        element.setAttribute('role', 'alert');
+        element.setAttribute('aria-live', 'assertive');
+        element.setAttribute('aria-atomic', 'true');
+
+        element.innerHTML = `
+            <div class="toast-header">
+                <span class="p-2 border border-light bg-${ color } rounded-circle me-2"></span>
+                <strong class="me-auto">System message</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">${ message }</div>
+        `;
+
+        element.addEventListener('hidden.bs.toast', () => {
+            container.remove();
+        });
+
+        const toast = new bootstrap.Toast(element);
+
+        container.appendChild(element);
+
+        document.querySelector('body').appendChild(container);
 
         toast.show();
     },

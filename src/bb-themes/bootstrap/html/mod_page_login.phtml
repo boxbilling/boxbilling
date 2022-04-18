@@ -2,15 +2,15 @@
 
 {% import 'macro_functions.phtml' as mf %}
 
-{% block meta_title %}{{ 'Login'|trans }} / {{ 'Registration'|trans }}{% endblock %}
+{% block meta_title %}{{ 'Login'|trans }} / {{ 'Register'|trans }}{% endblock %}
 
 {% block content_before %}
-    <h1>{{ 'Login'|trans }} / {{ 'Registration'|trans }}</h1>
+    <h1>{{ 'Login'|trans }} / {{ 'Register'|trans }}</h1>
     <ol class="breadcrumb">
         <li class="breadcrumb-item">
             <a href="{{ ''|link }}">{{ 'Home'|trans }}</a>
         </li>
-        <li class="breadcrumb-item active" aria-current="page">{{ 'Login'|trans }} / {{ 'Registration'|trans }}</li>
+        <li class="breadcrumb-item active" aria-current="page">{{ 'Login'|trans }} / {{ 'Register'|trans }}</li>
     </ol>
 {% endblock %}
 
@@ -35,7 +35,7 @@
                     data-bs-target="#register"
                     role="tab"
                     aria-controls="register"
-                    aria-selected="true">{{ 'Registration'|trans }}</button>
+                    aria-selected="true">{{ 'Register'|trans }}</button>
             </li>
         </ul>
         <div id="tabSignin" class="col-md-8 col-xl-6 mx-auto tab-content">
