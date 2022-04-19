@@ -63,7 +63,7 @@ $(function() {
     $('#license-reset').bind('click', function(event) {
         if (confirm("{{ 'Are you sure?'|trans }}")) {
             bb.post('client/servicelicense/reset', { order_id: {{ order.id }} }, function(result) {
-                boxbilling.message('License was reset');
+                boxbilling.message("{{ 'License was reset'|trans }}");
             });
         }
     });

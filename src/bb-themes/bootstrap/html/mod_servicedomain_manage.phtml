@@ -44,7 +44,7 @@
                     </ul>
                 </div>
             </div>
-            
+
             <div class="tab-pane fade" id="tab-protection">
                 <h4>{{ 'Domain Protection'|trans }}</h4>
                 <div class="text-secondary">
@@ -55,7 +55,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="tab-pane fade" id="tab-privacy">
                 <h4>{{ 'Domain Privacy Settings'|trans }}</h4>
                 <div class="text-secondary">
@@ -66,7 +66,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="tab-pane fade" id="tab-nameservers">
                 <h4>{{ 'Domain Nameservers'|trans }}</h4>
                 <form method="post" class="api-form" data-api-url="client/servicedomain/update_nameservers" data-api-msg="{{ 'Nameservers updated'|trans }}">
@@ -98,7 +98,7 @@
                     </div>
                 </form>
             </div>
-            
+
             <div class="tab-pane fade" id="tab-whois">
                 <h4>{{ 'Update domain contact details'|trans }}</h4>
                 <form class="api-form" method="post" data-api-url="client/servicedomain/update_contacts" data-api-msg="{{ 'Contact details updated'|trans }}">
@@ -170,7 +170,7 @@
                     </div>
                 </form>
             </div>
-        
+
             <div class="tab-pane fade" id="tab-epp">
                 <h4>{{ 'Domain Secret'|trans }}</h4>
                 <div class="well">
@@ -220,7 +220,7 @@
 
         document.getElementById('getAuthCode').addEventListener('click', () => {
             bb.post('client/servicedomain/get_transfer_code', { order_id: {{ order.id }} }, function(result) {
-                    boxbilling.message('Domain transfer code is: ' + result);
+                    boxbilling.message("{{ 'Domain transfer code is: '|trans }}" + result);
                 }
             );
         });
