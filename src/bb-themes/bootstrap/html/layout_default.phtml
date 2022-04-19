@@ -5,10 +5,10 @@
     <title>{% block meta_title %}{% endblock %} {{ settings.meta_title }}</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    
+
     <meta property="bb:url" content="{{ constant('BB_URL') }}">
     <meta property="bb:client_area" content="{{ '/'|link }}">
-    
+
     <meta name="description" content="{% block meta_description %}{{ settings.meta_description }}{% endblock %}">
     <meta name="keywords" content="{% block meta_keywords %}{{ settings.meta_keywords }}{% endblock %}">
     <meta name="robots" content="{% if settings.meta_robots|default %}{{ settings.meta_robots }}{% else %}index, follow{% endif %}">
@@ -17,14 +17,14 @@
     {% if settings.favicon %}
         <link rel="icon" href="{{ settings.favicon }}">
     {% endif %}
-    
+
     <!-- Bootstrap Core CSS -->
     {% if settings.theme != 'default' %}
         <link href="{{ 'css/themes/theme-'|asset_url }}{{ settings.theme }}.min.css" rel="stylesheet">
     {% else %}
         <link href="{{ 'css/bootstrap.min.css'|asset_url }}" rel="stylesheet">
     {% endif %}
-    
+
     <!-- Bootstrap Markdown Editor -->
     <link href="{{ 'css/bootstrap-markdown.min.css'|asset_url }}" rel="stylesheet">
 
@@ -159,12 +159,12 @@
                                     </li>
                                 </ul>
                             </li>
-                        {% else %}			
+                        {% else %}
                             <li class="nav-item">
                                 <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#login">{{ 'Login'|trans }}</a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ 'login'|link({ 'register': 1 }) }}" class="nav-link">{{ 'Register'|trans }}</a>
+                                <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#registration">{{ 'Register'|trans }}</a>
                             </li>
                         {% endif %}
                     </ul>
@@ -186,7 +186,7 @@
                         <img src=" {{ 'images/logo.png'|asset_url }}" alt="{{ company.name }}" class="img-fluid">
                     </a>
                 {% endif %}
-                
+
                 {% include '_menu.phtml' %}
 
                 {% set languages = guest.extension_languages %}
@@ -198,28 +198,29 @@
                         {% endfor %}
                     </select>
                 {% endif %}
-                
+
                 {% block sidebar %}{% endblock %}
-                
+
                 {% if settings.sidebar_note_enabled %}
                     <div class="card mt-3">
                         <h5 class="card-header">{{ settings.sidebar_note_title }}</h5>
                         <p class="card-body mb-0">{{ settings.sidebar_note_content }}</p>
                     </div>
-                {% endif %}	
-                
+                {% endif %}
+
                 {% block sidebar2 %}{% endblock %}
             </aside>
             <div class="col">
                 {% block content_before %}{% endblock %}
-            
+
                 {% include 'partial_message.phtml' %}
-            
+
                 {% block content %}{% endblock %}
                 {% block content_after %}{% endblock %}
 
                 {% if not client %}
                     {% include 'Modal/_login.phtml' %}
+                    {% include 'Modal/_registration.phtml' %}
                 {% endif %}
             </div>
         </div>
@@ -285,7 +286,7 @@
     <script src="{{ 'js/bootstrap-markdown.js'|asset_url }}"></script>
     <script src="{{ 'js/to-markdown.js'|asset_url }}"></script>
     <script src="{{ 'js/markdown.js'|asset_url }}"></script>
-    
+
     {% if settings.inject_javascript|default %}
         <!-- Custom Javascript -->
         <script>

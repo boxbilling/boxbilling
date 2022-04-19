@@ -1,5 +1,5 @@
-{% macro selectbox(name, options, selected, required, nullOption) %}
-    <select name="{{ name }}"{% if required %} required{% endif%} class="form-select">
+{% macro selectbox(name, options, selected, required, nullOption, id) %}
+    <select class="form-select" id="{{ id }}" name="{{ name }}" {% if required %} required{% endif%}>
         {% if nullOption %}<option value="">-- {{ nullOption }} --</option>{% endif %}
         {% for val, label in options %}
             <option value="{{ val }}" label="{{ label|e }}" {% if selected == val %}selected{% endif %}>{{ label|e }}</option>

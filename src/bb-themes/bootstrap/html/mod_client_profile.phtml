@@ -68,21 +68,21 @@
                                         <input type="text" class="form-control" id="inputFirstName" name="first_name" value="{{ profile.first_name }}" required>
                                     </div>
                                     <div class="col">
-                                        <label class="form-label" for="inputLastName">{{ 'Last Name'|trans }}:</label>
+                                        <label class="form-label" for="inputLastName">{{ 'Last name'|trans }}:</label>
                                         <input type="text" class="form-control" id="inputLastName" name="last_name" value="{{ profile.last_name }}" required>
                                     </div>
                                 </diw>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label" for="inputCompany">{{ 'Company Name'|trans }}:</label>
+                                <label class="form-label" for="inputCompany">{{ 'Company name'|trans }}:</label>
                                 <input type="text" class="form-control" id="inputCompany" name="company" value="{{ profile.company }}">
                             </div>
                             <div class="mb-3">
-                                <label class="form-label" for="inputPhone">{{ 'Phone Country Code'|trans }}:</label>
+                                <label class="form-label" for="inputPhone">{{ 'Phone'|trans }}:</label>
                                 <div class="input-group">
                                     <span class="input-group-text">+</span>
-                                    <input type="text" class="form-control" name="phone_cc" value="{{ profile.phone_cc }}" required>
-                                    <input type="text" class="form-control w-50" id="inputPhone" name="phone" value="{{ profile.phone }}" required>
+                                    <input type="text" class="form-control" name="phone_cc" value="{{ profile.phone_cc }}" placeholder="xxx" required>
+                                    <input type="text" class="form-control w-50" id="inputPhone" name="phone" value="{{ profile.phone }}" placeholder="xxx-xx-xx" required>
                                 </div>
                             </div>
                         </div>
@@ -102,8 +102,8 @@
                             <div class="mb-3">
                                 <div class="row">
                                     <div class="col-5">
-                                        <label class="form-label" for="inputCountry">{{ 'Country'|trans }}:</label>
-                                        {{ mf.selectbox('country', guest.system_countries, profile.country, 1, 'Select country') }}
+                                        <label class="form-label" for="selectCountry">{{ 'Country'|trans }}:</label>
+                                        {{ mf.selectbox('country', guest.system_countries, profile.country, 1, 'Select country', 'selectCountry') }}
                                     </div>
                                     <div class="col-4">
                                         <label class="form-label" for="inputState">{{ 'State'|trans }}:</label>

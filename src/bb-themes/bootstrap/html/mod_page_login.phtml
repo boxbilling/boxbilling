@@ -20,7 +20,6 @@
             <li class="nav-item" role="presentation">
                 <button
                     class="nav-link{% if not request.register %} active{% endif %}"
-                    id="login-tab"
                     data-bs-toggle="modal"
                     data-bs-target="#login"
                     role="tab"
@@ -30,21 +29,13 @@
             <li class="nav-item" role="presentation">
                 <button
                     class="nav-link{% if request.register %} active{% endif %}"
-                    id="register-tab"
-                    data-bs-toggle="tab"
-                    data-bs-target="#register"
+                    data-bs-toggle="modal"
+                    data-bs-target="#registration"
                     role="tab"
                     aria-controls="register"
                     aria-selected="true">{{ 'Register'|trans }}</button>
             </li>
         </ul>
-        <div id="tabSignin" class="col-md-8 col-xl-6 mx-auto tab-content">
-            <div class="tab-pane fade{% if request.register %} show active{% endif %}" id="register">
-                <form class="api-form" method="post" data-api-url="guest/client/create" data-api-redirect="login">
-                    {% include '_form-registration.phtml' %}
-                </form>
-            </div>
-        </div>
     {% else %}
         <script>
             window.location.replace("{{ 'client/me'|link }}");

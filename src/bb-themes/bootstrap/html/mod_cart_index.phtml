@@ -16,7 +16,7 @@
     </div>
 {% endblock %}
 
-{% block content %}	
+{% block content %}
 {% if cart.items|length > 0 %}
     {% if not client %}
         <section>
@@ -30,17 +30,10 @@
                 <li class="nav-item" role="presentation">
                     <button
                         class="nav-link"
-                        data-bs-toggle="tab"
+                        data-bs-toggle="modal"
                         data-bs-target="#registration">{{ 'Registration'|trans }}</button>
                 </li>
             </ul>
-            <div class="col-md-8 col-xl-6 mx-auto tab-content" id="tabSigninContent">
-                <div class="tab-pane fade" id="registration" role="tabpanel">
-                    <form method="post" class="api-form form-horizontal" data-api-url="guest/client/create" data-api-reload="1">
-                        {% include '_form-registration.phtml' %}
-                    </form>
-                </div>
-            </div>
             <hr>
         </section>
     {% endif %}
@@ -59,7 +52,7 @@
                                 <strong>
                                 {% if item.discount_price %}
                                     {% if item.quantity > 1 %}
-                                        {{ item.quantity }} x {{ item.price|money_convert }} = 
+                                        {{ item.quantity }} x {{ item.price|money_convert }} =
                                         <del>{{ (item.quantity * item.price)|money_convert }}</del>
                                         {{ (item.quantity * (item.price - item.discount_price))|money_convert }}
                                     {% else %}
@@ -113,7 +106,7 @@
                             {% endif %}
                             {{ (cart.total + tax_amount)|money_convert }}
                         </div>
-                    
+
                         <div class="mb-3">
                             {% include 'partial_currency.phtml' %}
                             <form action="{{ 'api/guest/cart/apply_promo'|link }}" method="post" class="api-form form-inline" data-api-reload="1">
@@ -169,7 +162,7 @@
                 <div class="card shadow-sm">
                     <div class="card-header">
                         <h4 class="mb-0">{{ 'Total'|trans }}</h4>
-                    </div>	
+                    </div>
                     <div class="card-body text-center">
                         <div class="h2 text-success mb-3">{{ (cart.total + tax_amount)|money_convert }}</div>
                         <div class="text-secondary">{{ 'No VAT' }}</div>

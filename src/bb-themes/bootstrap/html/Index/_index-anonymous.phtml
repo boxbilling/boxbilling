@@ -1,6 +1,6 @@
 {% if settings.showcase_enabled %}
     {% include 'Index/_showcase.phtml' %}
-{% endif %}	
+{% endif %}
 
 <div class="row g-3">
     <div class="col-md-8 col-12">
@@ -19,10 +19,10 @@
             </a>
         </div>
     </div>
-    
+
     <div class="col-sm-6 col-md-4">
         <div class="card shadow-sm text-center h-100">
-            <a href="{{ '/login'|link({ 'register': 1 }) }}" class="stretched-link text-decoration-none">
+            <a href="#" class="stretched-link text-decoration-none" data-bs-toggle="modal" data-bs-target="#registration">
                 <div class="card-img-top p-3">
                     <span class="fa-stack fa-5x">
                         <i class="fa fa-circle fa-stack-2x text-primary"></i>
@@ -36,7 +36,7 @@
             </a>
         </div>
     </div>
-    
+
     {% if guest.extension_is_on({ 'mod': 'news' }) %}
     <div class="col-sm-6 col-md-4">
         <div class="card shadow-sm text-center h-100">

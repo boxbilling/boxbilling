@@ -11,7 +11,7 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label" for="selectTicket{{ id }}Helpdesk">{{ 'Help desk'|trans }}:</label>
-                        {{ macro.selectbox('support_helpdesk_id', client.support_helpdesk_get_pairs, request.support_helpdesk_id, 1) }}
+                        {{ macro.selectbox('support_helpdesk_id', client.support_helpdesk_get_pairs, request.support_helpdesk_id, 1, null, 'selectTicket' ~ id ~ 'Helpdesk') }}
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="inputTicket{{ id }}Subject">{{ 'Subject'|trans }}:</label>
