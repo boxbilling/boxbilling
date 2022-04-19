@@ -43,7 +43,7 @@
                     <a href="{{ 'support'|link }}">{{ 'Active support tickets'|trans }}:</a> <span class="badge bg-danger rounded-pill">{{ order.active_tickets }}</span>
                 </li>
             {% endif %}
-        
+
             {% if order.group_master == 1 %}
                 {% set addons = client.order_addons({ 'id': order.id }) %}
                 {% if addons|length > 0 %}
@@ -65,7 +65,7 @@
         {% if order.period %}
             <a class="btn btn-success" id="renewal-button">{{ 'Renew now'|trans }}</a>
         {% endif %}
-        <a class="btn btn-info" data-bs-toggle="modal" data-bs-target="#ticket-order">{{ 'Open ticket'|trans }}</a>			
+        <a class="btn btn-info" data-bs-toggle="modal" data-bs-target="#ticket-order">{{ 'Open ticket'|trans }}</a>
         {% if upgradables %}<a class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#upgrades">{{ 'Request upgrade'|trans }}</a>{% endif %}
         {% if order.status == 'pending_setup' %}<a class="btn btn-danger api" href="{{ 'api/client/order/delete'|link({ 'id': order.id }) }}" data-api-redirect="{{ 'order/service'|link }}">{{ 'Cancel'|trans }}</a>{% endif %}
         {% if order.status == 'active' %}
@@ -137,23 +137,12 @@
 {% block js %}
 {% autoescape 'js' %}
 <script>
-    // $(function() {
-    // 	$('#renewal-button').bind('click', function(event) {
-    // 		bootbox.confirm("{{ 'Are you sure?'|trans }}", function(result) {
-    // 			if (result) {
-    // 				bb.post('client/invoice/renewal_invoice', { order_id: {{ order.id }} }, function(result) {
-    // 					bb.redirect("{{ 'invoice'|link }}" + '/' + result);
-    // 				});
-    // 			}
-    // 		}); 
-    // 	});
-    // });
-
-    // TODO: Need to make modal confirmation window
     document.getElementById('renewal-button').addEventListener('click', () => {
-        bb.post('client/invoice/renewal_invoice', { order_id: {{ order.id }} }, function(result) {
-            bb.redirect("{{ 'invoice'|link }}" + '/' + result);
-        });
+        if (confirm("{{ 'Are you sure?'|trans }}")) {
+            bb.post('client/invoice/renewal_invoice', { order_id: {{ order.id }} }, function(result) {
+                bb.redirect("{{ 'invoice'|link }}" + '/' + result);
+            });
+        }
     });
 </script>
 {% endautoescape %}

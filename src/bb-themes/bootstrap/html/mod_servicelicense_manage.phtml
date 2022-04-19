@@ -61,15 +61,11 @@
 <script>
 $(function() {
     $('#license-reset').bind('click', function(event) {
-        bootbox.confirm("{{ 'Are you sure?'|trans }}", function(result) {
-            if (result) {
-                  bb.post('client/servicelicense/reset', { order_id: {{ order.id }} },
-                    function(result) {
-                        boxbilling.message('License was reset');
-                    }
-                );
-            }
-        }); 
+        if (confirm("{{ 'Are you sure?'|trans }}")) {
+            bb.post('client/servicelicense/reset', { order_id: {{ order.id }} }, function(result) {
+                boxbilling.message('License was reset');
+            });
+        }
     });
 });
 </script>
