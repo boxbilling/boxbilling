@@ -1,6 +1,10 @@
 {% if settings.showcase_enabled %}
     {% include 'Index/_showcase.phtml' %}
-{% endif %}	
+{% endif %}
+
+{% if settings.stats_enabled %}
+    {% include 'Index/_statistics.phtml' %}
+{% endif %}
 
 <div class="row g-3">
     {% if settings.dash_services %}
@@ -17,7 +21,7 @@
                 </div>
                 <div class="list-group list-group-flush">
                     {% set services = client.order_get_list({ 'per_page': 10, 'page': request.page, 'hide_addons': 1, 'status': 'active' }) %}
-                    
+
                     {% for i, service in services.list %}
                         <a href="{{ '/order/service/manage'|link }}/{{ service.id }}" class="list-group-item">#{{ service.id }} - {{ service.title }}</a>
                     {% endfor %}
@@ -25,8 +29,8 @@
                 </div>
             </div>
         </div>
-    {% endif %}	
-    
+    {% endif %}
+
     {% if settings.dash_invoices %}
         <div class="col-md-6">
             <div class="card">
@@ -43,7 +47,7 @@
                     {% set unpaid_invoices = client.invoice_get_list({ 'status': 'unpaid', 'per_page': 10 }).list %}
                     {% for i, invoice in unpaid_invoices %}
                         <a href="{{ 'invoice'|link }}/{{ invoice.hash }}" class="list-group-item">
-                            {{ '#%05s'|format(invoice.id) }} - 
+                            {{ '#%05s'|format(invoice.id) }} -
                             {{ 'Due Date'|trans }}: {{ invoice.due_at|date('d/m/Y') }} <div class="float-end text-success">{{ invoice.total | money(invoice.currency) }}</div>
                         </a>
                     {% endfor %}
@@ -53,7 +57,7 @@
                 </div>
             </div>
         </div>
-    {% endif %}	
+    {% endif %}
 
     {% if settings.dash_support %}
     <div class="col-md-6">
@@ -69,13 +73,13 @@
             </div>
             <div class="list-group list-group-flush">
                 {% set tickets_on_hold = client.support_ticket_get_list({ 'status': 'on_hold' }) %}
-                
+
                 {% for i, ticket in tickets_on_hold.list %}
                     <a href="{{ 'support/ticket'|link }}/{{ ticket.id }}" class="list-group-item ">{{ ticket.subject }} <span class="badge bg-secondary">{{ ticket.helpdesk.name }}</span> <span class="badge bg-warning">{{ mf.status_name(ticket.status) }}</span></a>
                 {% endfor %}
-                
+
                 {% set tickets_open = client.support_ticket_get_list({ 'status': 'open' }) %}
-                
+
                 {% for i, ticket in tickets_open.list %}
                     <a href="{{ 'support/ticket'|link }}/{{ ticket.id }}" class="list-group-item d-flex justify-content-between align-items-center">{{ ticket.subject }} <span class="badge bg-secondary">{{ ticket.helpdesk.name }}</span></a>
                 {% endfor %}
@@ -123,8 +127,8 @@
             </div>
         </div>
     </div>
-    {% endif %}	
-    
+    {% endif %}
+
     {% if settings.dash_messages %}
     <div class="col-md-6">
         <div class="card">
@@ -143,7 +147,7 @@
             </div>
         </div>
     </div>
-    {% endif %}	
+    {% endif %}
 
     {% if settings.dash_kb and guest.extension_is_on({ 'mod': 'kb' }) %}
     <div class="col-md-6">
@@ -201,5 +205,5 @@
         </div>
         </div>
         {% endif %}
-    {% endif %}	
+    {% endif %}
 </div>
