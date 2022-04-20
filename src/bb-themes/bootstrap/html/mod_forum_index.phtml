@@ -9,24 +9,24 @@
 
 {% block content %}
     {% for cat_name, forums in guest.forum_get_categories %}
-    <h3>{{cat_name}}</h3>
-    <div class="list-group">
+    <h3>{{ cat_name }}</h3>
+    <div class="list-group mb-3">
         {%  for forum in forums %}
         <a href="{% if forum.status != 'locked' %}{{ '/forum'|link }}/{{ forum.slug }}{% endif %}" class="list-group-item{% if forum.status == 'locked' %} disabled{% endif %}">
             <h4 class="list-group-item-heading">{{ forum.title }}
                 <small class="pull-right"><strong>{{ forum.stats.topics_count|default(0) }} {{ 'Threads'|trans }}</strong> - {{ forum.stats.posts_count|default(0) }} {{ 'Posts'|trans }}</small>
             </h4>
-            <p class="list-group-item-text">{{ forum.description }}</p>
+            <div class="list-group-item-text">{{ forum.description }}</div>
         </a>
         {% endfor %}
     </div>
     {% endfor %}
-        
+
     {% if client and client.forum_favorites %}
         <p class="text-center">
-            <a class="btn btn-primary" role="button" data-toggle="collapse" href="#favorites" aria-expanded="false" aria-controls="favorites">{{ 'Favorite topics'|trans }}</a>
+            <a class="btn btn-primary" role="button" data-bs-toggle="collapse" href="#favorites" aria-expanded="false" aria-controls="favorites">{{ 'Favorite topics'|trans }}</a>
         </p>
-        <div class="collapse well" id="favorites">
+        <div class="collapse" id="favorites">
         <table class="table table-hover">
             <thead>
                 <tr>
@@ -65,14 +65,13 @@
                 </tr>
                 {% endfor %}
             </tbody>
-
         </table>
         </div>
     {% endif %}
 
     {% if not client %}
 	<p class="text-center">
-		<a class="btn btn-primary" href="" data-toggle="modal" data-target="#login">{{ 'Login'|trans }}</a>
+		<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#login">{{ 'Login'|trans }}</button>
 	</p>
     {% endif %}
 {% endblock %}

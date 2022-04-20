@@ -47,11 +47,11 @@ var bb = {
         if (url.indexOf('http://') > -1 || url.indexOf('https://') > -1) {
             return url;
         }
-        
+
         return $('meta[property="bb:url"]').attr("content") + 'index.php?_url=/api/' + url;
     },
     reload: function() {
-        window.location.href=window.location.href;
+        window.location.href = window.location.href;
     },
     redirect: function(url) {
         if (url === undefined) {
@@ -82,7 +82,7 @@ var bb = {
             var reload = $(this).attr('data-api-reload');
 			var tocreated = $(this).attr('data-api-tocreated');
             var url = $(this).attr('action');
-            
+
             if ($(this).attr('data-api-url')) {
                 url = $(this).attr('data-api-url');
             }
@@ -90,28 +90,28 @@ var bb = {
             bb.post(url, $(this).serialize(), function(result) {
                 if (reload !== undefined) {
                     bb.reload();
-                    
+
                     return;
                 }
-                
+
                 if (redirect !== undefined) {
                     bb.redirect(redirect);
-                    
+
                     return;
                 }
-                
+
                 if (tocreated !== undefined) {
                     bb.redirect(tocreated + '/' + result);
-                    
+
                     return;
                 }
-                
+
                 if (msg !== undefined) {
                     boxbilling.message(msg);
 
                     return;
                 }
-                
+
                 if (jsonp !== undefined && window.hasOwnProperty(jsonp)) {
                     return window[jsonp](result);
                 }
@@ -131,13 +131,13 @@ var bb = {
             bb.get($(this).attr('href'), {}, function(result) {
                 if (msg !== undefined) {
                     boxbilling.message(msg);
-                    
+
                     return;
                 }
 
                 if (reload !== undefined) {
                     bb.reload();
-                    
+
                     return;
                 }
 
@@ -156,7 +156,7 @@ var bb = {
 
                     return;
                 }
-                
+
                 bb.redirect(redirect);
             });
 
@@ -173,26 +173,26 @@ var bb = {
     cookieCreate: function (name,value,days) {
         if (days) {
             var date = new Date();
-        
+
             date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-        
+
             var expires = "; expires=" + date.toGMTString();
         } else var expires = "";
-        
+
         document.cookie = name + "=" + value+expires + "; path=/";
     },
     cookieRead: function (name) {
         var nameEQ = name + "=";
         var ca = document.cookie.split(';');
-        
+
         for (var i = 0; i < ca.length; i++) {
             var c = ca[i];
-            
+
             while (c.charAt(0)==' ') c = c.substring(1, c.length);
-            
+
             if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
         }
-        
+
         return null;
     },
     CurrencySelector: function() {
@@ -226,11 +226,11 @@ var bb = {
 //         $(this).parent().parent().find("ul.tabs li").removeClass("activeTab"); //Remove any "active" class
 //         $(this).addClass("activeTab"); // Add "active" class to selected tab
 //         $(this).parent().parent().find(".tab_content").hide(); // Hide all tab content
-        
+
 //         var activeTab = $(this).find("a").attr("href"); // Find the rel attribute value to identify the active tab + content
-        
+
 //         $(activeTab).show(); // Fade in the active content
-        
+
 //         return false;
 //     });
 // };
@@ -249,11 +249,11 @@ $("a[href='#top']").click(function() {
 //     function() {
 //         if ($(this).val() == "" && $(this).attr("placeholder") != "") {
 //             $(this).val($(this).attr("placeholder"));
-            
+
 //             $(this).focus(function(){
 //                 if ($(this).val() == $(this).attr("placeholder")) $(this).val("");
 //             });
-            
+
 //             $(this).blur(function(){
 //                 if ($(this).val() == "") $(this).val($(this).attr("placeholder"));
 //             });
