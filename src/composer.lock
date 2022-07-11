@@ -1249,16 +1249,16 @@
         },
         {
             "name": "stripe/stripe-php",
-            "version": "v8.7.0",
+            "version": "v8.10.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/stripe/stripe-php.git",
-                "reference": "07e92daf7bc4635f34542966bddaf48c2777d48d"
+                "reference": "ae44989a37e0785f325d696719afa46e3503dc7d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/stripe/stripe-php/zipball/07e92daf7bc4635f34542966bddaf48c2777d48d",
-                "reference": "07e92daf7bc4635f34542966bddaf48c2777d48d",
+                "url": "https://api.github.com/repos/stripe/stripe-php/zipball/ae44989a37e0785f325d696719afa46e3503dc7d",
+                "reference": "ae44989a37e0785f325d696719afa46e3503dc7d",
                 "shasum": ""
             },
             "require": {
@@ -1303,9 +1303,9 @@
             ],
             "support": {
                 "issues": "https://github.com/stripe/stripe-php/issues",
-                "source": "https://github.com/stripe/stripe-php/tree/v8.7.0"
+                "source": "https://github.com/stripe/stripe-php/tree/v8.10.0"
             },
-            "time": "2022-06-17T19:22:08+00:00"
+            "time": "2022-07-07T17:46:57+00:00"
         },
         {
             "name": "symfony/deprecation-contracts",
