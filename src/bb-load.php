@@ -76,15 +76,15 @@ function handler_exception($e)
         } else {
             $page = "<!DOCTYPE html>
       <html lang=\"en\">
-      
+
       <head>
           <meta charset=\"utf-8\">
           <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">
           <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
           <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-      
+
           <title>An error ocurred</title>
-      
+
           <!-- Google font -->
           <link href=\"https://fonts.googleapis.com/css?family=Nunito:400,700\" rel=\"stylesheet\">
 
@@ -93,17 +93,17 @@ function handler_exception($e)
               -webkit-box-sizing: border-box;
                       box-sizing: border-box;
             }
-            
+
             body {
               padding: 0;
               margin: 0;
             }
-            
+
             #error {
               position: relative;
               height: 100vh;
             }
-            
+
             #error .error {
               position: absolute;
               left: 50%;
@@ -112,14 +112,14 @@ function handler_exception($e)
                   -ms-transform: translate(-50%, -50%);
                       transform: translate(-50%, -50%);
             }
-            
+
             .error {
               max-width: 560px;
               width: 100%;
               padding-left: 160px;
               line-height: 1.1;
             }
-            
+
             .error .error-container {
               position: absolute;
               left: 0;
@@ -130,7 +130,7 @@ function handler_exception($e)
               background-image: url('/bb-themes/boxbilling/assets/images/box.png');
               background-size: cover;
             }
-            
+
             .error .error-container:before {
               content: '';
               position: absolute;
@@ -143,7 +143,7 @@ function handler_exception($e)
               background-color: #f2f5f8;
               z-index: -1;
             }
-            
+
             .error h1 {
               font-family: 'Nunito', sans-serif;
               font-size: 65px;
@@ -153,7 +153,7 @@ function handler_exception($e)
               color: #151723;
               text-transform: uppercase;
             }
-            
+
             .error h2 {
               font-family: 'Nunito', sans-serif;
               font-size: 21px;
@@ -162,13 +162,13 @@ function handler_exception($e)
               text-transform: uppercase;
               color: #151723;
             }
-            
+
             .error p {
               font-family: 'Nunito', sans-serif;
               color: #999fa5;
               font-weight: 400;
             }
-            
+
             .error a {
               font-family: 'Nunito', sans-serif;
               display: inline-block;
@@ -177,7 +177,7 @@ function handler_exception($e)
               text-decoration: none;
               color: #388dbc;
             }
-            
+
             @media only screen and (max-width: 767px) {
               .error .error-container {
                 width: 110px;
@@ -197,7 +197,7 @@ function handler_exception($e)
               padding: 2px;
               font-size: 90%;
             }
-            
+
           </style>
       </head>
       <body>
@@ -217,7 +217,7 @@ function handler_exception($e)
             echo sprintf('<center><p><a href="http://docs.boxbilling.com/en/latest/search.html?q=%s&check_keywords=yes&area=default" target="_blank">Look for detailed error explanation</a></p></center>', urlencode($e->getMessage()));
             echo '<center><hr><p>Powered by <a href="https://github.com/boxbilling/boxbilling/">BoxBilling</a></p></center>
       </body>
-      
+
       </html>';
         }
     }
@@ -265,13 +265,13 @@ if (!file_exists($configPath) || 0 == filesize($configPath)) {
     throw new Exception($msg, 101);
 }
 
-// Try to check if /install directory still exists, even after the installation was completed
-if (file_exists($configPath) && 0 !== filesize($configPath) && file_exists(BB_PATH_ROOT.'/install/index.php')) {
-    throw new Exception('For safety reasons, you have to delete the <b><em>/install</em></b> directory to start using BoxBilling.</p><p>Please delete the <b><em>/install</em></b> directory from your web server.', 102);
-}
-
 $config = require_once $configPath;
 require BB_PATH_VENDOR.'/autoload.php';
+
+// Try to check if /install directory still exists, even after the installation was completed
+if ($config['debug'] == false && file_exists($configPath) && 0 !== filesize($configPath) && file_exists(BB_PATH_ROOT.'/install/index.php')) {
+    throw new Exception('For safety reasons, you have to delete the <b><em>/install</em></b> directory to start using BoxBilling.</p><p>Please delete the <b><em>/install</em></b> directory from your web server.', 102);
+}
 
 date_default_timezone_set($config['timezone']);
 
