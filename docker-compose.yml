@@ -9,6 +9,8 @@ services:
       - 80:80
     networks:
       backend:
+    depends_on:
+      - php
   php:
     image: chialab/php:8.0-fpm
     volumes:
@@ -24,11 +26,11 @@ services:
       - database
     restart: always
   database:
-    image: mysql:5
+    image: mariadb
     ports:
-      - 3306:3306
+      - 6033:3306
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MARIADB_ROOT_PASSWORD: root
     networks:
       backend:
     restart: always

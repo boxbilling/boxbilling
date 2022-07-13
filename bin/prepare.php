@@ -17,7 +17,7 @@ $host = $config['db']['host'];
 $dbname = $config['db']['name'];
 $user = $config['db']['user'];
 $password = $config['db']['password'];
-$port = $config['db']['port'];
+$port = isset($config['db']['port']) ? $config['db']['port'] : 3306;
 
 
 echo sprintf("Connecting to database %s@%s/%s", $user, $host, $dbname) . PHP_EOL;
@@ -36,7 +36,7 @@ while (!$connected && $iter > 0) {
         $connected = true;
     } catch (Exception $e) {
         $message = $e->getMessage();
-        $message = "SQLSTATE[HY000] [2002] Connection refused in /var/www/html/bin/prepare.php:23";
+
         if(strpos($e->getMessage(), "Connection refused") !== false) {
             sleep(1); // mysql container might still not be up, lets wait
             $iter--;
@@ -74,7 +74,7 @@ if ($error[2]) {
     exit;
 }
 
-echo sprintf("Create SQL database structure from file %s", $structureSql) . PHP_EOL;
+echo sprintf("Create SQL database structure from file %s", $pathAppInstall . $structureSql) . PHP_EOL;
 $sql = file_get_contents($pathAppInstall . $structureSql);
 $dbh->exec($sql);
 $error = $dbh->errorInfo();
@@ -83,7 +83,7 @@ if ($error[2]) {
     exit;
 }
 
-echo sprintf("Import content to database from file %s", $contentSql) . PHP_EOL;
+echo sprintf("Import content to database from file %s", $pathAppInstall . $contentSql) . PHP_EOL;
 $sql = file_get_contents($pathAppInstall . $contentSql);
 $stmt = $dbh->prepare($sql);
 $stmt->execute();

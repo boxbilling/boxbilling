@@ -39,7 +39,8 @@ exec-db:        ## Enter DB container shell
 	$(DOCKER_DB_CONTAINER_EXEC) bash
 
 install: start  ## Install app after start
-	$(DOCKER_PHP_CONTAINER_EXEC) composer install --working-dir=src --no-progress --no-suggest --prefer-dist --no-dev
+	$(DOCKER_PHP_CONTAINER_EXEC) composer install --working-dir=src --no-progress --prefer-dist --no-dev
+	$(DOCKER_PHP_CONTAINER_EXEC) $(DOCKER_PHP_EXECUTABLE_CMD) ./bin/prepare.php
 
 reinstall:      ## Reinstall app
 	rm -rf ./src/bb-config.php
