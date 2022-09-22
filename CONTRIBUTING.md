@@ -28,11 +28,7 @@ The following is a set of guidelines for contributing to BoxBilling, which are h
 
 ## Code of Conduct
 
-This project and everyone participating in it is governed by the [BoxBilling Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to the moderators on our [Discord](https://boxbilling.org/discord) and [Slack](https://boxbilling.org/slack) communities.
-
-## I don't want to read this whole thing I just have a question!!!
-
-Drop a message to [Discord](https://boxbilling.org/discord) and [Slack](https://boxbilling.org/slack) communities for a question. Sometimes it takes time to respond; please be patient!
+This project and everyone participating in it is governed by the [BoxBilling Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. 
 
 ## What should I know before I get started?
 
