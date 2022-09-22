@@ -141,7 +141,7 @@ Your [pull requests](https://github.com/boxbilling/boxbilling/pulls) will be hig
 
 **Got questions? Found a bug? Ideas for improvements?**
 
-Don't hesitate to create an [issue](https://github.com/boxbilling/boxbilling/issues), or join us on [Discord](https://boxbilling.org/discord) to say hi.
+Don't hesitate to create an [issue](https://github.com/boxbilling/boxbilling/issues)
 
 ⭐ Not a developer? Feel free to help by starring the repository. It helps us catch the attention of new developers who'd like to contribute. 
 
@@ -156,4 +156,3 @@ This product includes GeoLite2 data created by MaxMind, available from [https://
 * [Website](https://www.boxbilling.org/)
 * [Documentation](https://docs.boxbilling.org/)
 * [Twitter](https://twitter.com/BoxBilling/)
-* [Discord](https://boxbilling.org/discord)
