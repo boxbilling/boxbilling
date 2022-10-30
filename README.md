@@ -19,6 +19,9 @@
 
 </div>
 
+> **Warning**
+> As of the time of writing (10-30-22), BoxBilling is no longer being actively maintained. [FOSSBilling](https://fossbilling.org/) is a fork of it that is being actively developed. If you do decide to use BoxBilling, please be aware that it's current state has multiple bugs and vulnerabilities 
+
 **BoxBilling** is a free open source, billing and client management solution. Whatever the size of your online services business, whether a startup or established, BoxBilling can help you to automate your invoicing, incoming payments, and client management and communication.
 
 If you run a web hosting business and are looking for an open-source alternative for billing and client management, then BoxBilling is the answer. Although it is mostly used as a solution for hosting businesses, there is no reason why you can't use BoxBilling for any other kind of online business, like digital downloads. 
