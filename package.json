@@ -11,7 +11,7 @@
     "grunt-concat-css": "*",
     "grunt-contrib-clean": "*",
     "grunt-contrib-concat": "*",
-    "grunt-contrib-cssmin": "^4.0.0",
+    "grunt-contrib-cssmin": "^5.0.0",
     "grunt-contrib-uglify": "^5.2.2",
     "grunt-spritesmith": "^6.10.0"
   }
