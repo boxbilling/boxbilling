@@ -84,16 +84,16 @@
         },
         {
             "name": "docnet/tfpdf",
-            "version": "v2.2.3",
+            "version": "v2.2.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DocnetUK/tfpdf.git",
-                "reference": "e2809ce7da5f3f9c77ec9cdf1e0704882fe012ba"
+                "reference": "94bc60df9be2a25bb9798412f799f97d70a662c0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DocnetUK/tfpdf/zipball/e2809ce7da5f3f9c77ec9cdf1e0704882fe012ba",
-                "reference": "e2809ce7da5f3f9c77ec9cdf1e0704882fe012ba",
+                "url": "https://api.github.com/repos/DocnetUK/tfpdf/zipball/94bc60df9be2a25bb9798412f799f97d70a662c0",
+                "reference": "94bc60df9be2a25bb9798412f799f97d70a662c0",
                 "shasum": ""
             },
             "require": {
@@ -115,16 +115,16 @@
             ],
             "authors": [
                 {
-                    "name": "Ian Back",
-                    "email": "ianb@bpm1.com"
+                    "name": "David Wilcock",
+                    "email": "dwilcock@doc-net.com"
                 },
                 {
                     "name": "Dave Blencowe",
                     "email": "dblencowe@gmail.com"
                 },
                 {
-                    "name": "David Wilcock",
-                    "email": "dwilcock@doc-net.com"
+                    "name": "Ian Back",
+                    "email": "ianb@bpm1.com"
                 }
             ],
             "description": "tfpdf",
@@ -134,9 +134,9 @@
             ],
             "support": {
                 "issues": "https://github.com/DocnetUK/tfpdf/issues",
-                "source": "https://github.com/DocnetUK/tfpdf/tree/master"
+                "source": "https://github.com/DocnetUK/tfpdf/tree/v2.2.5"
             },
-            "time": "2019-01-21T10:55:00+00:00"
+            "time": "2023-06-26T20:20:18+00:00"
         },
         {
             "name": "filp/whoops",
