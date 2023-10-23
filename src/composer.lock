@@ -84,16 +84,16 @@
         },
         {
             "name": "docnet/tfpdf",
-            "version": "v2.2.6",
+            "version": "v2.2.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DocnetUK/tfpdf.git",
-                "reference": "1288d987ad7303283737da22b9a04909cefde901"
+                "reference": "41feb1f55acaa64310c48c589913bf0c10cdec96"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DocnetUK/tfpdf/zipball/1288d987ad7303283737da22b9a04909cefde901",
-                "reference": "1288d987ad7303283737da22b9a04909cefde901",
+                "url": "https://api.github.com/repos/DocnetUK/tfpdf/zipball/41feb1f55acaa64310c48c589913bf0c10cdec96",
+                "reference": "41feb1f55acaa64310c48c589913bf0c10cdec96",
                 "shasum": ""
             },
             "require": {
@@ -134,9 +134,9 @@
             ],
             "support": {
                 "issues": "https://github.com/DocnetUK/tfpdf/issues",
-                "source": "https://github.com/DocnetUK/tfpdf/tree/v2.2.6"
+                "source": "https://github.com/DocnetUK/tfpdf/tree/v2.2.7"
             },
-            "time": "2023-07-19T11:05:11+00:00"
+            "time": "2023-10-16T07:51:59+00:00"
         },
         {
             "name": "filp/whoops",
