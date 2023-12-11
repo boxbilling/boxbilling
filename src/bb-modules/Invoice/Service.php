@@ -558,10 +558,6 @@ class Service implements InjectionAwareInterface
             return;
         }
 
-        if ($this->isInvoiceTypeDeposit($invoice)) {
-            $this->markAsPaid($invoice, false);
-        }
-
         $client = $this->di['db']->load('Client', $invoice->client_id);
         $cbrepo = $this->di['mod_service']('Client', 'Balance');
         $balance = $cbrepo->getClientBalance($client);
@@ -1350,7 +1346,7 @@ class Service implements InjectionAwareInterface
 
     /**
      * Return list of unpaid invoices which can be covered from client balance.
-     *
+     * Deposit invoices are excluded as they cannot be covered from client balance.
      * @param array $filter
      *
      * @return array
@@ -1364,8 +1360,9 @@ class Service implements InjectionAwareInterface
                     LEFT JOIN invoice_item as pi on pi.invoice_id = m.id
                 WHERE m.status = :status
                     AND m.approved = 1
-                    AND cb.amount >= pi.price';
-        $params = ['status' => \Model_Invoice::STATUS_UNPAID];
+                    AND cb.amount >= pi.price
+                    AND pi.type != :type';
+        $params = ['status' => \Model_Invoice::STATUS_UNPAID, 'type' => \Model_InvoiceItem::TYPE_DEPOSIT];
 
         $client_id = isset($filter['client_id']) ? (int) $filter['client_id'] : null;
 
